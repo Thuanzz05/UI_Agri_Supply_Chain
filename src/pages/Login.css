@@ -1,0 +1,35 @@
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.login-header .ant-typography {
+  margin-bottom: 8px;
+  color: #1890ff;
+}
+
+.ant-form-item {
+  margin-bottom: 20px;
+}
+
+.ant-btn-primary {
+  height: 45px;
+  font-size: 16px;
+  border-radius: 6px;
+}
