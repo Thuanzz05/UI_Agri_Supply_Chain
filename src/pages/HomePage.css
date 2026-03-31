@@ -14,60 +14,108 @@ body {
   min-height: 100vh;
 }
 
+/* Navigation */
 .nav {
   position: fixed;
   top: 0;
-  width: 100%;
+  left: 0;
+  right: 0;
   background: white;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #e5e7eb;
   z-index: 1000;
+  height: 64px;
 }
 
-.nav-wrap {
+.nav-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 24px;
+  height: 100%;
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: center;
-  height: 70px;
+  padding: 0 24px;
 }
 
-.logo {
+.nav-logo {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
-.logo img {
-  width: 32px;
-  height: 32px;
+.nav-logo img {
+  width: 28px;
+  height: 28px;
 }
 
-.logo span {
-  font-size: 24px;
+.nav-logo span {
+  font-size: 20px;
   font-weight: 700;
-  color: #333;
+  color: #1f2937;
 }
 
-.menu {
+.nav-menu {
   display: flex;
   align-items: center;
   gap: 32px;
+  flex: 1;
+  justify-content: center;
 }
 
-.menu a {
-  color: #666;
+.nav-link {
+  color: #6b7280;
   text-decoration: none;
   font-weight: 500;
+  font-size: 15px;
+  transition: color 0.2s;
 }
 
-.menu a:hover {
-  color: #333;
+.nav-link:hover {
+  color: #1f2937;
+}
+
+.nav-buttons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.btn-login {
+  padding: 8px 16px;
+  border: 1px solid #d1d5db;
+  background: white;
+  color: #374151;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-login:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.btn-signup {
+  padding: 8px 16px;
+  border: none;
+  background: #3b82f6;
+  color: white;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-signup:hover {
+  background: #2563eb;
 }
 
 .hero {
-  padding: 140px 0 80px;
+  padding: 120px 0 80px;
   background: #f8f9fa;
 }
 
@@ -392,8 +440,22 @@ body {
 }
 
 @media (max-width: 768px) {
-  .menu {
+  .nav-container {
+    padding: 0 16px;
+  }
+  
+  .nav-menu {
     display: none;
+  }
+  
+  .nav-buttons {
+    gap: 8px;
+  }
+  
+  .btn-login,
+  .btn-signup {
+    padding: 6px 12px;
+    font-size: 13px;
   }
   
   .hero .wrap {
@@ -427,5 +489,17 @@ body {
   .top {
     flex-direction: column;
     gap: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-logo span {
+    font-size: 18px;
+  }
+  
+  .btn-login,
+  .btn-signup {
+    padding: 6px 10px;
+    font-size: 12px;
   }
 }

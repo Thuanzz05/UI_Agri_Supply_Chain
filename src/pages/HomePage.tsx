@@ -6,16 +6,19 @@ const HomePage = () => {
   return (
     <div className="page">
       <nav className="nav">
-        <div className="nav-wrap">
-          <div className="logo">
+        <div className="nav-container">
+          <div className="nav-logo">
             <img src="/favicon.svg" alt="Logo" />
             <span>AgriChain</span>
           </div>
-          <div className="menu">
-            <a href="#features">Features</a>
-            <a href="#about">About</a>
-            <a href="#contact">Contact</a>
-            <Button type="primary">Get Started</Button>
+          <div className="nav-menu">
+            <a href="#features" className="nav-link">Tính năng</a>
+            <a href="#about" className="nav-link">Giới thiệu</a>
+            <a href="#contact" className="nav-link">Liên hệ</a>
+          </div>
+          <div className="nav-buttons">
+            <button className="btn-login">Đăng nhập</button>
+            <button className="btn-signup">Đăng ký</button>
           </div>
         </div>
       </nav>
