@@ -1,6 +1,8 @@
+Backend: https://github.com/Thuanzz05/Agri_Supply_Chain
+
 # Agri_Supply_Chain_UI
 
-Agricultural Supply Chain Management System built with React + TypeScript + Vite
+Agricultural Supply Chain Management System built with React + TypeScript
 
 ## Getting Started
 
@@ -18,10 +20,3 @@ npm run dev
 ```bash
 npm run build
 ```
-
-## Tech Stack
-
-- React 18
-- TypeScript
-- Vite
-- ESLint
