@@ -237,7 +237,7 @@ const TonKhoDaiLyPage: React.FC = () => {
       fixed: 'right',
       render: (_, record) => (
         <Button 
-          type="primary" 
+          type="link"
           size="small"
           icon={<EditOutlined />} 
           onClick={() => showUpdateModal(record)}

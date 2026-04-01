@@ -1,6 +1,7 @@
 import React from 'react';
 import { Space, Typography } from 'antd';
-import { FacebookOutlined, VideoCameraOutlined } from '@ant-design/icons';
+import { FacebookOutlined } from '@ant-design/icons';
+import { TikTokIcon } from './TikTokIcon';
 import { getSocialLinks } from '../utils/socialLinks';
 
 const { Text } = Typography;
@@ -31,7 +32,7 @@ const SocialLinks: React.FC<SocialLinksProps> = ({
       key: 'tiktok',
       label: textMode === 'url' ? links.tiktok : 'TikTok',
       url: links.tiktok,
-      icon: <VideoCameraOutlined style={{ color: '#000000' }} />,
+      icon: <TikTokIcon style={{ color: '#000000' }} />,
     },
   ].filter(Boolean) as Array<{
     key: string;

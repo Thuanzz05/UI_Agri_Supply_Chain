@@ -17,7 +17,7 @@ import {
   LockOutlined,
   UnlockOutlined,
   DeleteOutlined,
-  KeyOutlined,
+  EditOutlined,
 } from '@ant-design/icons';
 import { AdminLayout } from '../../components/Layout';
 import { apiService } from '../../services/apiService';
@@ -207,7 +207,7 @@ const QuanLyTaiKhoan: React.FC = () => {
           <Button
             type="link"
             size="small"
-            icon={<KeyOutlined />}
+            icon={<EditOutlined />}
             onClick={() => openPasswordModal(record)}
           >
             Đổi MK
@@ -298,7 +298,7 @@ const QuanLyTaiKhoan: React.FC = () => {
       <Modal
         title={
           <Space>
-            <KeyOutlined />
+            <EditOutlined />
             Đổi mật khẩu
           </Space>
         }
@@ -348,18 +348,27 @@ const QuanLyTaiKhoan: React.FC = () => {
           >
             <Input.Password placeholder="Nhập lại mật khẩu mới" />
           </Form.Item>
-          <Form.Item>
-            <Space style={{ width: '100%', justifyContent: 'flex-end' }}>
-              <Button onClick={() => {
-                setPasswordModalVisible(false);
-                form.resetFields();
-              }}>
+          <Form.Item style={{ marginBottom: 0 }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+              <Button 
+                onClick={() => {
+                  setPasswordModalVisible(false);
+                  form.resetFields();
+                }}
+              >
                 Hủy
               </Button>
-              <Button type="primary" htmlType="submit">
+              <Button 
+                htmlType="submit"
+                style={{
+                  backgroundColor: '#4CAF50',
+                  borderColor: '#4CAF50',
+                  color: 'white'
+                }}
+              >
                 Đổi mật khẩu
               </Button>
-            </Space>
+            </div>
           </Form.Item>
         </Form>
       </Modal>

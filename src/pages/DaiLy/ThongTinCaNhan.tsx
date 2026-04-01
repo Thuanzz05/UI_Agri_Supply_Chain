@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card, Form, Input, message, Avatar, Row, Col, Divider } from 'antd';
-import { PhoneOutlined, MailOutlined, HomeOutlined, SaveOutlined, ShopOutlined, FacebookOutlined, VideoCameraOutlined } from '@ant-design/icons';
+import { PhoneOutlined, MailOutlined, HomeOutlined, SaveOutlined, ShopOutlined, FacebookOutlined } from '@ant-design/icons';
+import { TikTokIcon } from '../../components/TikTokIcon';
 import { AdminLayout } from '../../components/Layout';
 import { authService } from '../../services/authService';
 import { apiService } from '../../services/apiService';
@@ -122,7 +123,7 @@ const ThongTinCaNhan: React.FC = () => {
                 )}
               </div>
               <div>
-                <VideoCameraOutlined style={{ marginRight: 8, color: '#000000' }} />
+                <TikTokIcon style={{ marginRight: 8, color: '#000000' }} />
                 {socialLinks.tiktok ? (
                   <a href={socialLinks.tiktok} target="_blank" rel="noopener noreferrer">
                     {socialLinks.tiktok}
@@ -217,7 +218,7 @@ const ThongTinCaNhan: React.FC = () => {
                 ]}
               >
                 <Input 
-                  prefix={<VideoCameraOutlined />}
+                  prefix={<TikTokIcon />}
                   placeholder="https://tiktok.com/@..."
                   size="large"
                 />
