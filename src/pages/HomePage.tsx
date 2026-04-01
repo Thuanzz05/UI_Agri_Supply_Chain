@@ -14,8 +14,8 @@ const HomePage = () => {
             <h1>Hệ thống Quản lý Chuỗi Cung Ứng Nông Sản</h1>
             <p>Kiểm soát và theo dõi toàn diện từ trang trại đến người tiêu dùng. Tối ưu hóa quy trình và đảm bảo chất lượng với khả năng truy xuất nguồn gốc hoàn chỉnh.</p>
             <div className="btns">
-              <Button type="primary" size="large">Dùng thử miễn phí</Button>
-              <Button size="large">Xem demo</Button>
+              <Button type="primary" size="large">Bắt đầu ngay</Button>
+              <Button size="large">Tìm hiểu thêm</Button>
             </div>
           </div>
           <div className="visual">
@@ -149,7 +149,7 @@ const HomePage = () => {
           <p>Tham gia cùng hàng nghìn doanh nghiệp nông nghiệp đang sử dụng nền tảng của chúng tôi</p>
           <div className="btns">
             <Button type="primary" size="large">Dùng thử miễn phí</Button>
-            <Button size="large">hi</Button>
+            <Button size="large">Liên hệ tư vấn</Button>
           </div>
         </div>
       </section>

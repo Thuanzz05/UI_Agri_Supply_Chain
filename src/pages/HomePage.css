@@ -289,6 +289,12 @@ body {
   margin-bottom: 40px;
 }
 
+.cta .btns {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+}
+
 .footer {
   background: #222;
   color: white;
