@@ -49,6 +49,42 @@ const About = () => {
           </div>
         </div>
       </section>
+
+      <section className="core-values">
+        <div className="wrap">
+          <h2>Giá trị cốt lõi</h2>
+          <div className="values-grid">
+            <div className="value-item">
+              <div className="value-image">
+                <img src="/quy_trinh_kiem_dinh_chat_luong.jpg" alt="Minh bạch" />
+              </div>
+              <h3>Minh bạch</h3>
+              <p>Đảm bảo thông tin rõ ràng, chính xác trong toàn bộ chuỗi cung ứng</p>
+            </div>
+            <div className="value-item">
+              <div className="value-image">
+                <img src="/trang_trai.jpg" alt="Bền vững" />
+              </div>
+              <h3>Bền vững</h3>
+              <p>Phát triển giải pháp thân thiện với môi trường và xã hội</p>
+            </div>
+            <div className="value-item">
+              <div className="value-image">
+                <img src="/ananlytics.jpg" alt="Đổi mới" />
+              </div>
+              <h3>Đổi mới</h3>
+              <p>Không ngừng cải tiến và ứng dụng công nghệ tiên tiến</p>
+            </div>
+            <div className="value-item">
+              <div className="value-image">
+                <img src="/mang_luoi_doi_tac.jpg" alt="Hợp tác" />
+              </div>
+              <h3>Hợp tác</h3>
+              <p>Xây dựng mối quan hệ đối tác bền vững và cùng phát triển</p>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 };
