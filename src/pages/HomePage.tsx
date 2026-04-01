@@ -1,6 +1,6 @@
 import { Button } from 'antd';
-import { NodeIndexOutlined } from '@ant-design/icons';
 import Header from '../components/Header';
+import Footer from '../components/Footer';
 import './HomePage.css';
 
 const HomePage = () => {
@@ -154,24 +154,7 @@ const HomePage = () => {
         </div>
       </section>
 
-      <footer className="footer">
-        <div className="wrap">
-          <div className="top">
-            <div className="brand">
-              <NodeIndexOutlined style={{ fontSize: '20px', color: '#52c41a' }} />
-              <span>AgriChain</span>
-            </div>
-            <div className="links">
-              <a href="#privacy">Privacy</a>
-              <a href="#terms">Terms</a>
-              <a href="#support">Support</a>
-            </div>
-          </div>
-          <div className="bottom">
-            <p>© 2026 AgriChain. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };
