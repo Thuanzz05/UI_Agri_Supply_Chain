@@ -85,6 +85,41 @@ const About = () => {
           </div>
         </div>
       </section>
+
+      <section className="achievements">
+        <div className="wrap">
+          <h2>Thành tựu đạt được</h2>
+          <div className="stats-grid">
+            <div className="stat-item">
+              <div className="stat-number">500+</div>
+              <div className="stat-label">Trang trại kết nối</div>
+            </div>
+            <div className="stat-item">
+              <div className="stat-number">50+</div>
+              <div className="stat-label">Doanh nghiệp đối tác</div>
+            </div>
+            <div className="stat-item">
+              <div className="stat-number">1M+</div>
+              <div className="stat-label">Sản phẩm được truy xuất</div>
+            </div>
+            <div className="stat-item">
+              <div className="stat-number">99.9%</div>
+              <div className="stat-label">Độ tin cậy hệ thống</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="cta-about">
+        <div className="wrap">
+          <h2>Cùng xây dựng tương lai nông nghiệp</h2>
+          <p>Hãy để AgriChain đồng hành cùng bạn trong hành trình số hóa và phát triển bền vững</p>
+          <div className="cta-buttons">
+            <button className="btn-primary">Liên hệ ngay</button>
+            <button className="btn-secondary">Tìm hiểu thêm</button>
+          </div>
+        </div>
+      </section>
     </div>
   );
 };

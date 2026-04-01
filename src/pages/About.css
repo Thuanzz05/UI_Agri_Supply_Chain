@@ -9,6 +9,7 @@
   font-size: 48px;
   font-weight: 700;
   margin-bottom: 24px;
+  color: white;
 }
 
 .about-hero p {
@@ -171,4 +172,101 @@
   font-size: 14px;
   line-height: 1.6;
   color: #666;
+}
+.achievements {
+  padding: 100px 0;
+  background: #f8f9fa;
+}
+
+.achievements h2 {
+  font-size: 36px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 80px;
+  color: #333;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 48px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.stat-item {
+  text-align: center;
+  padding: 32px 16px;
+}
+
+.stat-number {
+  font-size: 48px;
+  font-weight: 700;
+  color: #52c41a;
+  margin-bottom: 12px;
+}
+
+.stat-label {
+  font-size: 16px;
+  color: #666;
+  font-weight: 500;
+}
+
+.cta-about {
+  padding: 100px 0;
+  background: #333;
+  color: white;
+  text-align: center;
+}
+
+.cta-about h2 {
+  font-size: 36px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: white;
+}
+
+.cta-about p {
+  font-size: 18px;
+  color: #ccc;
+  margin-bottom: 40px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.cta-buttons {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+}
+
+.btn-primary, .btn-secondary {
+  padding: 12px 32px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-primary {
+  background: #52c41a;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #389e0d;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: white;
+  border: 2px solid white;
+}
+
+.btn-secondary:hover {
+  background: white;
+  color: #333;
 }
