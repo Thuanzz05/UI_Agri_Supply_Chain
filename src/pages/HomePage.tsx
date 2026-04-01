@@ -30,7 +30,7 @@ const HomePage = () => {
           <div className="process">
             <div className="step">
               <div className="step-img">
-                <img src="https://images.unsplash.com/photo-1500937386664-56d1dfef3854?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Trang trại" />
+                <img src="/trang_trai.jpg" alt="Trang trại" />
               </div>
               <div className="step-content">
                 <h3>1. Trang trại</h3>
@@ -44,13 +44,13 @@ const HomePage = () => {
                 <p>Sản phẩm được kiểm tra chất lượng tại các trạm kiểm định. Kết quả được ghi nhận và cập nhật vào hệ thống để đảm bảo an toàn thực phẩm.</p>
               </div>
               <div className="step-img">
-                <img src="https://images.unsplash.com/photo-1582719471384-894fbb16e074?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Kiểm định" />
+                <img src="/kiem_dinh_chat_luong.jpg" alt="Kiểm định" />
               </div>
             </div>
 
             <div className="step">
               <div className="step-img">
-                <img src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Vận chuyển" />
+                <img src="/van_chuyen.jpg" alt="Vận chuyển" />
               </div>
               <div className="step-content">
                 <h3>3. Vận chuyển & Phân phối</h3>
@@ -64,7 +64,7 @@ const HomePage = () => {
                 <p>Người mua có thể quét mã QR để xem toàn bộ hành trình của sản phẩm từ trang trại đến tay họ, đảm bảo minh bạch và tin cậy.</p>
               </div>
               <div className="step-img">
-                <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Người tiêu dùng" />
+                <img src="/nguoi_tieu_dung.jpg" alt="Người tiêu dùng" />
               </div>
             </div>
           </div>
@@ -77,28 +77,28 @@ const HomePage = () => {
           <div className="grid">
             <div className="card">
               <div className="card-img">
-                <img src="/favicon.svg" alt="Analytics" />
+                <img src="/ananlytics.jpg" alt="Analytics" />
               </div>
               <h3>Phân tích thời gian thực</h3>
               <p>Theo dõi các chỉ số hiệu suất và có được thông tin chi tiết với bảng điều khiển toàn diện.</p>
             </div>
             <div className="card">
               <div className="card-img">
-                <img src="/favicon.svg" alt="Quality" />
+                <img src="/dam_bao_chat_luong.jpg" alt="Quality Control Laboratory" />
               </div>
               <h3>Đảm bảo chất lượng</h3>
               <p>Đảm bảo chất lượng sản phẩm với quy trình kiểm tra tự động và quản lý chứng nhận.</p>
             </div>
             <div className="card">
               <div className="card-img">
-                <img src="/favicon.svg" alt="Logistics" />
+                <img src="/quan_ly_logistics.jpg" alt="Transportation Logistics" />
               </div>
               <h3>Quản lý logistics</h3>
               <p>Tối ưu hóa tuyến đường vận chuyển và quản lý hàng tồn kho một cách hiệu quả.</p>
             </div>
             <div className="card">
               <div className="card-img">
-                <img src="/favicon.svg" alt="Network" />
+                <img src="/mang_luoi_doi_tac.jpg" alt="Network" />
               </div>
               <h3>Mạng lưới đối tác</h3>
               <p>Kết nối nông dân, nhà phân phối và nhà bán lẻ trong một nền tảng.</p>
@@ -112,20 +112,20 @@ const HomePage = () => {
           <h2>Hình ảnh thực tế</h2>
           <div className="images">
             <div className="img-item">
-              <img src="/favicon.svg" alt="Trang trại hiện đại" />
+              <img src="/trang_trai_cong_nghe_cao.jpg" alt="Trang trại thông minh" />
               <p>Trang trại ứng dụng công nghệ cao</p>
             </div>
             <div className="img-item">
-              <img src="/favicon.svg" alt="Kiểm định sản phẩm" />
+              <img src="/quy_trinh_kiem_dinh_chat_luong.jpg" alt="Phòng thí nghiệm kiểm định" />
               <p>Quy trình kiểm định chất lượng nghiêm ngặt</p>
             </div>
             <div className="img-item">
-              <img src="/favicon.svg" alt="Kho bảo quản" />
-              <p>Hệ thống kho bảo quản hiện đại</p>
+              <img src="/cam_bien_cho_nha_kinh.jpg" alt="Nhà kính hiện đại" />
+              <p>Hệ thống nhà kính tự động hóa</p>
             </div>
             <div className="img-item">
-              <img src="/favicon.svg" alt="Vận chuyển" />
-              <p>Xe vận chuyển chuyên dụng</p>
+              <img src="/trung_tam_phan_phoi.jpg" alt="Trung tâm phân phối" />
+              <p>Trung tâm phân phối hiện đại</p>
             </div>
           </div>
         </div>
