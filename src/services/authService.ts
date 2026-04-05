@@ -2,14 +2,14 @@ import axios from 'axios';
 
 const API_BASE_URL = 'https://localhost:7009';
 
-const api = axios.create({
+export const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-api.interceptors.request.use((config) => {
+apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -23,33 +23,36 @@ export interface LoginRequest {
 }
 
 export interface User {
-  MaTaiKhoan: number;
-  TenDangNhap: string;
-  LoaiTaiKhoan: string;
+  maTaiKhoan: number;
+  tenDangNhap: string;
+  loaiTaiKhoan: string;
 }
 
 export interface LoginResponse {
   success: boolean;
   message: string;
   data?: {
-    MaTaiKhoan: number;
-    TenDangNhap: string;
-    LoaiTaiKhoan: string;
-    Token: string;
+    maTaiKhoan: number;
+    tenDangNhap: string;
+    loaiTaiKhoan: string;
+    token: string;
   };
 }
 
 export const authService = {
   async login(loginData: LoginRequest): Promise<LoginResponse> {
     try {
-      const response = await api.post<LoginResponse>('/api/auth/login', loginData);
+      const response = await apiClient.post<LoginResponse>('/api/auth/login', loginData);
       
       if (response.data.success && response.data.data) {
-        localStorage.setItem('token', response.data.data.Token);
+        // Lưu token với key đúng từ API response
+        const token = response.data.data.token;
+        
+        localStorage.setItem('token', token);
         localStorage.setItem('user', JSON.stringify({
-          MaTaiKhoan: response.data.data.MaTaiKhoan,
-          TenDangNhap: response.data.data.TenDangNhap,
-          LoaiTaiKhoan: response.data.data.LoaiTaiKhoan
+          maTaiKhoan: response.data.data.maTaiKhoan,
+          tenDangNhap: response.data.data.tenDangNhap,
+          loaiTaiKhoan: response.data.data.loaiTaiKhoan
         }));
       }
       
@@ -64,7 +67,7 @@ export const authService = {
 
   async getCurrentUser(): Promise<User | null> {
     try {
-      const response = await api.get('/api/auth/me');
+      const response = await apiClient.get('/api/auth/me');
       if (response.data.success) {
         return response.data.data;
       }
@@ -89,6 +92,7 @@ export const authService = {
   },
 
   isAuthenticated(): boolean {
-    return !!this.getToken();
+    const token = this.getToken();
+    return !!token;
   }
 };

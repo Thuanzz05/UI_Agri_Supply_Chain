@@ -1,4 +1,4 @@
-import { Layout, Card, Row, Col, Table } from 'antd';
+import { Card, Row, Col, Table } from 'antd';
 import { 
   TrophyOutlined, 
   TeamOutlined, 
@@ -7,8 +7,6 @@ import {
 } from '@ant-design/icons';
 import Sidebar from '../../components/Sidebar';
 import './Dashboard.css';
-
-const { Content } = Layout;
 
 const Dashboard = () => {
   // Dữ liệu mẫu cho bảng

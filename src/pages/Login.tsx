@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Form, Input, Button, Card, Typography, message } from 'antd';
 import { UserOutlined, LockOutlined, LoginOutlined } from '@ant-design/icons';
 import { authService, type LoginRequest } from '../services/authService';
@@ -14,6 +15,7 @@ interface LoginFormData {
 const Login: React.FC = () => {
   const [form] = Form.useForm();
   const [loading, setLoading] = React.useState(false);
+  const navigate = useNavigate();
 
   const onFinish = async (values: LoginFormData) => {
     setLoading(true);
@@ -25,9 +27,16 @@ const Login: React.FC = () => {
 
       const response = await authService.login(loginData);
       
-      if (response.success) {
+      if (response.success && response.data) {
         message.success('Đăng nhập thành công!');
-        window.location.href = '/dashboard';
+        
+        // Redirect based on user role - Admin goes to admin dashboard
+        if (response.data.loaiTaiKhoan === 'Admin') {
+          navigate('/admin/dashboard');
+        } else {
+          // Other roles can go to different dashboards later
+          navigate('/admin/dashboard'); // For now, all go to admin dashboard
+        }
       } else {
         message.error(response.message || 'Đăng nhập thất bại!');
       }
