@@ -3,9 +3,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import {
   DashboardOutlined,
   UserOutlined,
-  ShopOutlined,
-  BarChartOutlined,
-  SettingOutlined,
   LogoutOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -22,6 +19,10 @@ const Sidebar: React.FC = () => {
 
   const toggleCollapsed = () => {
     setCollapsed(!collapsed);
+    // Dispatch custom event để các trang admin biết sidebar đã thay đổi
+    window.dispatchEvent(new CustomEvent('sidebarToggle', { 
+      detail: { collapsed: !collapsed } 
+    }));
   };
 
   const items: MenuItem[] = [
@@ -36,19 +37,7 @@ const Sidebar: React.FC = () => {
       label: 'Người dùng' 
     },
     { 
-      key: '/admin/farms', 
-      icon: <ShopOutlined />, 
-      label: 'Trang trại' 
-    },
-    { 
-      key: '/admin/analytics', 
-      icon: <BarChartOutlined />, 
-      label: 'Thống kê' 
-    },
-    { 
-      key: '/admin/settings', 
-      icon: <SettingOutlined />, 
-      label: 'Cài đặt' 
+      type: 'divider'
     },
     { 
       key: '/', 
@@ -109,7 +98,8 @@ const Sidebar: React.FC = () => {
         onClick={handleMenuClick}
         style={{ 
           border: 'none',
-          height: 'calc(100vh - 64px)'
+          height: 'calc(100vh - 64px)',
+          overflow: 'auto'
         }}
       />
     </div>
