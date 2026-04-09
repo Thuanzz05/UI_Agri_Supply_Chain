@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, Table, Button, Space, Tag, Input } from 'antd';
+import { Card, Table, Button, Space, Input, message } from 'antd';
 import type { TableProps } from 'antd';
 import { 
   PlusOutlined, 
@@ -9,132 +9,93 @@ import {
 } from '@ant-design/icons';
 import { AdminLayout } from '../../components/Layout';
 import { CustomPagination } from '../../components/CustomPagination';
+import { apiService } from '../../services/apiService';
 
 interface DataType {
   key: string;
-  id: string;
-  name: string;
-  category: string;
-  quantity: string;
-  unit: string;
-  price: string;
-  status: string;
-  harvestDate: string;
+  maSanPham: number;
+  tenSanPham: string;
+  donViTinh: string;
+  moTa: string;
 }
 
 const QuanLySanPham: React.FC = () => {
   const [currentPage, setCurrentPage] = React.useState(1);
   const [pageSize, setPageSize] = React.useState(10);
+  
+  // 2.1: Tạo state để lưu dữ liệu từ API
+  const [data, setData] = React.useState<DataType[]>([]);
+  const [loading, setLoading] = React.useState(false);
+  const [total, setTotal] = React.useState(0);
 
-  // Dữ liệu mẫu sản phẩm
-  const data: DataType[] = [
-    {
-      key: '1',
-      id: 'SP001',
-      name: 'Rau cải xanh',
-      category: 'Rau lá',
-      quantity: '150',
-      unit: 'kg',
-      price: '25,000',
-      status: 'Còn hàng',
-      harvestDate: '2024-01-15'
-    },
-    {
-      key: '2',
-      id: 'SP002',
-      name: 'Cà chua',
-      category: 'Quả',
-      quantity: '200',
-      unit: 'kg',
-      price: '35,000',
-      status: 'Còn hàng',
-      harvestDate: '2024-01-14'
-    },
-    {
-      key: '3',
-      id: 'SP003',
-      name: 'Xà lách',
-      category: 'Rau lá',
-      quantity: '0',
-      unit: 'kg',
-      price: '30,000',
-      status: 'Hết hàng',
-      harvestDate: '2024-01-10'
-    },
-    {
-      key: '4',
-      id: 'SP004',
-      name: 'Dưa chuột',
-      category: 'Quả',
-      quantity: '180',
-      unit: 'kg',
-      price: '20,000',
-      status: 'Còn hàng',
-      harvestDate: '2024-01-16'
-    },
-    {
-      key: '5',
-      id: 'SP005',
-      name: 'Rau muống',
-      category: 'Rau lá',
-      quantity: '120',
-      unit: 'kg',
-      price: '15,000',
-      status: 'Còn hàng',
-      harvestDate: '2024-01-15'
+  // 2.2: Tạo function để gọi API lấy dữ liệu
+  const fetchProducts = async () => {
+    setLoading(true); // Bật loading
+    try {
+      const response = await apiService.getFarmerProducts();
+      console.log('API Response:', response); // Debug: xem cấu trúc dữ liệu
+      
+      // 2.3: Kiểm tra và map dữ liệu từ API
+      if (response && response.data) {
+        const products = Array.isArray(response.data) ? response.data : [];
+        
+        // 2.4: Chuyển đổi dữ liệu từ API sang format của bảng
+        const mappedData: DataType[] = products.map((product: any) => ({
+          key: product.maSanPham?.toString(),
+          maSanPham: product.maSanPham,
+          tenSanPham: product.tenSanPham,
+          donViTinh: product.donViTinh,
+          moTa: product.moTa
+        }));
+        
+        // 2.5: Cập nhật state với dữ liệu đã map
+        setData(mappedData);
+        setTotal(mappedData.length);
+      } else {
+        setData([]);
+        setTotal(0);
+      }
+    } catch (error: any) {
+      console.error('Error fetching products:', error);
+      message.error('Không thể tải danh sách sản phẩm');
+      setData([]);
+      setTotal(0);
+    } finally {
+      setLoading(false); // Tắt loading
     }
-  ];
+  };
 
+  // 2.6: Gọi API khi component được mount (hiển thị lần đầu)
+  React.useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  
   const columns: TableProps<DataType>['columns'] = [
     {
       title: 'Mã SP',
-      dataIndex: 'id',
-      key: 'id',
+      dataIndex: 'maSanPham',
+      key: 'maSanPham',
       width: 80,
     },
     {
       title: 'Tên sản phẩm',
-      dataIndex: 'name',
-      key: 'name',
-      width: 150,
+      dataIndex: 'tenSanPham',
+      key: 'tenSanPham',
+      width: 200,
     },
     {
-      title: 'Danh mục',
-      dataIndex: 'category',
-      key: 'category',
+      title: 'Đơn vị tính',
+      dataIndex: 'donViTinh',
+      key: 'donViTinh',
       width: 100,
     },
     {
-      title: 'Số lượng',
-      dataIndex: 'quantity',
-      key: 'quantity',
-      width: 80,
-      render: (quantity: string, record: DataType) => (
-        <span>{quantity} {record.unit}</span>
-      ),
-    },
-    {
-      title: 'Giá (VNĐ/kg)',
-      dataIndex: 'price',
-      key: 'price',
-      width: 100,
-    },
-    {
-      title: 'Trạng thái',
-      dataIndex: 'status',
-      key: 'status',
-      width: 100,
-      render: (_, { status }) => (
-        <Tag color={status === 'Còn hàng' ? 'green' : 'red'}>
-          {status}
-        </Tag>
-      ),
-    },
-    {
-      title: 'Ngày thu hoạch',
-      dataIndex: 'harvestDate',
-      key: 'harvestDate',
-      width: 120,
+      title: 'Mô tả',
+      dataIndex: 'moTa',
+      key: 'moTa',
+      width: 300,
+      ellipsis: true,
     },
     {
       title: 'Thao tác',
@@ -195,12 +156,13 @@ const QuanLySanPham: React.FC = () => {
           columns={columns} 
           dataSource={data}
           pagination={false}
-          scroll={{ x: 1000 }}
+          scroll={{ x: 800 }}
+          loading={loading}
         />
         
         <CustomPagination
           current={currentPage}
-          total={data.length}
+          total={total}
           pageSize={pageSize}
           onChange={(page, size) => {
             setCurrentPage(page);
