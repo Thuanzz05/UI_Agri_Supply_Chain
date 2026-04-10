@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, Table, Button, Space, Input, message } from 'antd';
+import { Card, Table, Button, Space, Input, message, Modal, Form } from 'antd';
 import type { TableProps } from 'antd';
 import { 
   PlusOutlined, 
@@ -10,6 +10,7 @@ import {
 import { AdminLayout } from '../../components/Layout';
 import { CustomPagination } from '../../components/CustomPagination';
 import { apiService } from '../../services/apiService';
+import type { ProductFormData } from '../../types/product';
 
 interface DataType {
   key: string;
@@ -27,6 +28,10 @@ const QuanLySanPham: React.FC = () => {
   const [data, setData] = React.useState<DataType[]>([]);
   const [loading, setLoading] = React.useState(false);
   const [total, setTotal] = React.useState(0);
+  
+  // State cho modal thêm sản phẩm
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const [form] = Form.useForm();
 
   // 2.2: Tạo function để gọi API lấy dữ liệu
   const fetchProducts = async () => {
@@ -69,6 +74,34 @@ const QuanLySanPham: React.FC = () => {
   React.useEffect(() => {
     fetchProducts();
   }, []);
+
+  // Hàm mở modal
+  const showModal = () => {
+    setIsModalOpen(true);
+  };
+
+  // Hàm đóng modal
+  const handleCancel = () => {
+    setIsModalOpen(false);
+    form.resetFields();
+  };
+
+  // Hàm xử lý submit form thêm sản phẩm
+  const handleAddProduct = async (values: ProductFormData) => {
+    try {
+      setLoading(true);
+      await apiService.addFarmerProduct(values);
+      message.success('Thêm sản phẩm thành công!');
+      setIsModalOpen(false);
+      form.resetFields();
+      fetchProducts(); // Tải lại danh sách sản phẩm
+    } catch (error: any) {
+      console.error('Error adding product:', error);
+      message.error(error.response?.data?.message || 'Không thể thêm sản phẩm');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   
   const columns: TableProps<DataType>['columns'] = [
@@ -147,6 +180,7 @@ const QuanLySanPham: React.FC = () => {
             type="primary" 
             icon={<PlusOutlined />}
             size="large"
+            onClick={showModal}
           >
             Thêm sản phẩm
           </Button>
@@ -173,6 +207,67 @@ const QuanLySanPham: React.FC = () => {
           }
         />
       </Card>
+
+      {/* Modal thêm sản phẩm */}
+      <Modal
+        title="Thêm sản phẩm mới"
+        open={isModalOpen}
+        onCancel={handleCancel}
+        footer={null}
+        width={600}
+      >
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleAddProduct}
+          style={{ marginTop: 24 }}
+        >
+          <Form.Item
+            label="Tên sản phẩm"
+            name="tenSanPham"
+            rules={[
+              { required: true, message: 'Vui lòng nhập tên sản phẩm!' },
+              { min: 3, message: 'Tên sản phẩm phải có ít nhất 3 ký tự!' }
+            ]}
+          >
+            <Input placeholder="Nhập tên sản phẩm" />
+          </Form.Item>
+
+          <Form.Item
+            label="Đơn vị tính"
+            name="donViTinh"
+            rules={[
+              { required: true, message: 'Vui lòng nhập đơn vị tính!' }
+            ]}
+          >
+            <Input placeholder="Ví dụ: kg, tấn, thùng..." />
+          </Form.Item>
+
+          <Form.Item
+            label="Mô tả"
+            name="moTa"
+            rules={[
+              { required: true, message: 'Vui lòng nhập mô tả sản phẩm!' }
+            ]}
+          >
+            <Input.TextArea 
+              rows={4} 
+              placeholder="Nhập mô tả chi tiết về sản phẩm"
+            />
+          </Form.Item>
+
+          <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
+            <Space>
+              <Button onClick={handleCancel}>
+                Hủy
+              </Button>
+              <Button type="primary" htmlType="submit" loading={loading}>
+                Thêm sản phẩm
+              </Button>
+            </Space>
+          </Form.Item>
+        </Form>
+      </Modal>
     </AdminLayout>
   );
 };

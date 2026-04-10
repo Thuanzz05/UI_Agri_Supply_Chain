@@ -41,5 +41,15 @@ export const apiService = {
     } catch (error) {
       throw error;
     }
+  },
+
+  // API thêm sản phẩm mới
+  async addFarmerProduct(productData: any) {
+    try {
+      const response = await apiClient.post('/api-nongdan/san-pham/create', productData);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
   }
 };
