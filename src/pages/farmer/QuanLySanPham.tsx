@@ -159,6 +159,18 @@ const QuanLySanPham: React.FC = () => {
     );
   }, [data, searchText]);
 
+  // Reset về trang 1 khi tìm kiếm
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchText]);
+
+  // Dữ liệu hiển thị theo trang
+  const paginatedData = React.useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    return filteredData.slice(startIndex, endIndex);
+  }, [filteredData, currentPage, pageSize]);
+
   
   const columns: TableProps<DataType>['columns'] = [
     {
@@ -255,7 +267,7 @@ const QuanLySanPham: React.FC = () => {
         
         <Table<DataType>
           columns={columns} 
-          dataSource={filteredData}
+          dataSource={paginatedData}
           pagination={false}
           scroll={{ x: 800 }}
           loading={loading}
