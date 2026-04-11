@@ -31,6 +31,8 @@ const QuanLySanPham: React.FC = () => {
   
   // State cho modal thêm sản phẩm
   const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const [isEditMode, setIsEditMode] = React.useState(false);
+  const [editingProduct, setEditingProduct] = React.useState<DataType | null>(null);
   const [form] = Form.useForm();
 
   // 2.2: Tạo function để gọi API lấy dữ liệu
@@ -38,7 +40,6 @@ const QuanLySanPham: React.FC = () => {
     setLoading(true); // Bật loading
     try {
       const response = await apiService.getFarmerProducts();
-      console.log('API Response:', response); // Debug: xem cấu trúc dữ liệu
       
       // 2.3: Kiểm tra và map dữ liệu từ API
       if (response && response.data) {
@@ -61,7 +62,6 @@ const QuanLySanPham: React.FC = () => {
         setTotal(0);
       }
     } catch (error: any) {
-      console.error('Error fetching products:', error);
       message.error('Không thể tải danh sách sản phẩm');
       setData([]);
       setTotal(0);
@@ -75,29 +75,54 @@ const QuanLySanPham: React.FC = () => {
     fetchProducts();
   }, []);
 
-  // Hàm mở modal
+  // Hàm mở modal thêm mới
   const showModal = () => {
+    setIsEditMode(false);
+    setEditingProduct(null);
+    form.resetFields();
+    setIsModalOpen(true);
+  };
+
+  // Hàm mở modal sửa
+  const showEditModal = (record: DataType) => {
+    setIsEditMode(true);
+    setEditingProduct(record);
+    form.setFieldsValue({
+      tenSanPham: record.tenSanPham,
+      donViTinh: record.donViTinh,
+      moTa: record.moTa
+    });
     setIsModalOpen(true);
   };
 
   // Hàm đóng modal
   const handleCancel = () => {
     setIsModalOpen(false);
+    setIsEditMode(false);
+    setEditingProduct(null);
     form.resetFields();
   };
 
-  // Hàm xử lý submit form thêm sản phẩm
-  const handleAddProduct = async (values: ProductFormData) => {
+  // Hàm xử lý submit form (thêm hoặc sửa)
+  const handleSubmit = async (values: ProductFormData) => {
     try {
       setLoading(true);
-      await apiService.addFarmerProduct(values);
-      message.success('Thêm sản phẩm thành công!');
+      if (isEditMode && editingProduct) {
+        // Sửa sản phẩm
+        await apiService.updateFarmerProduct(editingProduct.maSanPham, values);
+        message.success('Cập nhật sản phẩm thành công!');
+      } else {
+        // Thêm sản phẩm mới
+        await apiService.addFarmerProduct(values);
+        message.success('Thêm sản phẩm thành công!');
+      }
       setIsModalOpen(false);
       form.resetFields();
+      setIsEditMode(false);
+      setEditingProduct(null);
       fetchProducts(); // Tải lại danh sách sản phẩm
     } catch (error: any) {
-      console.error('Error adding product:', error);
-      message.error(error.response?.data?.message || 'Không thể thêm sản phẩm');
+      message.error(error.response?.data?.message || 'Không thể lưu sản phẩm');
     } finally {
       setLoading(false);
     }
@@ -134,12 +159,18 @@ const QuanLySanPham: React.FC = () => {
       title: 'Thao tác',
       key: 'action',
       width: 150,
-      render: () => (
+      render: (_, record) => (
         <Space size="small">
           <Button 
-            type="primary" 
+            type="default" 
             size="small" 
             icon={<EditOutlined />}
+            style={{ 
+              color: '#1890ff', 
+              borderColor: '#1890ff',
+              minWidth: '65px'
+            }}
+            onClick={() => showEditModal(record)}
           >
             Sửa
           </Button>
@@ -147,6 +178,7 @@ const QuanLySanPham: React.FC = () => {
             danger 
             size="small" 
             icon={<DeleteOutlined />}
+            style={{ minWidth: '65px' }}
           >
             Xóa
           </Button>
@@ -208,9 +240,9 @@ const QuanLySanPham: React.FC = () => {
         />
       </Card>
 
-      {/* Modal thêm sản phẩm */}
+      {/* Modal thêm/sửa sản phẩm */}
       <Modal
-        title="Thêm sản phẩm mới"
+        title={isEditMode ? "Sửa sản phẩm" : "Thêm sản phẩm mới"}
         open={isModalOpen}
         onCancel={handleCancel}
         footer={null}
@@ -219,7 +251,7 @@ const QuanLySanPham: React.FC = () => {
         <Form
           form={form}
           layout="vertical"
-          onFinish={handleAddProduct}
+          onFinish={handleSubmit}
           style={{ marginTop: 24 }}
         >
           <Form.Item
@@ -258,11 +290,21 @@ const QuanLySanPham: React.FC = () => {
 
           <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
             <Space>
-              <Button onClick={handleCancel}>
+              <Button onClick={handleCancel} size="middle">
                 Hủy
               </Button>
-              <Button type="primary" htmlType="submit" loading={loading}>
-                Thêm sản phẩm
+              <Button 
+                type="primary" 
+                htmlType="submit" 
+                loading={loading} 
+                size="middle"
+                style={{ 
+                  fontSize: '14px',
+                  height: '32px',
+                  padding: '0 15px'
+                }}
+              >
+                {isEditMode ? 'Cập nhật' : 'Thêm sản phẩm'}
               </Button>
             </Space>
           </Form.Item>

@@ -51,5 +51,15 @@ export const apiService = {
     } catch (error) {
       throw error;
     }
+  },
+
+  // API cập nhật sản phẩm
+  async updateFarmerProduct(maSanPham: number, productData: any) {
+    try {
+      const response = await apiClient.put(`/api-nongdan/san-pham/update/${maSanPham}`, productData);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
   }
 };
