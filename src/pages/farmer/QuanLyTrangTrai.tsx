@@ -1,11 +1,13 @@
 import React from 'react';
-import { Card, Table, message } from 'antd';
+import { Card, Table, Button, message, Modal, Form, Input, Space } from 'antd';
 import type { TableProps } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
 import { AdminLayout } from '../../components/Layout';
 import { CustomPagination } from '../../components/CustomPagination';
 import { apiService } from '../../services/apiService';
+import type { FarmFormData } from '../../types/farm';
 
-// BƯỚC 1: Định nghĩa kiểu dữ liệu cho bảng
+// Định nghĩa kiểu dữ liệu cho bảng
 interface DataType {
   key: string;
   maTrangTrai: number;
@@ -17,13 +19,17 @@ interface DataType {
 }
 
 const QuanLyTrangTrai: React.FC = () => {
-  // BƯỚC 2: Tạo các state cần thiết
+  // State quản lý phân trang
   const [currentPage, setCurrentPage] = React.useState(1);
   const [pageSize, setPageSize] = React.useState(10);
   const [data, setData] = React.useState<DataType[]>([]);
   const [loading, setLoading] = React.useState(false);
+  
+  // State quản lý modal thêm trang trại
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const [form] = Form.useForm();
 
-  // BƯỚC 3: Tạo function gọi API lấy danh sách trang trại
+  // Function gọi API lấy danh sách trang trại
   const fetchFarms = async () => {
     setLoading(true);
     try {
@@ -32,7 +38,6 @@ const QuanLyTrangTrai: React.FC = () => {
       if (response && response.data) {
         const farms = Array.isArray(response.data) ? response.data : [];
         
-        // Map dữ liệu từ API sang format của bảng
         const mappedData: DataType[] = farms.map((farm: any) => ({
           key: farm.maTrangTrai?.toString(),
           maTrangTrai: farm.maTrangTrai,
@@ -55,19 +60,62 @@ const QuanLyTrangTrai: React.FC = () => {
     }
   };
 
-  // BƯỚC 4: Gọi API khi component được mount
+  // Gọi API khi component mount
   React.useEffect(() => {
     fetchFarms();
   }, []);
 
-  // BƯỚC 5: Xử lý phân trang
+  // Hàm mở modal thêm mới
+  const showModal = () => {
+    form.resetFields();
+    setIsModalOpen(true);
+  };
+
+  // Hàm đóng modal
+  const handleCancel = () => {
+    setIsModalOpen(false);
+    form.resetFields();
+  };
+
+  // Hàm xử lý submit form thêm trang trại
+  const handleSubmit = async (values: FarmFormData) => {
+    try {
+      setLoading(true);
+      
+      const userStr = localStorage.getItem('user');
+      if (!userStr) {
+        message.error('Không tìm thấy thông tin người dùng');
+        return;
+      }
+      
+      const user = JSON.parse(userStr);
+      
+      const farmData = {
+        ...values,
+        maNongDan: user.maTaiKhoan
+      };
+      
+      await apiService.addFarm(farmData);
+      message.success('Thêm trang trại thành công!');
+      setIsModalOpen(false);
+      form.resetFields();
+      fetchFarms();
+    } catch (error: any) {
+      console.error('Error adding farm:', error);
+      message.error(error.response?.data?.message || 'Không thể thêm trang trại');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Tính toán dữ liệu phân trang
   const paginatedData = React.useMemo(() => {
     const startIndex = (currentPage - 1) * pageSize;
     const endIndex = startIndex + pageSize;
     return data.slice(startIndex, endIndex);
   }, [data, currentPage, pageSize]);
 
-  // BƯỚC 6: Định nghĩa các cột của bảng
+  // Định nghĩa các cột của bảng
   const columns: TableProps<DataType>['columns'] = [
     {
       title: 'Mã TT',
@@ -109,6 +157,24 @@ const QuanLyTrangTrai: React.FC = () => {
       </div>
       
       <Card>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'flex-end',
+          alignItems: 'center',
+          marginBottom: '24px',
+          padding: '16px 0',
+          borderBottom: '1px solid #f0f0f0'
+        }}>
+          <Button 
+            type="primary" 
+            icon={<PlusOutlined />}
+            onClick={showModal}
+            style={{ height: '32px', fontSize: '14px' }}
+          >
+            Thêm trang trại
+          </Button>
+        </div>
+        
         <Table<DataType>
           columns={columns} 
           dataSource={paginatedData}
@@ -130,6 +196,72 @@ const QuanLyTrangTrai: React.FC = () => {
           }
         />
       </Card>
+
+      {/* Modal thêm trang trại */}
+      <Modal
+        title="Thêm trang trại mới"
+        open={isModalOpen}
+        onCancel={handleCancel}
+        footer={null}
+        width={600}
+      >
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleSubmit}
+          style={{ marginTop: 24 }}
+        >
+          <Form.Item
+            label="Tên trang trại"
+            name="tenTrangTrai"
+            rules={[
+              { required: true, message: 'Vui lòng nhập tên trang trại!' },
+              { min: 3, message: 'Tên trang trại phải có ít nhất 3 ký tự!' }
+            ]}
+          >
+            <Input placeholder="Nhập tên trang trại" />
+          </Form.Item>
+
+          <Form.Item
+            label="Địa chỉ"
+            name="diaChi"
+            rules={[
+              { required: true, message: 'Vui lòng nhập địa chỉ!' }
+            ]}
+          >
+            <Input placeholder="Nhập địa chỉ trang trại" />
+          </Form.Item>
+
+          <Form.Item
+            label="Số chứng nhận"
+            name="soChungNhan"
+            rules={[
+              { required: true, message: 'Vui lòng nhập số chứng nhận!' }
+            ]}
+          >
+            <Input placeholder="Ví dụ: VG001234" />
+          </Form.Item>
+
+          <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
+            <Space>
+              <Button 
+                onClick={handleCancel}
+                style={{ height: '32px', padding: '4px 15px' }}
+              >
+                Hủy
+              </Button>
+              <Button 
+                type="primary" 
+                htmlType="submit" 
+                loading={loading}
+                style={{ height: '32px', padding: '4px 15px' }}
+              >
+                Thêm trang trại
+              </Button>
+            </Space>
+          </Form.Item>
+        </Form>
+      </Modal>
     </AdminLayout>
   );
 };
