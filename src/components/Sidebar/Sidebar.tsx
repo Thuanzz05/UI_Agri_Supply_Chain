@@ -10,6 +10,7 @@ import {
   ShopOutlined,
   ShoppingOutlined,
   InboxOutlined,
+  HomeOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Button, Menu } from 'antd';
@@ -72,6 +73,11 @@ const Sidebar: React.FC = () => {
       key: '/farmer/dashboard', 
       icon: <DashboardOutlined />, 
       label: 'Dashboard' 
+    },
+    { 
+      key: '/farmer/farms', 
+      icon: <HomeOutlined />, 
+      label: 'Trang trại' 
     },
     { 
       key: '/farmer/products', 

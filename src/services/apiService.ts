@@ -71,5 +71,67 @@ export const apiService = {
     } catch (error) {
       throw error;
     }
+  },
+
+  // ============ API TRANG TRẠI ============
+  
+  // Lấy tất cả trang trại
+  async getAllFarms() {
+    try {
+      const response = await apiClient.get('/api-nongdan/trang-trai/get-all');
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Lấy trang trại theo nông dân
+  async getFarmsByFarmer(maNongDan: string) {
+    try {
+      const response = await apiClient.get(`/api-nongdan/trang-trai/get-by-nong-dan/${maNongDan}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Lấy trang trại theo ID
+  async getFarmById(id: number) {
+    try {
+      const response = await apiClient.get(`/api-nongdan/trang-trai/get-by-id/${id}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Thêm trang trại mới
+  async addFarm(farmData: any) {
+    try {
+      const response = await apiClient.post('/api-nongdan/trang-trai/create', farmData);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Cập nhật trang trại
+  async updateFarm(id: number, farmData: any) {
+    try {
+      const response = await apiClient.put(`/api-nongdan/trang-trai/update/${id}`, farmData);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Xóa trang trại
+  async deleteFarm(id: number) {
+    try {
+      const response = await apiClient.delete(`/api-nongdan/trang-trai/delete/${id}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
   }
 };

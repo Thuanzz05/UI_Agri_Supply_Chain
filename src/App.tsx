@@ -9,6 +9,7 @@ import Users from './pages/admin/Users';
 import Reports from './pages/admin/Reports';
 import DashboardNongDan from './pages/farmer/DashboardNongDan';
 import QuanLySanPham from './pages/farmer/QuanLySanPham';
+import QuanLyTrangTrai from './pages/farmer/QuanLyTrangTrai';
 import DashboardDaiLy from './pages/agent/DashboardDaiLy';
 import DashboardSieuThi from './pages/supermarket/DashboardSieuThi';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -59,6 +60,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <QuanLySanPham />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/farmer/farms" 
+            element={
+              <ProtectedRoute>
+                <QuanLyTrangTrai />
               </ProtectedRoute>
             } 
           />
