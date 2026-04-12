@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, Table, Button, message, Modal, Form, Input, Space } from 'antd';
 import type { TableProps } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
+import { PlusOutlined, EditOutlined } from '@ant-design/icons';
 import { AdminLayout } from '../../components/Layout';
 import { CustomPagination } from '../../components/CustomPagination';
 import { apiService } from '../../services/apiService';
@@ -25,8 +25,10 @@ const QuanLyTrangTrai: React.FC = () => {
   const [data, setData] = React.useState<DataType[]>([]);
   const [loading, setLoading] = React.useState(false);
   
-  // State quản lý modal thêm trang trại
+  // State quản lý modal thêm/sửa trang trại
   const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const [isEditMode, setIsEditMode] = React.useState(false);
+  const [editingFarm, setEditingFarm] = React.useState<DataType | null>(null);
   const [form] = Form.useForm();
 
   // Function gọi API lấy danh sách trang trại
@@ -67,17 +69,33 @@ const QuanLyTrangTrai: React.FC = () => {
 
   // Hàm mở modal thêm mới
   const showModal = () => {
+    setIsEditMode(false);
+    setEditingFarm(null);
     form.resetFields();
+    setIsModalOpen(true);
+  };
+
+  // Hàm mở modal sửa
+  const showEditModal = (record: DataType) => {
+    setIsEditMode(true);
+    setEditingFarm(record);
+    form.setFieldsValue({
+      tenTrangTrai: record.tenTrangTrai,
+      diaChi: record.diaChi,
+      soChungNhan: record.soChungNhan
+    });
     setIsModalOpen(true);
   };
 
   // Hàm đóng modal
   const handleCancel = () => {
     setIsModalOpen(false);
+    setIsEditMode(false);
+    setEditingFarm(null);
     form.resetFields();
   };
 
-  // Hàm xử lý submit form thêm trang trại
+  // Hàm xử lý submit form thêm/sửa trang trại
   const handleSubmit = async (values: FarmFormData) => {
     try {
       setLoading(true);
@@ -90,19 +108,32 @@ const QuanLyTrangTrai: React.FC = () => {
       
       const user = JSON.parse(userStr);
       
-      const farmData = {
-        ...values,
-        maNongDan: user.maTaiKhoan
-      };
+      if (isEditMode && editingFarm) {
+        // Sửa trang trại
+        const farmData = {
+          ...values,
+          maNongDan: editingFarm.maNongDan
+        };
+        await apiService.updateFarm(editingFarm.maTrangTrai, farmData);
+        message.success('Cập nhật trang trại thành công!');
+      } else {
+        // Thêm trang trại mới
+        const farmData = {
+          ...values,
+          maNongDan: user.maTaiKhoan
+        };
+        await apiService.addFarm(farmData);
+        message.success('Thêm trang trại thành công!');
+      }
       
-      await apiService.addFarm(farmData);
-      message.success('Thêm trang trại thành công!');
       setIsModalOpen(false);
+      setIsEditMode(false);
+      setEditingFarm(null);
       form.resetFields();
       fetchFarms();
     } catch (error: any) {
-      console.error('Error adding farm:', error);
-      message.error(error.response?.data?.message || 'Không thể thêm trang trại');
+      console.error('Error saving farm:', error);
+      message.error(error.response?.data?.message || 'Không thể lưu trang trại');
     } finally {
       setLoading(false);
     }
@@ -146,6 +177,25 @@ const QuanLyTrangTrai: React.FC = () => {
       dataIndex: 'tenNongDan',
       key: 'tenNongDan',
       width: 150,
+    },
+    {
+      title: 'Thao tác',
+      key: 'action',
+      width: 100,
+      render: (_, record) => (
+        <Button 
+          type="default" 
+          size="small" 
+          icon={<EditOutlined />}
+          style={{ 
+            color: '#1890ff', 
+            borderColor: '#1890ff'
+          }}
+          onClick={() => showEditModal(record)}
+        >
+          Sửa
+        </Button>
+      ),
     },
   ];
 
@@ -197,9 +247,9 @@ const QuanLyTrangTrai: React.FC = () => {
         />
       </Card>
 
-      {/* Modal thêm trang trại */}
+      {/* Modal thêm/sửa trang trại */}
       <Modal
-        title="Thêm trang trại mới"
+        title={isEditMode ? "Sửa trang trại" : "Thêm trang trại mới"}
         open={isModalOpen}
         onCancel={handleCancel}
         footer={null}
@@ -256,7 +306,7 @@ const QuanLyTrangTrai: React.FC = () => {
                 loading={loading}
                 style={{ height: '32px', padding: '4px 15px' }}
               >
-                Thêm trang trại
+                {isEditMode ? 'Cập nhật' : 'Thêm trang trại'}
               </Button>
             </Space>
           </Form.Item>
