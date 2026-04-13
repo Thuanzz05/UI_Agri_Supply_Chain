@@ -133,5 +133,77 @@ export const apiService = {
     } catch (error) {
       throw error;
     }
+  },
+
+  // ============ API LÔ NÔNG SẢN ============
+  
+  // Lấy tất cả lô nông sản
+  async getAllBatches() {
+    try {
+      const response = await apiClient.get('/api-nongdan/lo-nong-san/get-all');
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Lấy lô nông sản theo nông dân
+  async getBatchesByFarmer(maNongDan: string) {
+    try {
+      const response = await apiClient.get(`/api-nongdan/lo-nong-san/get-by-nong-dan/${maNongDan}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Lấy lô nông sản theo trang trại
+  async getBatchesByFarm(maTrangTrai: number) {
+    try {
+      const response = await apiClient.get(`/api-nongdan/lo-nong-san/get-by-trang-trai/${maTrangTrai}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Lấy lô nông sản theo ID
+  async getBatchById(id: number) {
+    try {
+      const response = await apiClient.get(`/api-nongdan/lo-nong-san/get-by-id/${id}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Thêm lô nông sản mới
+  async addBatch(batchData: any) {
+    try {
+      const response = await apiClient.post('/api-nongdan/lo-nong-san/create', batchData);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Cập nhật lô nông sản
+  async updateBatch(id: number, batchData: any) {
+    try {
+      const response = await apiClient.put(`/api-nongdan/lo-nong-san/update/${id}`, batchData);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Xóa lô nông sản
+  async deleteBatch(id: number) {
+    try {
+      const response = await apiClient.delete(`/api-nongdan/lo-nong-san/delete/${id}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
   }
 };

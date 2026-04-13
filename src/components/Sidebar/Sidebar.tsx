@@ -11,6 +11,7 @@ import {
   ShoppingOutlined,
   InboxOutlined,
   HomeOutlined,
+  AppstoreOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Button, Menu } from 'antd';
@@ -83,6 +84,11 @@ const Sidebar: React.FC = () => {
       key: '/farmer/products', 
       icon: <ShopOutlined />, 
       label: 'Sản phẩm' 
+    },
+    { 
+      key: '/farmer/batches', 
+      icon: <AppstoreOutlined />, 
+      label: 'Lô nông sản' 
     },
     { 
       type: 'divider'
