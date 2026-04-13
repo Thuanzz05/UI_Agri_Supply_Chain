@@ -1,6 +1,7 @@
 import React from 'react';
-import { Card, Table, message, Tag } from 'antd';
+import { Card, Table, message, Tag, Input } from 'antd';
 import type { TableProps } from 'antd';
+import { SearchOutlined } from '@ant-design/icons';
 import { AdminLayout } from '../../components/Layout';
 import { CustomPagination } from '../../components/CustomPagination';
 import { apiService } from '../../services/apiService';
@@ -29,6 +30,9 @@ const QuanLyLoNongSan: React.FC = () => {
   const [pageSize, setPageSize] = React.useState(10);
   const [data, setData] = React.useState<DataType[]>([]);
   const [loading, setLoading] = React.useState(false);
+  
+  // State quản lý tìm kiếm
+  const [searchText, setSearchText] = React.useState('');
 
   // Function gọi API lấy danh sách lô nông sản
   const fetchBatches = async () => {
@@ -72,12 +76,29 @@ const QuanLyLoNongSan: React.FC = () => {
     fetchBatches();
   }, []);
 
-  // Tính toán dữ liệu phân trang
+  // Lọc dữ liệu theo từ khóa tìm kiếm
+  const filteredData = React.useMemo(() => {
+    if (!searchText) return data;
+    
+    return data.filter(item => 
+      item.maQR.toLowerCase().includes(searchText.toLowerCase()) ||
+      item.tenTrangTrai.toLowerCase().includes(searchText.toLowerCase()) ||
+      item.tenSanPham.toLowerCase().includes(searchText.toLowerCase()) ||
+      item.trangThai.toLowerCase().includes(searchText.toLowerCase())
+    );
+  }, [data, searchText]);
+
+  // Reset về trang 1 khi tìm kiếm
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchText]);
+
+  // Tính toán dữ liệu phân trang (từ filteredData)
   const paginatedData = React.useMemo(() => {
     const startIndex = (currentPage - 1) * pageSize;
     const endIndex = startIndex + pageSize;
-    return data.slice(startIndex, endIndex);
-  }, [data, currentPage, pageSize]);
+    return filteredData.slice(startIndex, endIndex);
+  }, [filteredData, currentPage, pageSize]);
 
   // Hàm hiển thị trạng thái
   const renderStatus = (status: string) => {
@@ -163,6 +184,24 @@ const QuanLyLoNongSan: React.FC = () => {
       </div>
       
       <Card>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'flex-start',
+          alignItems: 'center',
+          marginBottom: '24px',
+          padding: '16px 0',
+          borderBottom: '1px solid #f0f0f0'
+        }}>
+          <Input
+            placeholder="Tìm kiếm lô nông sản..."
+            prefix={<SearchOutlined />}
+            style={{ width: 300 }}
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            allowClear
+          />
+        </div>
+        
         <Table<DataType>
           columns={columns} 
           dataSource={paginatedData}
@@ -173,7 +212,7 @@ const QuanLyLoNongSan: React.FC = () => {
         
         <CustomPagination
           current={currentPage}
-          total={data.length}
+          total={filteredData.length}
           pageSize={pageSize}
           onChange={(page, size) => {
             setCurrentPage(page);
