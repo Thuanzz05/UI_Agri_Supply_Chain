@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, Table, Button, message, Modal, Form, Input, Space } from 'antd';
 import type { TableProps } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined } from '@ant-design/icons';
 import { AdminLayout } from '../../components/Layout';
 import { CustomPagination } from '../../components/CustomPagination';
 import { apiService } from '../../services/apiService';
@@ -24,6 +24,9 @@ const QuanLyTrangTrai: React.FC = () => {
   const [pageSize, setPageSize] = React.useState(10);
   const [data, setData] = React.useState<DataType[]>([]);
   const [loading, setLoading] = React.useState(false);
+  
+  // State quản lý tìm kiếm
+  const [searchText, setSearchText] = React.useState('');
   
   // State quản lý modal thêm/sửa trang trại
   const [isModalOpen, setIsModalOpen] = React.useState(false);
@@ -162,12 +165,29 @@ const QuanLyTrangTrai: React.FC = () => {
     });
   };
 
-  // Tính toán dữ liệu phân trang
+  // Lọc dữ liệu theo từ khóa tìm kiếm
+  const filteredData = React.useMemo(() => {
+    if (!searchText) return data;
+    
+    return data.filter(item => 
+      item.tenTrangTrai.toLowerCase().includes(searchText.toLowerCase()) ||
+      item.diaChi.toLowerCase().includes(searchText.toLowerCase()) ||
+      item.soChungNhan.toLowerCase().includes(searchText.toLowerCase()) ||
+      item.tenNongDan.toLowerCase().includes(searchText.toLowerCase())
+    );
+  }, [data, searchText]);
+
+  // Reset về trang 1 khi tìm kiếm
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchText]);
+
+  // Tính toán dữ liệu phân trang (từ filteredData thay vì data)
   const paginatedData = React.useMemo(() => {
     const startIndex = (currentPage - 1) * pageSize;
     const endIndex = startIndex + pageSize;
-    return data.slice(startIndex, endIndex);
-  }, [data, currentPage, pageSize]);
+    return filteredData.slice(startIndex, endIndex);
+  }, [filteredData, currentPage, pageSize]);
 
   // Định nghĩa các cột của bảng
   const columns: TableProps<DataType>['columns'] = [
@@ -244,12 +264,20 @@ const QuanLyTrangTrai: React.FC = () => {
       <Card>
         <div style={{
           display: 'flex',
-          justifyContent: 'flex-end',
+          justifyContent: 'space-between',
           alignItems: 'center',
           marginBottom: '24px',
           padding: '16px 0',
           borderBottom: '1px solid #f0f0f0'
         }}>
+          <Input
+            placeholder="Tìm kiếm trang trại..."
+            prefix={<SearchOutlined />}
+            style={{ width: 300 }}
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            allowClear
+          />
           <Button 
             type="primary" 
             icon={<PlusOutlined />}
@@ -270,7 +298,7 @@ const QuanLyTrangTrai: React.FC = () => {
         
         <CustomPagination
           current={currentPage}
-          total={data.length}
+          total={filteredData.length}
           pageSize={pageSize}
           onChange={(page, size) => {
             setCurrentPage(page);
