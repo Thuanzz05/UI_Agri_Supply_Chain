@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, Table, message, Tag, Input, Button, Modal, Form, InputNumber, DatePicker, Select, Space } from 'antd';
 import type { TableProps } from 'antd';
-import { SearchOutlined, PlusOutlined, EditOutlined } from '@ant-design/icons';
+import { SearchOutlined, PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { AdminLayout } from '../../components/Layout';
 import { CustomPagination } from '../../components/CustomPagination';
 import { apiService } from '../../services/apiService';
@@ -186,6 +186,29 @@ const QuanLyLoNongSan: React.FC = () => {
     }
   };
 
+  // Hàm xử lý xóa lô nông sản
+  const handleDelete = (record: DataType) => {
+    Modal.confirm({
+      title: 'Xác nhận xóa lô nông sản',
+      content: `Bạn có chắc chắn muốn xóa lô nông sản "${record.maQR}" - ${record.tenSanPham}?`,
+      okText: 'Xóa',
+      okType: 'danger',
+      cancelText: 'Hủy',
+      onOk: async () => {
+        try {
+          setLoading(true);
+          await apiService.deleteBatch(record.maLo);
+          message.success('Xóa lô nông sản thành công!');
+          fetchBatches();
+        } catch (error: any) {
+          message.error(error.response?.data?.message || 'Không thể xóa lô nông sản');
+        } finally {
+          setLoading(false);
+        }
+      }
+    });
+  };
+
   // Lọc dữ liệu theo từ khóa tìm kiếm
   const filteredData = React.useMemo(() => {
     if (!searchText) return data;
@@ -287,20 +310,32 @@ const QuanLyLoNongSan: React.FC = () => {
     {
       title: 'Thao tác',
       key: 'action',
-      width: 100,
+      width: 150,
       render: (_, record) => (
-        <Button 
-          type="default" 
-          size="small" 
-          icon={<EditOutlined />}
-          style={{ 
-            color: '#1890ff', 
-            borderColor: '#1890ff'
-          }}
-          onClick={() => showEditModal(record)}
-        >
-          Sửa
-        </Button>
+        <Space size="small">
+          <Button 
+            type="default" 
+            size="small" 
+            icon={<EditOutlined />}
+            style={{ 
+              color: '#1890ff', 
+              borderColor: '#1890ff',
+              minWidth: '65px'
+            }}
+            onClick={() => showEditModal(record)}
+          >
+            Sửa
+          </Button>
+          <Button 
+            danger 
+            size="small" 
+            icon={<DeleteOutlined />}
+            style={{ minWidth: '65px' }}
+            onClick={() => handleDelete(record)}
+          >
+            Xóa
+          </Button>
+        </Space>
       ),
     },
   ];
