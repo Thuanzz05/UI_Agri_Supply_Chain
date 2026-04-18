@@ -10,7 +10,7 @@ import {
 import { AdminLayout } from '../../components/Layout';
 import { CustomPagination } from '../../components/CustomPagination';
 import { apiService } from '../../services/apiService';
-import type { DuLieuFormKhoThem } from '../../types/kho';
+import type { DuLieuFormKhoThem, DuLieuFormKhoSua } from '../../types/kho';
 
 interface DataType {
   key: string;
@@ -30,8 +30,10 @@ const QuanLyKho: React.FC = () => {
   const [loading, setLoading] = React.useState(false);
   const [searchText, setSearchText] = React.useState('');
 
-  // State cho modal thêm kho hàng
+  // State cho modal thêm/sửa kho hàng
   const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const [isEditMode, setIsEditMode] = React.useState(false);
+  const [editingWarehouse, setEditingWarehouse] = React.useState<DataType | null>(null);
   const [form] = Form.useForm();
 
   // Function để gọi API lấy dữ liệu
@@ -72,27 +74,50 @@ const QuanLyKho: React.FC = () => {
 
   // Hàm mở modal thêm mới
   const showModal = () => {
+    setIsEditMode(false);
+    setEditingWarehouse(null);
     form.resetFields();
+    setIsModalOpen(true);
+  };
+
+  // Hàm mở modal sửa
+  const showEditModal = (record: DataType) => {
+    setIsEditMode(true);
+    setEditingWarehouse(record);
+    form.setFieldsValue({
+      tenKho: record.tenKho,
+      loaiKho: record.loaiKho,
+      diaChi: record.diaChi
+    });
     setIsModalOpen(true);
   };
 
   // Hàm đóng modal
   const handleCancel = () => {
     setIsModalOpen(false);
+    setIsEditMode(false);
+    setEditingWarehouse(null);
     form.resetFields();
   };
 
-  // Hàm xử lý submit form thêm kho hàng
-  const handleSubmit = async (values: DuLieuFormKhoThem) => {
+  // Hàm xử lý submit form (thêm hoặc sửa)
+  const handleSubmit = async (values: DuLieuFormKhoThem | DuLieuFormKhoSua) => {
     try {
       setLoading(true);
-      await apiService.addWarehouse(values);
-      message.success('Thêm kho hàng thành công!');
+      if (isEditMode && editingWarehouse) {
+        await apiService.updateWarehouse(editingWarehouse.maKho, values);
+        message.success('Cập nhật kho hàng thành công!');
+      } else {
+        await apiService.addWarehouse(values);
+        message.success('Thêm kho hàng thành công!');
+      }
       setIsModalOpen(false);
       form.resetFields();
+      setIsEditMode(false);
+      setEditingWarehouse(null);
       fetchWarehouses(); // Tải lại dữ liệu
     } catch (error: any) {
-      message.error(error.response?.data?.message || 'Không thể thêm kho hàng');
+      message.error(error.response?.data?.message || 'Không thể lưu kho hàng');
     } finally {
       setLoading(false);
     }
@@ -159,7 +184,7 @@ const QuanLyKho: React.FC = () => {
       title: 'Thao tác',
       key: 'action',
       width: 150,
-      render: (_, _record) => (
+      render: (_, record) => (
         <Space size="small">
           <Button 
             type="default" 
@@ -170,6 +195,7 @@ const QuanLyKho: React.FC = () => {
               borderColor: '#1890ff',
               minWidth: '65px'
             }}
+            onClick={() => showEditModal(record)}
           >
             Sửa
           </Button>
@@ -242,9 +268,9 @@ const QuanLyKho: React.FC = () => {
         />
       </Card>
 
-      {/* Modal thêm kho hàng */}
+      {/* Modal thêm/sửa kho hàng */}
       <Modal
-        title="Thêm kho hàng mới"
+        title={isEditMode ? "Sửa kho hàng" : "Thêm kho hàng mới"}
         open={isModalOpen}
         onCancel={handleCancel}
         footer={null}
@@ -277,25 +303,30 @@ const QuanLyKho: React.FC = () => {
             <Input placeholder="Ví dụ: daily, lanh, thuong..." />
           </Form.Item>
 
-          <Form.Item
-            label="Mã chủ sở hữu"
-            name="maChuSoHuu"
-            rules={[
-              { required: true, message: 'Vui lòng nhập mã chủ sở hữu!' }
-            ]}
-          >
-            <Input type="number" placeholder="Nhập mã chủ sở hữu" />
-          </Form.Item>
+          {/* Chỉ hiển thị các trường này khi thêm mới */}
+          {!isEditMode && (
+            <>
+              <Form.Item
+                label="Mã chủ sở hữu"
+                name="maChuSoHuu"
+                rules={[
+                  { required: true, message: 'Vui lòng nhập mã chủ sở hữu!' }
+                ]}
+              >
+                <Input type="number" placeholder="Nhập mã chủ sở hữu" />
+              </Form.Item>
 
-          <Form.Item
-            label="Loại chủ sở hữu"
-            name="loaiChuSoHuu"
-            rules={[
-              { required: true, message: 'Vui lòng nhập loại chủ sở hữu!' }
-            ]}
-          >
-            <Input placeholder="Ví dụ: daily, nongdan..." />
-          </Form.Item>
+              <Form.Item
+                label="Loại chủ sở hữu"
+                name="loaiChuSoHuu"
+                rules={[
+                  { required: true, message: 'Vui lòng nhập loại chủ sở hữu!' }
+                ]}
+              >
+                <Input placeholder="Ví dụ: daily, nongdan..." />
+              </Form.Item>
+            </>
+          )}
 
           <Form.Item
             label="Địa chỉ"
@@ -326,7 +357,7 @@ const QuanLyKho: React.FC = () => {
                   padding: '0 15px'
                 }}
               >
-                Thêm kho hàng
+                {isEditMode ? 'Cập nhật' : 'Thêm kho hàng'}
               </Button>
             </Space>
           </Form.Item>
