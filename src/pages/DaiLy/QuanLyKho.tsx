@@ -175,38 +175,38 @@ const QuanLyKho: React.FC = () => {
       title: 'Mã kho',
       dataIndex: 'maKho',
       key: 'maKho',
-      width: 80,
+      width: 70,
     },
     {
       title: 'Tên kho',
       dataIndex: 'tenKho',
       key: 'tenKho',
-      width: 200,
+      width: 160,
     },
     {
       title: 'Loại kho',
       dataIndex: 'loaiKho',
       key: 'loaiKho',
-      width: 120,
+      width: 100,
     },
     {
       title: 'Địa chỉ',
       dataIndex: 'diaChi',
       key: 'diaChi',
-      width: 300,
+      width: 220,
       ellipsis: true,
     },
     {
       title: 'Chủ sở hữu',
       dataIndex: 'tenChuSoHuu',
       key: 'tenChuSoHuu',
-      width: 200,
+      width: 150,
       ellipsis: true,
     },
     {
       title: 'Thao tác',
       key: 'action',
-      width: 150,
+      width: 140,
       render: (_, record) => (
         <Space size="small">
           <Button 
@@ -216,7 +216,7 @@ const QuanLyKho: React.FC = () => {
             style={{ 
               color: '#1890ff', 
               borderColor: '#1890ff',
-              minWidth: '65px'
+              minWidth: '60px'
             }}
             onClick={() => showEditModal(record)}
           >
@@ -226,7 +226,7 @@ const QuanLyKho: React.FC = () => {
             danger 
             size="small" 
             icon={<DeleteOutlined />}
-            style={{ minWidth: '65px' }}
+            style={{ minWidth: '60px' }}
             onClick={() => handleDelete(record)}
           >
             Xóa
@@ -274,7 +274,7 @@ const QuanLyKho: React.FC = () => {
           columns={columns} 
           dataSource={paginatedData}
           pagination={false}
-          scroll={{ x: 800 }}
+          scroll={{ x: 850 }}
           loading={loading}
         />
         

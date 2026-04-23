@@ -189,54 +189,55 @@ const TonKhoDaiLyPage: React.FC = () => {
       title: 'Mã kho',
       dataIndex: 'maKho',
       key: 'maKho',
-      width: 100,
+      width: 80,
     },
     {
       title: 'Tên kho',
       dataIndex: 'tenKho',
       key: 'tenKho',
-      width: 220,
+      width: 160,
     },
     {
       title: 'Mã lô',
       dataIndex: 'maLo',
       key: 'maLo',
-      width: 100,
+      width: 70,
     },
     {
       title: 'Sản phẩm',
       dataIndex: 'tenSanPham',
       key: 'tenSanPham',
-      width: 200,
+      width: 150,
     },
     {
       title: 'Số lượng',
       key: 'soLuong',
-      width: 160,
+      width: 120,
       render: (_, record) => `${record.soLuong.toLocaleString('vi-VN')} ${record.donViTinh}`,
     },
     {
       title: 'Mã QR',
       dataIndex: 'maQR',
       key: 'maQR',
-      width: 120,
+      width: 100,
       render: (value: string) => <Tag color="green">{value}</Tag>,
     },
     {
       title: 'Ngày cập nhật',
       dataIndex: 'ngayCapNhat',
       key: 'ngayCapNhat',
-      width: 140,
+      width: 110,
       render: (value: string) => formatDate(value),
     },
     {
       title: 'Thao tác',
       key: 'action',
-      width: 150,
+      width: 120,
       fixed: 'right',
       render: (_, record) => (
         <Button 
           type="primary" 
+          size="small"
           icon={<EditOutlined />} 
           onClick={() => showUpdateModal(record)}
         >
@@ -308,7 +309,7 @@ const TonKhoDaiLyPage: React.FC = () => {
           dataSource={paginatedInventory}
           pagination={false}
           loading={loading}
-          scroll={{ x: 1120 }}
+          scroll={{ x: 920 }}
         />
 
         <CustomPagination
@@ -323,7 +324,14 @@ const TonKhoDaiLyPage: React.FC = () => {
         />
       </Card>
 
-      <Modal title="Điều chỉnh số lượng tồn kho" open={isModalOpen} onCancel={handleCloseModal} footer={null} destroyOnHidden>
+      <Modal 
+        title="Điều chỉnh số lượng tồn kho" 
+        open={isModalOpen} 
+        onCancel={handleCloseModal} 
+        footer={null} 
+        destroyOnHidden
+        className="ton-kho-modal"
+      >
         <Alert
           message="Chỉ điều chỉnh khi cần thiết"
           description="Tồn kho tự động cập nhật qua nhập/xuất hàng. Chỉ điều chỉnh khi phát hiện sai lệch thực tế."
@@ -357,8 +365,8 @@ const TonKhoDaiLyPage: React.FC = () => {
           </Form.Item>
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
-            <Button onClick={handleCloseModal}>Hủy</Button>
-            <Button type="primary" htmlType="submit" loading={submitting}>
+            <Button size="small" onClick={handleCloseModal}>Hủy</Button>
+            <Button size="small" type="primary" htmlType="submit" loading={submitting}>
               Xác nhận điều chỉnh
             </Button>
           </div>
