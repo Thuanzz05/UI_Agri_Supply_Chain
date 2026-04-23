@@ -91,6 +91,11 @@ const Sidebar: React.FC = () => {
       label: 'Lô nông sản' 
     },
     { 
+      key: '/farmer/orders', 
+      icon: <InboxOutlined />, 
+      label: 'Đơn hàng' 
+    },
+    { 
       type: 'divider'
     },
     { 

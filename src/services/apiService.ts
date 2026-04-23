@@ -311,5 +311,25 @@ export const apiService = {
     }
 
     throw lastError;
-  }
+  },
+
+  // ==================== API Đơn hàng ====================
+  
+  // Lấy đơn hàng theo nông dân
+  getFarmerOrdersByFarmer: async (maNongDan: number) => {
+    const response = await apiClient.get(`/api-nongdan/don-hang/get-by-nong-dan/${maNongDan}`);
+    return response.data;
+  },
+
+  // Lấy chi tiết đơn hàng
+  getFarmerOrderById: async (id: number) => {
+    const response = await apiClient.get(`/api-nongdan/don-hang/get-by-id/${id}`);
+    return response.data;
+  },
+
+  // Xác nhận/từ chối đơn hàng (nông dân)
+  updateFarmerOrderStatus: async (id: number, trangThai: string) => {
+    const response = await apiClient.put(`/api-nongdan/don-hang/xac-nhan/${id}`, { trangThai });
+    return response.data;
+  },
 };

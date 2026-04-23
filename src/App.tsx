@@ -12,6 +12,7 @@ import DashboardNongDan from './pages/NongDan/DashboardNongDan';
 import QuanLySanPham from './pages/NongDan/QuanLySanPham';
 import QuanLyTrangTrai from './pages/NongDan/QuanLyTrangTrai';
 import QuanLyLoNongSan from './pages/NongDan/QuanLyLoNongSan';
+import QuanLyDonHangNongDan from './pages/NongDan/QuanLyDonHang';
 import DashboardDaiLy from './pages/DaiLy/DashboardDaiLy';
 import TonKhoDaiLy from './pages/DaiLy/TonKhoDaiLy';
 import DashboardSieuThi from './pages/SieuThi/DashboardSieuThi';
@@ -79,6 +80,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <QuanLyLoNongSan />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/farmer/orders" 
+            element={
+              <ProtectedRoute>
+                <QuanLyDonHangNongDan />
               </ProtectedRoute>
             } 
           />
