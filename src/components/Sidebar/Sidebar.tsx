@@ -123,9 +123,14 @@ const Sidebar: React.FC = () => {
       label: 'Tồn kho' 
     },
     { 
-      key: '/agent/orders', 
+      key: '/agent/orders-in', 
       icon: <InboxOutlined />, 
-      label: 'Đơn hàng' 
+      label: 'Đơn hàng mua vào' 
+    },
+    { 
+      key: '/agent/orders-out', 
+      icon: <InboxOutlined />, 
+      label: 'Đơn hàng bán ra' 
     },
     { 
       type: 'divider'

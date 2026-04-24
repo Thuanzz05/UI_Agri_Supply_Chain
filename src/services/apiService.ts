@@ -313,7 +313,7 @@ export const apiService = {
     throw lastError;
   },
 
-  // ==================== API Đơn hàng ====================
+  // ==================== API Đơn hàng Nông dân ====================
   
   // Lấy đơn hàng theo nông dân
   async getFarmerOrdersByFarmer(maNongDan: number) {
@@ -372,6 +372,169 @@ export const apiService = {
     for (const route of routes) {
       try {
         const response = await apiClient.put(route, { trangThai });
+        return response.data;
+      } catch (error: any) {
+        lastError = error;
+        const status = error?.response?.status;
+        if (status !== 404) {
+          throw error;
+        }
+      }
+    }
+    throw lastError;
+  },
+
+  // ==================== API Đơn hàng Đại lý ====================
+  
+  // Lấy đơn hàng mua từ nông dân (đại lý là người mua)
+  async getAgentOrdersFromFarmer(maDaiLy: number) {
+    const routes = [
+      `/api-daily/don-hang-nong-dan/get-by-dai-ly/${maDaiLy}`,
+      `/api/don-hang-nong-dan/get-by-dai-ly/${maDaiLy}`
+    ];
+    
+    let lastError: any = null;
+    for (const route of routes) {
+      try {
+        const response = await apiClient.get(route);
+        return response.data;
+      } catch (error: any) {
+        lastError = error;
+        const status = error?.response?.status;
+        if (status !== 404) {
+          throw error;
+        }
+      }
+    }
+    throw lastError;
+  },
+
+  // Lấy chi tiết đơn hàng mua từ nông dân
+  async getAgentOrderFromFarmerById(id: number) {
+    const routes = [
+      `/api-daily/don-hang-nong-dan/get-by-id/${id}`,
+      `/api/don-hang-nong-dan/get-by-id/${id}`
+    ];
+    
+    let lastError: any = null;
+    for (const route of routes) {
+      try {
+        const response = await apiClient.get(route);
+        return response.data;
+      } catch (error: any) {
+        lastError = error;
+        const status = error?.response?.status;
+        if (status !== 404) {
+          throw error;
+        }
+      }
+    }
+    throw lastError;
+  },
+
+  // Xác nhận/từ chối đơn hàng mua từ nông dân
+  async updateAgentOrderFromFarmerStatus(id: number, trangThai: string) {
+    const routes = [
+      `/api-daily/don-hang-nong-dan/xac-nhan/${id}`,
+      `/api/don-hang-nong-dan/xac-nhan/${id}`
+    ];
+    
+    let lastError: any = null;
+    for (const route of routes) {
+      try {
+        const response = await apiClient.put(route, { trangThai });
+        return response.data;
+      } catch (error: any) {
+        lastError = error;
+        const status = error?.response?.status;
+        if (status !== 404) {
+          throw error;
+        }
+      }
+    }
+    throw lastError;
+  },
+
+  // Tạo đơn hàng mua từ nông dân (đại lý tạo)
+  async createAgentOrderFromFarmer(orderData: any) {
+    const routes = [
+      `/api-daily/don-hang-nong-dan/create`,
+      `/api/don-hang-nong-dan/create`
+    ];
+    
+    let lastError: any = null;
+    for (const route of routes) {
+      try {
+        const response = await apiClient.post(route, orderData);
+        return response.data;
+      } catch (error: any) {
+        lastError = error;
+        const status = error?.response?.status;
+        if (status !== 404) {
+          throw error;
+        }
+      }
+    }
+    throw lastError;
+  },
+
+  // Lấy đơn hàng bán cho siêu thị (đại lý là người bán)
+  async getAgentOrdersToSupermarket(maDaiLy: number) {
+    const routes = [
+      `/api-daily/don-hang-sieu-thi/get-by-dai-ly/${maDaiLy}`,
+      `/api/don-hang-sieu-thi/get-by-dai-ly/${maDaiLy}`
+    ];
+    
+    let lastError: any = null;
+    for (const route of routes) {
+      try {
+        const response = await apiClient.get(route);
+        return response.data;
+      } catch (error: any) {
+        lastError = error;
+        const status = error?.response?.status;
+        if (status !== 404) {
+          throw error;
+        }
+      }
+    }
+    throw lastError;
+  },
+
+  // Lấy chi tiết đơn hàng bán cho siêu thị
+  async getAgentOrderToSupermarketById(id: number) {
+    const routes = [
+      `/api-daily/don-hang-sieu-thi/get-by-id/${id}`,
+      `/api/don-hang-sieu-thi/get-by-id/${id}`
+    ];
+    
+    let lastError: any = null;
+    for (const route of routes) {
+      try {
+        const response = await apiClient.get(route);
+        return response.data;
+      } catch (error: any) {
+        lastError = error;
+        const status = error?.response?.status;
+        if (status !== 404) {
+          throw error;
+        }
+      }
+    }
+    throw lastError;
+  },
+
+  // Tạo đơn hàng bán cho siêu thị
+  async createAgentOrderToSupermarket(orderData: any) {
+    const routes = [
+      `/api-daily/don-hang-sieu-thi/create`,
+      `/api/don-hang-sieu-thi/create`
+    ];
+    
+    let lastError: any = null;
+    for (const route of routes) {
+      try {
+        const response = await apiClient.post(route, orderData);
         return response.data;
       } catch (error: any) {
         lastError = error;

@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  Alert,
   Button,
   Card,
   Col,
@@ -8,7 +7,6 @@ import {
   Modal,
   Row,
   Select,
-  Space,
   Statistic,
   Table,
   Tag,
@@ -16,12 +14,10 @@ import {
 } from 'antd';
 import type { TableProps } from 'antd';
 import {
-  CheckCircleOutlined,
-  CloseCircleOutlined,
   DollarOutlined,
   EyeOutlined,
   FileTextOutlined,
-  ReloadOutlined,
+  PlusOutlined,
   ShoppingCartOutlined,
 } from '@ant-design/icons';
 import { AdminLayout } from '../../components/Layout';
@@ -62,30 +58,24 @@ const getTrangThaiText = (trangThai: string) => {
 
 const getApiErrorMessage = (error: any, fallbackMessage: string) => {
   const responseData = error?.response?.data;
-
   if (typeof responseData === 'string' && responseData.trim()) {
     return responseData;
   }
-
   if (typeof responseData?.message === 'string' && responseData.message.trim()) {
     return responseData.message;
   }
-
   if (typeof responseData?.title === 'string' && responseData.title.trim()) {
     return responseData.title;
   }
-
   return fallbackMessage;
 };
 
-const QuanLyDonHangNongDan: React.FC = () => {
+const DonHangBanRa: React.FC = () => {
   const [currentPage, setCurrentPage] = React.useState(1);
   const [pageSize, setPageSize] = React.useState(10);
   const [loading, setLoading] = React.useState(false);
   const [orders, setOrders] = React.useState<DonHangTableItem[]>([]);
   const [filterStatus, setFilterStatus] = React.useState<string>('all');
-  
-  // Modal chi tiết
   const [isDetailModalOpen, setIsDetailModalOpen] = React.useState(false);
   const [selectedOrder, setSelectedOrder] = React.useState<DonHang | null>(null);
   const [detailLoading, setDetailLoading] = React.useState(false);
@@ -93,7 +83,6 @@ const QuanLyDonHangNongDan: React.FC = () => {
   const fetchOrders = async () => {
     setLoading(true);
     try {
-      // Lấy thông tin user để lấy mã nông dân
       const userStr = localStorage.getItem('user');
       if (!userStr) {
         message.error('Vui lòng đăng nhập lại');
@@ -102,16 +91,15 @@ const QuanLyDonHangNongDan: React.FC = () => {
       }
 
       const user = JSON.parse(userStr);
-      // Xử lý cả PascalCase và camelCase
-      const maNongDan = user.maNongDan || user.MaNongDan;
+      const maDaiLy = user.maDaiLy || (user as any).MaDaiLy;
       
-      if (!maNongDan) {
-        message.warning('Phiên đăng nhập cũ. Vui lòng đăng xuất và đăng nhập lại để cập nhật thông tin');
+      if (!maDaiLy) {
+        message.warning('Phiên đăng nhập cũ. Vui lòng đăng xuất và đăng nhập lại');
         setOrders([]);
         return;
       }
 
-      const response = await apiService.getFarmerOrdersByFarmer(maNongDan);
+      const response = await apiService.getAgentOrdersToSupermarket(maDaiLy);
       const items = Array.isArray(response?.data) ? response.data : [];
 
       setOrders(
@@ -136,7 +124,7 @@ const QuanLyDonHangNongDan: React.FC = () => {
     setIsDetailModalOpen(true);
     setDetailLoading(true);
     try {
-      const response = await apiService.getFarmerOrderById(order.maDonHang);
+      const response = await apiService.getAgentOrderToSupermarketById(order.maDonHang);
       setSelectedOrder(response.data);
     } catch (error: any) {
       message.error(getApiErrorMessage(error, 'Không thể tải chi tiết đơn hàng'));
@@ -149,32 +137,6 @@ const QuanLyDonHangNongDan: React.FC = () => {
   const handleCloseDetailModal = () => {
     setIsDetailModalOpen(false);
     setSelectedOrder(null);
-  };
-
-  const handleUpdateStatus = async (maDonHang: number, trangThai: string) => {
-    Modal.confirm({
-      title: trangThai === 'hoan_thanh' ? 'Xác nhận đơn hàng' : 'Từ chối đơn hàng',
-      content: trangThai === 'hoan_thanh' 
-        ? 'Bạn có chắc chắn muốn xác nhận đơn hàng này?' 
-        : 'Bạn có chắc chắn muốn từ chối đơn hàng này?',
-      okText: trangThai === 'hoan_thanh' ? 'Xác nhận' : 'Từ chối',
-      okType: trangThai === 'hoan_thanh' ? 'primary' : 'danger',
-      cancelText: 'Hủy',
-      onOk: async () => {
-        try {
-          await apiService.updateFarmerOrderStatus(maDonHang, trangThai);
-          message.success(
-            trangThai === 'hoan_thanh' 
-              ? 'Xác nhận đơn hàng thành công' 
-              : 'Từ chối đơn hàng thành công'
-          );
-          handleCloseDetailModal();
-          await fetchOrders();
-        } catch (error: any) {
-          message.error(getApiErrorMessage(error, 'Không thể cập nhật trạng thái đơn hàng'));
-        }
-      },
-    });
   };
 
   const filteredOrders = React.useMemo(() => {
@@ -223,7 +185,7 @@ const QuanLyDonHangNongDan: React.FC = () => {
       width: 80,
     },
     {
-      title: 'Người mua',
+      title: 'Siêu thị',
       dataIndex: 'tenNguoiMua',
       key: 'tenNguoiMua',
       width: 180,
@@ -307,8 +269,8 @@ const QuanLyDonHangNongDan: React.FC = () => {
   return (
     <AdminLayout>
       <div className="page-header">
-        <h1>Quản lý đơn hàng</h1>
-        <p>Xem và xử lý đơn hàng mua từ đại lý</p>
+        <h1>Đơn hàng bán ra</h1>
+        <p>Quản lý đơn hàng bán cho siêu thị</p>
       </div>
 
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
@@ -327,7 +289,6 @@ const QuanLyDonHangNongDan: React.FC = () => {
               title="Chờ xác nhận"
               value={pendingCount}
               prefix={<ShoppingCartOutlined />}
-              valueStyle={{ color: '#faad14' }}
             />
           </Card>
         </Col>
@@ -336,8 +297,7 @@ const QuanLyDonHangNongDan: React.FC = () => {
             <Statistic
               title="Hoàn thành"
               value={completedCount}
-              prefix={<CheckCircleOutlined />}
-              valueStyle={{ color: '#52c41a' }}
+              prefix={<FileTextOutlined />}
             />
           </Card>
         </Col>
@@ -377,8 +337,8 @@ const QuanLyDonHangNongDan: React.FC = () => {
               { label: 'Đã hủy', value: 'da_huy' },
             ]}
           />
-          <Button icon={<ReloadOutlined />} onClick={fetchOrders} loading={loading}>
-            Làm mới
+          <Button type="primary" icon={<PlusOutlined />}>
+            Tạo đơn hàng
           </Button>
         </div>
 
@@ -402,52 +362,17 @@ const QuanLyDonHangNongDan: React.FC = () => {
         />
       </Card>
 
-      {/* Modal chi tiết đơn hàng */}
       <Modal
         title="Chi tiết đơn hàng"
         open={isDetailModalOpen}
         onCancel={handleCloseDetailModal}
         width={900}
-        footer={
-          selectedOrder?.trangThai === 'cho_xac_nhan' ? (
-            <Space>
-              <Button onClick={handleCloseDetailModal}>Đóng</Button>
-              <Button
-                danger
-                size="small"
-                icon={<CloseCircleOutlined />}
-                onClick={() => handleUpdateStatus(selectedOrder.maDonHang, 'da_huy')}
-              >
-                Từ chối
-              </Button>
-              <Button
-                type="primary"
-                size="small"
-                icon={<CheckCircleOutlined />}
-                onClick={() => handleUpdateStatus(selectedOrder.maDonHang, 'hoan_thanh')}
-              >
-                Xác nhận
-              </Button>
-            </Space>
-          ) : (
-            <Button onClick={handleCloseDetailModal}>Đóng</Button>
-          )
-        }
+        footer={<Button onClick={handleCloseDetailModal}>Đóng</Button>}
       >
         {detailLoading ? (
           <div style={{ textAlign: 'center', padding: '40px 0' }}>Đang tải...</div>
         ) : selectedOrder ? (
           <>
-            {selectedOrder.trangThai === 'cho_xac_nhan' && (
-              <Alert
-                message="Đơn hàng chờ xác nhận"
-                description="Vui lòng kiểm tra kỹ thông tin đơn hàng trước khi xác nhận hoặc từ chối."
-                type="warning"
-                showIcon
-                style={{ marginBottom: 20 }}
-              />
-            )}
-
             <Descriptions bordered column={2} size="small">
               <Descriptions.Item label="Mã đơn hàng">{selectedOrder.maDonHang}</Descriptions.Item>
               <Descriptions.Item label="Trạng thái">
@@ -455,7 +380,7 @@ const QuanLyDonHangNongDan: React.FC = () => {
                   {getTrangThaiText(selectedOrder.trangThai)}
                 </Tag>
               </Descriptions.Item>
-              <Descriptions.Item label="Người mua">{selectedOrder.tenNguoiMua}</Descriptions.Item>
+              <Descriptions.Item label="Siêu thị">{selectedOrder.tenNguoiMua}</Descriptions.Item>
               <Descriptions.Item label="Ngày đặt">
                 {dayjs(selectedOrder.ngayDat).format('DD/MM/YYYY HH:mm')}
               </Descriptions.Item>
@@ -483,4 +408,4 @@ const QuanLyDonHangNongDan: React.FC = () => {
   );
 };
 
-export default QuanLyDonHangNongDan;
+export default DonHangBanRa;
