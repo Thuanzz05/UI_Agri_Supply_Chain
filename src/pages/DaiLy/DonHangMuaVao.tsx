@@ -29,6 +29,8 @@ import { AdminLayout } from '../../components/Layout';
 import { CustomPagination } from '../../components/CustomPagination';
 import { apiService } from '../../services/apiService';
 import type { ChiTietDonHang, DonHang } from '../../types/donHang';
+import type { NongDan } from '../../types/nongDan';
+import type { LoNongSan } from '../../types/loNongSan';
 import dayjs from 'dayjs';
 
 interface DonHangTableItem extends DonHang {
@@ -81,9 +83,25 @@ const DonHangMuaVao: React.FC = () => {
   const [loading, setLoading] = React.useState(false);
   const [orders, setOrders] = React.useState<DonHangTableItem[]>([]);
   const [filterStatus, setFilterStatus] = React.useState<string>('all');
+  
+  // Modal chi tiết
   const [isDetailModalOpen, setIsDetailModalOpen] = React.useState(false);
   const [selectedOrder, setSelectedOrder] = React.useState<DonHang | null>(null);
   const [detailLoading, setDetailLoading] = React.useState(false);
+
+  // Modal tạo đơn
+  const [isCreateModalOpen, setIsCreateModalOpen] = React.useState(false);
+  const [createLoading, setCreateLoading] = React.useState(false);
+  const [createForm, setCreateForm] = React.useState({
+    maNongDan: '',
+    chiTietDonHang: [{ maLo: '', soLuong: '', donGia: '' }],
+  });
+
+  // Danh sách nông dân và lô hàng
+  const [farmers, setFarmers] = React.useState<NongDan[]>([]);
+  const [batches, setBatches] = React.useState<LoNongSan[]>([]);
+  const [loadingFarmers, setLoadingFarmers] = React.useState(false);
+  const [loadingBatches, setLoadingBatches] = React.useState(false);
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -124,6 +142,32 @@ const DonHangMuaVao: React.FC = () => {
   React.useEffect(() => {
     fetchOrders();
   }, []);
+
+  // Fetch danh sách nông dân và lô hàng khi mở modal
+  const fetchFarmersAndBatches = async () => {
+    setLoadingFarmers(true);
+    setLoadingBatches(true);
+    
+    try {
+      const [farmersResponse, batchesResponse] = await Promise.all([
+        apiService.getAllFarmers(),
+        apiService.getAllBatches(),
+      ]);
+
+      if (farmersResponse?.data) {
+        setFarmers(Array.isArray(farmersResponse.data) ? farmersResponse.data : []);
+      }
+
+      if (batchesResponse?.data) {
+        setBatches(Array.isArray(batchesResponse.data) ? batchesResponse.data : []);
+      }
+    } catch (error: any) {
+      message.error(getApiErrorMessage(error, 'Không thể tải danh sách'));
+    } finally {
+      setLoadingFarmers(false);
+      setLoadingBatches(false);
+    }
+  };
 
   const showDetailModal = async (order: DonHangTableItem) => {
     setIsDetailModalOpen(true);
@@ -168,6 +212,91 @@ const DonHangMuaVao: React.FC = () => {
         }
       },
     });
+  };
+
+  // Handlers cho modal tạo đơn
+  const showCreateModal = () => {
+    setIsCreateModalOpen(true);
+    setCreateForm({
+      maNongDan: '',
+      chiTietDonHang: [{ maLo: '', soLuong: '', donGia: '' }],
+    });
+    fetchFarmersAndBatches();
+  };
+
+  const handleCloseCreateModal = () => {
+    setIsCreateModalOpen(false);
+    setCreateForm({
+      maNongDan: '',
+      chiTietDonHang: [{ maLo: '', soLuong: '', donGia: '' }],
+    });
+  };
+
+  const handleAddProduct = () => {
+    setCreateForm({
+      ...createForm,
+      chiTietDonHang: [...createForm.chiTietDonHang, { maLo: '', soLuong: '', donGia: '' }],
+    });
+  };
+
+  const handleRemoveProduct = (index: number) => {
+    const newChiTiet = createForm.chiTietDonHang.filter((_, i) => i !== index);
+    setCreateForm({ ...createForm, chiTietDonHang: newChiTiet });
+  };
+
+  const handleProductChange = (index: number, field: string, value: string) => {
+    const newChiTiet = [...createForm.chiTietDonHang];
+    newChiTiet[index] = { ...newChiTiet[index], [field]: value };
+    setCreateForm({ ...createForm, chiTietDonHang: newChiTiet });
+  };
+
+  const handleCreateOrder = async () => {
+    // Validation
+    if (!createForm.maNongDan) {
+      message.error('Vui lòng nhập mã nông dân');
+      return;
+    }
+
+    const hasEmptyProduct = createForm.chiTietDonHang.some(
+      (item) => !item.maLo || !item.soLuong || !item.donGia
+    );
+    if (hasEmptyProduct) {
+      message.error('Vui lòng điền đầy đủ thông tin sản phẩm');
+      return;
+    }
+
+    setCreateLoading(true);
+    try {
+      const userStr = localStorage.getItem('user');
+      if (!userStr) {
+        message.error('Vui lòng đăng nhập lại');
+        return;
+      }
+
+      const user = JSON.parse(userStr);
+      const maDaiLy = user.maDaiLy || (user as any).MaDaiLy;
+
+      await apiService.createAgentOrderFromFarmer({
+        loaiDon: 'nongdan_to_daily',
+        maNguoiBan: parseInt(createForm.maNongDan),
+        loaiNguoiBan: 'nongdan',
+        maNguoiMua: maDaiLy,
+        loaiNguoiMua: 'daily',
+        chiTietDonHang: createForm.chiTietDonHang.map((item) => ({
+          maLo: parseInt(item.maLo),
+          soLuong: parseFloat(item.soLuong),
+          donGia: parseFloat(item.donGia),
+        })),
+      });
+
+      message.success('Tạo đơn hàng thành công');
+      handleCloseCreateModal();
+      await fetchOrders();
+    } catch (error: any) {
+      message.error(getApiErrorMessage(error, 'Không thể tạo đơn hàng'));
+    } finally {
+      setCreateLoading(false);
+    }
   };
 
   const filteredOrders = React.useMemo(() => {
@@ -256,6 +385,7 @@ const DonHangMuaVao: React.FC = () => {
           size="small"
           icon={<EyeOutlined />}
           onClick={() => showDetailModal(record)}
+          style={{ fontSize: '14px', height: '32px', padding: '0 15px' }}
         >
           Chi tiết
         </Button>
@@ -369,10 +499,22 @@ const DonHangMuaVao: React.FC = () => {
             ]}
           />
           <div style={{ display: 'flex', gap: 8 }}>
-            <Button icon={<ReloadOutlined />} onClick={fetchOrders} loading={loading}>
+            <Button 
+              size="small" 
+              icon={<ReloadOutlined />} 
+              onClick={fetchOrders} 
+              loading={loading}
+              style={{ fontSize: '14px', height: '32px', padding: '0 15px' }}
+            >
               Làm mới
             </Button>
-            <Button type="primary" icon={<PlusOutlined />}>
+            <Button 
+              size="small" 
+              type="primary" 
+              icon={<PlusOutlined />} 
+              onClick={showCreateModal}
+              style={{ fontSize: '14px', height: '32px', padding: '0 15px' }}
+            >
               Tạo đơn hàng
             </Button>
           </div>
@@ -406,12 +548,18 @@ const DonHangMuaVao: React.FC = () => {
         footer={
           selectedOrder?.trangThai === 'cho_xac_nhan' ? (
             <Space>
-              <Button onClick={handleCloseDetailModal}>Đóng</Button>
+              <Button 
+                onClick={handleCloseDetailModal}
+                style={{ fontSize: '14px', height: '32px', padding: '0 15px' }}
+              >
+                Đóng
+              </Button>
               <Button
                 danger
                 size="small"
                 icon={<CloseCircleOutlined />}
                 onClick={() => handleUpdateStatus(selectedOrder.maDonHang, 'da_huy')}
+                style={{ fontSize: '14px', height: '32px', padding: '0 15px' }}
               >
                 Từ chối
               </Button>
@@ -420,12 +568,18 @@ const DonHangMuaVao: React.FC = () => {
                 size="small"
                 icon={<CheckCircleOutlined />}
                 onClick={() => handleUpdateStatus(selectedOrder.maDonHang, 'hoan_thanh')}
+                style={{ fontSize: '14px', height: '32px', padding: '0 15px' }}
               >
                 Xác nhận
               </Button>
             </Space>
           ) : (
-            <Button onClick={handleCloseDetailModal}>Đóng</Button>
+            <Button 
+              onClick={handleCloseDetailModal}
+              style={{ fontSize: '14px', height: '32px', padding: '0 15px' }}
+            >
+              Đóng
+            </Button>
           )
         }
       >
@@ -473,6 +627,117 @@ const DonHangMuaVao: React.FC = () => {
             </div>
           </>
         ) : null}
+      </Modal>
+
+      {/* Modal tạo đơn hàng */}
+      <Modal
+        title="Tạo đơn hàng mua từ nông dân"
+        open={isCreateModalOpen}
+        onCancel={handleCloseCreateModal}
+        onOk={handleCreateOrder}
+        confirmLoading={createLoading}
+        width={700}
+        okText="Tạo đơn hàng"
+        cancelText="Hủy"
+      >
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ display: 'block', marginBottom: 8 }}>
+            Chọn nông dân: <span style={{ color: 'red' }}>*</span>
+          </label>
+          <Select
+            showSearch
+            placeholder="Tìm và chọn nông dân"
+            style={{ width: '100%' }}
+            value={createForm.maNongDan || undefined}
+            onChange={(value) => setCreateForm({ ...createForm, maNongDan: value })}
+            loading={loadingFarmers}
+            filterOption={(input, option) =>
+              (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+            }
+            options={farmers.map((farmer) => ({
+              value: farmer.maNongDan?.toString(),
+              label: `${farmer.maNongDan} - ${farmer.hoTen || farmer.tenNongDan || 'Chưa có tên'}${
+                farmer.diaChi ? ` (${farmer.diaChi})` : ''
+              }`,
+            }))}
+          />
+        </div>
+
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ display: 'block', marginBottom: 8 }}>
+            Danh sách lô: <span style={{ color: 'red' }}>*</span>
+          </label>
+          {createForm.chiTietDonHang.map((item, index) => (
+            <div
+              key={index}
+              style={{
+                display: 'flex',
+                gap: 8,
+                marginBottom: 8,
+                alignItems: 'flex-start',
+              }}
+            >
+              <div style={{ flex: 2 }}>
+                <Select
+                  showSearch
+                  placeholder="Chọn lô"
+                  style={{ width: '100%' }}
+                  value={item.maLo || undefined}
+                  onChange={(value) => handleProductChange(index, 'maLo', value)}
+                  loading={loadingBatches}
+                  filterOption={(input, option) =>
+                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                  }
+                  options={batches.map((batch) => ({
+                    value: batch.maLo?.toString(),
+                    label: `Lô ${batch.maLo} - ${batch.tenSanPham || 'Chưa có tên'} (${
+                      batch.soLuongHienTai || 0
+                    } ${batch.donViTinh || 'kg'})`,
+                  }))}
+                />
+              </div>
+              <input
+                type="number"
+                value={item.soLuong}
+                onChange={(e) => handleProductChange(index, 'soLuong', e.target.value)}
+                placeholder="Số lượng"
+                style={{
+                  flex: 1,
+                  padding: '8px',
+                  border: '1px solid #d9d9d9',
+                  borderRadius: '4px',
+                }}
+              />
+              <input
+                type="number"
+                value={item.donGia}
+                onChange={(e) => handleProductChange(index, 'donGia', e.target.value)}
+                placeholder="Đơn giá"
+                style={{
+                  flex: 1,
+                  padding: '8px',
+                  border: '1px solid #d9d9d9',
+                  borderRadius: '4px',
+                }}
+              />
+              {createForm.chiTietDonHang.length > 1 && (
+                <Button danger size="small" onClick={() => handleRemoveProduct(index)}>
+                  Xóa
+                </Button>
+              )}
+            </div>
+          ))}
+          <Button
+            type="dashed"
+            onClick={handleAddProduct}
+            block
+            size="small"
+            icon={<PlusOutlined />}
+            style={{ marginTop: 8 }}
+          >
+            Thêm lô
+          </Button>
+        </div>
       </Modal>
     </AdminLayout>
   );

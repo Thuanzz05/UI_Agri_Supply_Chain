@@ -313,6 +313,28 @@ export const apiService = {
     throw lastError;
   },
 
+  // ============ API NÔNG DÂN ============
+  
+  // Lấy tất cả nông dân
+  async getAllFarmers() {
+    try {
+      const response = await apiClient.get('/api-nongdan/nong-dan/get-all');
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Lấy nông dân theo ID
+  async getFarmerById(id: number) {
+    try {
+      const response = await apiClient.get(`/api-nongdan/nong-dan/get-by-id/${id}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
   // ==================== API Đơn hàng Nông dân ====================
   
   // Lấy đơn hàng theo nông dân
