@@ -171,9 +171,14 @@ const Sidebar: React.FC = () => {
       label: 'Đơn hàng' 
     },
     { 
+      key: '/supermarket/warehouses', 
+      icon: <HomeOutlined />, 
+      label: 'Kho hàng' 
+    },
+    { 
       key: '/supermarket/inventory', 
       icon: <ShoppingOutlined />, 
-      label: 'Kho hàng' 
+      label: 'Tồn kho' 
     },
     { 
       key: '/supermarket/profile', 

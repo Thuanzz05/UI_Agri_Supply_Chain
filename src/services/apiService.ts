@@ -412,6 +412,29 @@ export const apiService = {
     throw lastError;
   },
 
+  // Lấy kho hàng của siêu thị
+  async getSupermarketWarehouses(maSieuThi: number) {
+    const routes = [
+      `/api-sieuthi/kho/get-by-sieu-thi/${maSieuThi}`,
+      `/api/kho/get-by-sieu-thi/${maSieuThi}`
+    ];
+    
+    let lastError: any = null;
+    for (const route of routes) {
+      try {
+        const response = await apiClient.get(route);
+        return response.data;
+      } catch (error: any) {
+        lastError = error;
+        const status = error?.response?.status;
+        if (status !== 404) {
+          throw error;
+        }
+      }
+    }
+    throw lastError;
+  },
+
   // ==================== API Đơn hàng Nông dân ====================
   
   // Lấy đơn hàng theo nông dân

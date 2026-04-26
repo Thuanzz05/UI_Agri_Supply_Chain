@@ -23,6 +23,7 @@ import DashboardDaiLy from './pages/DaiLy/DashboardDaiLy';
 import TonKhoDaiLy from './pages/DaiLy/TonKhoDaiLy';
 import DashboardSieuThi from './pages/SieuThi/DashboardSieuThi';
 import QuanLyDonHangSieuThi from './pages/SieuThi/QuanLyDonHang';
+import QuanLyKhoSieuThi from './pages/SieuThi/QuanLyKho';
 import ThongTinCaNhanSieuThi from './pages/SieuThi/ThongTinCaNhan';
 import ProtectedRoute from './components/ProtectedRoute';
 import 'antd/dist/reset.css';
@@ -177,6 +178,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <QuanLyDonHangSieuThi />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/supermarket/warehouses" 
+            element={
+              <ProtectedRoute>
+                <QuanLyKhoSieuThi />
               </ProtectedRoute>
             } 
           />
