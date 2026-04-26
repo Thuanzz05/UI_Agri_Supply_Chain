@@ -345,6 +345,28 @@ export const apiService = {
     }
   },
 
+  // ============ API ĐẠI LÝ ============
+  
+  // Lấy đại lý theo ID
+  async getAgentById(id: number) {
+    try {
+      const response = await apiClient.get(`/api-daily/dai-ly/get-by-id/${id}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Cập nhật thông tin đại lý
+  async updateAgentInfo(id: number, agentData: any) {
+    try {
+      const response = await apiClient.put(`/api-daily/dai-ly/update/${id}`, agentData);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
   // ==================== API Đơn hàng Nông dân ====================
   
   // Lấy đơn hàng theo nông dân

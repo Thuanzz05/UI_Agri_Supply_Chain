@@ -144,6 +144,11 @@ const Sidebar: React.FC = () => {
       label: 'Kiểm định chất lượng' 
     },
     { 
+      key: '/agent/profile', 
+      icon: <UserOutlined />, 
+      label: 'Thông tin cá nhân' 
+    },
+    { 
       type: 'divider'
     },
     { 
