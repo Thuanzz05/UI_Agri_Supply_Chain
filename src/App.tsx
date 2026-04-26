@@ -22,6 +22,7 @@ import ThongTinCaNhanNongDan from './pages/NongDan/ThongTinCaNhan';
 import DashboardDaiLy from './pages/DaiLy/DashboardDaiLy';
 import TonKhoDaiLy from './pages/DaiLy/TonKhoDaiLy';
 import DashboardSieuThi from './pages/SieuThi/DashboardSieuThi';
+import ThongTinCaNhanSieuThi from './pages/SieuThi/ThongTinCaNhan';
 import ProtectedRoute from './components/ProtectedRoute';
 import 'antd/dist/reset.css';
 
@@ -167,6 +168,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <DashboardSieuThi />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/supermarket/profile" 
+            element={
+              <ProtectedRoute>
+                <ThongTinCaNhanSieuThi />
               </ProtectedRoute>
             } 
           />

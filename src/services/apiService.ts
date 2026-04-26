@@ -367,6 +367,28 @@ export const apiService = {
     }
   },
 
+  // ============ API SIÊU THỊ ============
+  
+  // Lấy siêu thị theo ID
+  async getSupermarketById(id: number) {
+    try {
+      const response = await apiClient.get(`/api-sieuthi/sieu-thi/get-by-id/${id}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Cập nhật thông tin siêu thị
+  async updateSupermarketInfo(id: number, supermarketData: any) {
+    try {
+      const response = await apiClient.put(`/api-sieuthi/sieu-thi/update/${id}`, supermarketData);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
   // ==================== API Đơn hàng Nông dân ====================
   
   // Lấy đơn hàng theo nông dân

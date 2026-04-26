@@ -171,6 +171,11 @@ const Sidebar: React.FC = () => {
       label: 'Kho hàng' 
     },
     { 
+      key: '/supermarket/profile', 
+      icon: <UserOutlined />, 
+      label: 'Thông tin cá nhân' 
+    },
+    { 
       type: 'divider'
     },
     { 
