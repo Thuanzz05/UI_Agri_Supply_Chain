@@ -739,4 +739,98 @@ export const apiService = {
     }
     throw lastError;
   },
+
+  // ==================== API Vận chuyển ====================
+  
+  // Lấy tất cả vận chuyển
+  async getTransports() {
+    const routes = [
+      `/api-daily/van-chuyen/get-all`,
+      `/api/van-chuyen/get-all`
+    ];
+    
+    let lastError: any = null;
+    for (const route of routes) {
+      try {
+        const response = await apiClient.get(route);
+        return response.data;
+      } catch (error: any) {
+        lastError = error;
+        const status = error?.response?.status;
+        if (status !== 404) {
+          throw error;
+        }
+      }
+    }
+    throw lastError;
+  },
+
+  // Tạo vận chuyển mới
+  async createTransport(transportData: any) {
+    const routes = [
+      `/api-daily/van-chuyen/create`,
+      `/api/van-chuyen/create`
+    ];
+    
+    let lastError: any = null;
+    for (const route of routes) {
+      try {
+        const response = await apiClient.post(route, transportData);
+        return response.data;
+      } catch (error: any) {
+        lastError = error;
+        const status = error?.response?.status;
+        if (status !== 404) {
+          throw error;
+        }
+      }
+    }
+    throw lastError;
+  },
+
+  // Cập nhật trạng thái vận chuyển
+  async updateTransportStatus(id: number, updateData: any) {
+    const routes = [
+      `/api-daily/van-chuyen/update-trang-thai/${id}`,
+      `/api/van-chuyen/update-trang-thai/${id}`
+    ];
+    
+    let lastError: any = null;
+    for (const route of routes) {
+      try {
+        const response = await apiClient.put(route, updateData);
+        return response.data;
+      } catch (error: any) {
+        lastError = error;
+        const status = error?.response?.status;
+        if (status !== 404) {
+          throw error;
+        }
+      }
+    }
+    throw lastError;
+  },
+
+  // Hoàn thành vận chuyển
+  async completeTransport(id: number) {
+    const routes = [
+      `/api-daily/van-chuyen/hoan-thanh/${id}`,
+      `/api/van-chuyen/hoan-thanh/${id}`
+    ];
+    
+    let lastError: any = null;
+    for (const route of routes) {
+      try {
+        const response = await apiClient.put(route);
+        return response.data;
+      } catch (error: any) {
+        lastError = error;
+        const status = error?.response?.status;
+        if (status !== 404) {
+          throw error;
+        }
+      }
+    }
+    throw lastError;
+  },
 };

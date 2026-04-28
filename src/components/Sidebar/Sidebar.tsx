@@ -13,6 +13,7 @@ import {
   HomeOutlined,
   AppstoreOutlined,
   SafetyOutlined,
+  TruckOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Button, Menu } from 'antd';
@@ -142,6 +143,11 @@ const Sidebar: React.FC = () => {
       key: '/agent/quality-check', 
       icon: <SafetyOutlined />, 
       label: 'Kiểm định chất lượng' 
+    },
+    { 
+      key: '/agent/transport', 
+      icon: <TruckOutlined />, 
+      label: 'Vận chuyển' 
     },
     { 
       key: '/agent/profile', 

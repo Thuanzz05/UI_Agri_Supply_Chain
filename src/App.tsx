@@ -12,6 +12,7 @@ import QuanLyKho from './pages/DaiLy/QuanLyKho';
 import DonHangMuaVao from './pages/DaiLy/DonHangMuaVao';
 import DonHangBanRa from './pages/DaiLy/DonHangBanRa';
 import KiemDinhChatLuong from './pages/DaiLy/KiemDinhChatLuong';
+import QuanLyVanChuyen from './pages/DaiLy/QuanLyVanChuyen';
 import ThongTinCaNhanDaiLy from './pages/DaiLy/ThongTinCaNhan';
 import DashboardNongDan from './pages/NongDan/DashboardNongDan';
 import QuanLySanPham from './pages/NongDan/QuanLySanPham';
@@ -154,6 +155,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <KiemDinhChatLuong />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/agent/transport" 
+            element={
+              <ProtectedRoute>
+                <QuanLyVanChuyen />
               </ProtectedRoute>
             } 
           />
