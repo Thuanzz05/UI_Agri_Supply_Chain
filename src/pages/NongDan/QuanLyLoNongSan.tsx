@@ -47,11 +47,29 @@ const QuanLyLoNongSan: React.FC = () => {
   const [farms, setFarms] = React.useState<any[]>([]);
   const [products, setProducts] = React.useState<any[]>([]);
 
-  // Function gọi API lấy danh sách lô nông sản
+  // Function gọi API lấy danh sách lô nông sản của nông dân đang đăng nhập
   const fetchBatches = async () => {
     setLoading(true);
     try {
-      const response = await apiService.getAllBatches();
+      // Lấy thông tin nông dân từ localStorage
+      const userStr = localStorage.getItem('user');
+      if (!userStr) {
+        message.error('Không tìm thấy thông tin người dùng');
+        setData([]);
+        return;
+      }
+
+      const user = JSON.parse(userStr);
+      const maNongDan = user.maNongDan;
+
+      if (!maNongDan) {
+        message.error('Không tìm thấy mã nông dân');
+        setData([]);
+        return;
+      }
+
+      // Gọi API lấy lô nông sản theo nông dân
+      const response = await apiService.getBatchesByFarmer(maNongDan);
       
       if (response && response.data) {
         const batches = Array.isArray(response.data) ? response.data : [];
