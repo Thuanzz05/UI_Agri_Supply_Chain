@@ -14,6 +14,7 @@ const Header = () => {
         </div>
         <div className="nav-menu">
           <a href="#features" className="nav-link">Tính năng</a>
+          <Link to="/guide" className="nav-link">Hướng dẫn</Link>
           <Link to="/about" className="nav-link">Giới thiệu</Link>
           <Link to="/contact" className="nav-link">Liên hệ</Link>
         </div>

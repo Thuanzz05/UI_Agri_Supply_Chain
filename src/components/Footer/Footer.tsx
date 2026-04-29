@@ -1,4 +1,5 @@
 import { NodeIndexOutlined } from '@ant-design/icons';
+import { Link } from 'react-router-dom';
 import './Footer.css';
 
 const Footer = () => {
@@ -13,7 +14,7 @@ const Footer = () => {
           <div className="links">
             <a href="#privacy">Privacy</a>
             <a href="#terms">Terms</a>
-            <a href="#support">Support</a>
+            <Link to="/guide">Guide</Link>
           </div>
         </div>
         <div className="bottom">

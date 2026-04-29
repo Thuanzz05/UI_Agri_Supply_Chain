@@ -4,6 +4,7 @@ import viVN from 'antd/locale/vi_VN';
 import HomePage from './pages/HomePage';
 import About from './pages/About';
 import Contact from './pages/Contact';
+import Guide from './pages/Guide';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/admin/Dashboard';
@@ -37,6 +38,7 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/about" element={<About />} />
+          <Route path="/guide" element={<Guide />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
