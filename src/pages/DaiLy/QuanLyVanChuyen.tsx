@@ -11,13 +11,17 @@ import dayjs from 'dayjs';
 interface VanChuyen {
   maVanChuyen: number;
   maLo: number;
-  tenSanPham: string;
+  tenSanPham?: string;
   diemDi: string;
   diemDen: string;
   ngayBatDau: string;
   ngayKetThuc?: string;
   trangThai: string;
-  phuongTienVanChuyen: string;
+  donViTinh?: string;
+  maQR?: string;
+  soLuongLo?: number;
+  ngayThuHoach?: string;
+  hanSuDung?: string;
   ghiChu?: string;
 }
 
@@ -36,9 +40,34 @@ const QuanLyVanChuyen: React.FC = () => {
   const loadVanChuyens = async () => {
     try {
       setLoading(true);
-      const response = await apiService.getTransports();
-      const data = response.data || response;
-      setVanChuyens(Array.isArray(data) ? data : []);
+      
+      // Lấy thông tin đại lý từ localStorage
+      const userStr = localStorage.getItem('user');
+      if (!userStr) {
+        message.error('Không tìm thấy thông tin người dùng');
+        setVanChuyens([]);
+        return;
+      }
+
+      const user = JSON.parse(userStr);
+      const maDaiLy = user.maDaiLy;
+
+      if (!maDaiLy) {
+        message.error('Không tìm thấy mã đại lý');
+        setVanChuyens([]);
+        return;
+      }
+
+      // Gọi API lấy vận chuyển theo đại lý
+      const response = await apiService.getTransportsByAgent(maDaiLy);
+      // Backend trả về { success, data, count } - cần lấy data từ response
+      let list: any[] = [];
+      if (response && response.data) {
+        list = Array.isArray(response.data) ? response.data : [];
+      } else if (Array.isArray(response)) {
+        list = response;
+      }
+      setVanChuyens(list);
     } catch (error: any) {
       console.error('Error loading transports:', error);
       message.error('Không thể tải danh sách vận chuyển');
@@ -140,6 +169,7 @@ const QuanLyVanChuyen: React.FC = () => {
       dataIndex: 'tenSanPham',
       key: 'tenSanPham',
       width: 150,
+      render: (text: string) => text || 'N/A',
     },
     {
       title: 'Điểm đi',
@@ -170,10 +200,11 @@ const QuanLyVanChuyen: React.FC = () => {
       render: (date: string) => date ? dayjs(date).format('DD/MM/YYYY') : '-',
     },
     {
-      title: 'Phương tiện',
-      dataIndex: 'phuongTienVanChuyen',
-      key: 'phuongTienVanChuyen',
+      title: 'Mã QR',
+      dataIndex: 'maQR',
+      key: 'maQR',
       width: 120,
+      render: (text: string) => text || '-',
     },
     {
       title: 'Trạng thái',
@@ -280,7 +311,7 @@ const QuanLyVanChuyen: React.FC = () => {
           dataSource={filteredVanChuyens}
           rowKey="maVanChuyen"
           loading={loading}
-          scroll={{ x: 1200 }}
+          scroll={{ x: 1400 }}
           pagination={{
             pageSize: 10,
             showSizeChanger: true,
@@ -349,19 +380,6 @@ const QuanLyVanChuyen: React.FC = () => {
               </Form.Item>
             </Col>
           </Row>
-
-          <Form.Item
-            label="Phương tiện vận chuyển"
-            name="phuongTienVanChuyen"
-            rules={[{ required: true, message: 'Vui lòng chọn phương tiện!' }]}
-          >
-            <Select placeholder="Chọn phương tiện">
-              <Select.Option value="xe_tai">Xe tải</Select.Option>
-              <Select.Option value="xe_container">Xe container</Select.Option>
-              <Select.Option value="xe_lanh">Xe lạnh</Select.Option>
-              <Select.Option value="tau_hoa">Tàu hỏa</Select.Option>
-            </Select>
-          </Form.Item>
 
           <Form.Item
             label="Trạng thái"

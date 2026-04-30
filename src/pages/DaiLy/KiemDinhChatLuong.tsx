@@ -191,12 +191,12 @@ const KiemDinhChatLuong: React.FC = () => {
     {
       title: 'Thao tác',
       key: 'action',
-      width: 120,
+      width: 150,
       fixed: 'right',
       render: (_, record) => (
         <ActionButton
           type="primary"
-          icon={<EyeOutlined />}
+          icon={record.trangThaiKiemDinh === 'cho_kiem_dinh' ? <SafetyOutlined /> : <EyeOutlined />}
           onClick={() => showKiemDinhModal(record)}
         >
           {record.trangThaiKiemDinh === 'cho_kiem_dinh' ? 'Kiểm định' : 'Chi tiết'}

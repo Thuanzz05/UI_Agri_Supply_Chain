@@ -765,6 +765,29 @@ export const apiService = {
     throw lastError;
   },
 
+  // Lấy vận chuyển theo đại lý
+  async getTransportsByAgent(maDaiLy: number) {
+    const routes = [
+      `/api-daily/van-chuyen/get-by-daily/${maDaiLy}`,
+      `/api/van-chuyen/get-by-daily/${maDaiLy}`
+    ];
+    
+    let lastError: any = null;
+    for (const route of routes) {
+      try {
+        const response = await apiClient.get(route);
+        return response.data;
+      } catch (error: any) {
+        lastError = error;
+        const status = error?.response?.status;
+        if (status !== 404) {
+          throw error;
+        }
+      }
+    }
+    throw lastError;
+  },
+
   // Tạo vận chuyển mới
   async createTransport(transportData: any) {
     const routes = [
