@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, Form, Input, message, Avatar, Row, Col, Divider } from 'antd';
-import { UserOutlined, PhoneOutlined, MailOutlined, HomeOutlined, SaveOutlined } from '@ant-design/icons';
+import { UserOutlined, PhoneOutlined, MailOutlined, HomeOutlined, SaveOutlined, FacebookOutlined, VideoCameraOutlined } from '@ant-design/icons';
 import { AdminLayout } from '../../components/Layout';
 import { authService } from '../../services/authService';
 import { apiService } from '../../services/apiService';
@@ -35,6 +35,8 @@ const ThongTinCaNhan: React.FC = () => {
         soDienThoai: data.soDienThoai,
         email: data.email,
         diaChi: data.diaChi,
+        facebook: data.facebook || '',
+        tiktok: data.tiktok || '',
       });
     } catch (error: any) {
       console.error('Error loading user info:', error);
@@ -79,7 +81,7 @@ const ThongTinCaNhan: React.FC = () => {
               <Avatar 
                 size={120} 
                 icon={<UserOutlined />}
-                style={{ backgroundColor: '#1890ff', marginBottom: 20 }}
+                style={{ backgroundColor: '#52c41a', marginBottom: 20 }}
               />
               <h2 style={{ marginBottom: 8 }}>{userInfo?.hoTen || 'Chưa có tên'}</h2>
               <p style={{ color: '#8c8c8c', marginBottom: 4 }}>
@@ -94,16 +96,36 @@ const ThongTinCaNhan: React.FC = () => {
             
             <div style={{ padding: '0 20px' }}>
               <div style={{ marginBottom: 16 }}>
-                <PhoneOutlined style={{ marginRight: 8, color: '#1890ff' }} />
+                <PhoneOutlined style={{ marginRight: 8, color: '#52c41a' }} />
                 <span>{userInfo?.soDienThoai || 'Chưa cập nhật'}</span>
               </div>
               <div style={{ marginBottom: 16 }}>
-                <MailOutlined style={{ marginRight: 8, color: '#1890ff' }} />
+                <MailOutlined style={{ marginRight: 8, color: '#52c41a' }} />
                 <span>{userInfo?.email || 'Chưa cập nhật'}</span>
               </div>
-              <div>
-                <HomeOutlined style={{ marginRight: 8, color: '#1890ff' }} />
+              <div style={{ marginBottom: 16 }}>
+                <HomeOutlined style={{ marginRight: 8, color: '#52c41a' }} />
                 <span>{userInfo?.diaChi || 'Chưa cập nhật'}</span>
+              </div>
+              <div style={{ marginBottom: 16 }}>
+                <FacebookOutlined style={{ marginRight: 8, color: '#1877F2' }} />
+                {userInfo?.facebook ? (
+                  <a href={userInfo.facebook} target="_blank" rel="noopener noreferrer">
+                    {userInfo.facebook}
+                  </a>
+                ) : (
+                  <span style={{ color: '#8c8c8c' }}>Chưa cập nhật</span>
+                )}
+              </div>
+              <div>
+                <VideoCameraOutlined style={{ marginRight: 8, color: '#000000' }} />
+                {userInfo?.tiktok ? (
+                  <a href={userInfo.tiktok} target="_blank" rel="noopener noreferrer">
+                    {userInfo.tiktok}
+                  </a>
+                ) : (
+                  <span style={{ color: '#8c8c8c' }}>Chưa cập nhật</span>
+                )}
               </div>
             </div>
           </Card>
@@ -165,6 +187,34 @@ const ThongTinCaNhan: React.FC = () => {
                 <Input.TextArea 
                   placeholder="Nhập địa chỉ"
                   rows={3}
+                  size="large"
+                />
+              </Form.Item>
+
+              <Form.Item
+                label="Facebook"
+                name="facebook"
+                rules={[
+                  { type: 'url', message: 'Vui lòng nhập đường dẫn Facebook hợp lệ!' }
+                ]}
+              >
+                <Input 
+                  prefix={<FacebookOutlined style={{ color: '#1877F2' }} />}
+                  placeholder="https://facebook.com/..."
+                  size="large"
+                />
+              </Form.Item>
+
+              <Form.Item
+                label="TikTok"
+                name="tiktok"
+                rules={[
+                  { type: 'url', message: 'Vui lòng nhập đường dẫn TikTok hợp lệ!' }
+                ]}
+              >
+                <Input 
+                  prefix={<VideoCameraOutlined />}
+                  placeholder="https://tiktok.com/@..."
                   size="large"
                 />
               </Form.Item>

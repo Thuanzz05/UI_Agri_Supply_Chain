@@ -267,17 +267,17 @@ const TonKhoDaiLyPage: React.FC = () => {
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
         <Col xs={24} sm={12} lg={8}>
           <Card>
-            <Statistic title="Tong so luong ton" value={totalQuantity} suffix="don vi" prefix={<DatabaseOutlined />} />
+            <Statistic title="Tổng số lượng tồn" value={totalQuantity} suffix="đơn vị" prefix={<DatabaseOutlined />} />
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={8}>
           <Card>
-            <Statistic title="So kho co hang" value={totalWarehouses} prefix={<ShopOutlined />} />
+            <Statistic title="Số kho có hàng" value={totalWarehouses} prefix={<ShopOutlined />} />
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={8}>
           <Card>
-            <Statistic title="So san pham" value={totalProducts} prefix={<QrcodeOutlined />} />
+            <Statistic title="Số sản phẩm" value={totalProducts} prefix={<QrcodeOutlined />} />
           </Card>
         </Col>
       </Row>

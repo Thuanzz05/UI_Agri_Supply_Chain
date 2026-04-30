@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Tag, Space, message, Card, Statistic, Row, Col, Modal, Form, Input } from 'antd';
-import { HomeOutlined, InboxOutlined, EnvironmentOutlined, PlusOutlined } from '@ant-design/icons';
+import { Table, Tag, message, Card, Statistic, Row, Col } from 'antd';
+import { HomeOutlined, InboxOutlined, EnvironmentOutlined } from '@ant-design/icons';
 import { AdminLayout } from '../../components/Layout';
 import { authService } from '../../services/authService';
 import { apiService } from '../../services/apiService';
-import { ActionButton } from '../../components/ActionButton';
 import type { ColumnsType } from 'antd/es/table';
 
 interface Kho {
@@ -21,9 +20,6 @@ interface Kho {
 const QuanLyKho: React.FC = () => {
   const [khos, setKhos] = useState<Kho[]>([]);
   const [loading, setLoading] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [editingKho, setEditingKho] = useState<Kho | null>(null);
-  const [form] = Form.useForm();
 
   useEffect(() => {
     loadKhos();
