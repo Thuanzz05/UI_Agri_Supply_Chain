@@ -5,6 +5,7 @@ import {
   Card,
   Col,
   Descriptions,
+  InputNumber,
   Modal,
   Row,
   Select,
@@ -17,7 +18,6 @@ import {
 import type { TableProps } from 'antd';
 import {
   CheckCircleOutlined,
-  CloseCircleOutlined,
   DollarOutlined,
   EyeOutlined,
   FileTextOutlined,
@@ -153,8 +153,6 @@ const DonHangMuaVao: React.FC = () => {
     
     try {
       const userStr = localStorage.getItem('user');
-      const user = userStr ? JSON.parse(userStr) : null;
-      const maDaiLy = user?.maTaiKhoan;
 
       const [farmersResponse, batchesResponse] = await Promise.all([
         apiService.getAllFarmers(),
@@ -249,31 +247,7 @@ const DonHangMuaVao: React.FC = () => {
     setSelectedOrder(null);
   };
 
-  const handleUpdateStatus = async (maDonHang: number, trangThai: string) => {
-    Modal.confirm({
-      title: trangThai === 'hoan_thanh' ? 'Xác nhận đơn hàng' : 'Từ chối đơn hàng',
-      content: trangThai === 'hoan_thanh' 
-        ? 'Bạn có chắc chắn muốn xác nhận đơn hàng này?' 
-        : 'Bạn có chắc chắn muốn từ chối đơn hàng này?',
-      okText: trangThai === 'hoan_thanh' ? 'Xác nhận' : 'Từ chối',
-      okType: trangThai === 'hoan_thanh' ? 'primary' : 'danger',
-      cancelText: 'Hủy',
-      onOk: async () => {
-        try {
-          await apiService.updateAgentOrderFromFarmerStatus(maDonHang, trangThai);
-          message.success(
-            trangThai === 'hoan_thanh' 
-              ? 'Xác nhận đơn hàng thành công' 
-              : 'Từ chối đơn hàng thành công'
-          );
-          handleCloseDetailModal();
-          await fetchOrders();
-        } catch (error: any) {
-          message.error(getApiErrorMessage(error, 'Không thể cập nhật trạng thái'));
-        }
-      },
-    });
-  };
+
 
   // Handlers cho modal tạo đơn
   const showCreateModal = () => {
@@ -334,7 +308,7 @@ const DonHangMuaVao: React.FC = () => {
   const handleCreateOrder = async () => {
     // Validation
     if (!createForm.maNongDan) {
-      message.error('Vui lòng nhập mã nông dân');
+      message.error('Vui lòng chọn nông dân');
       return;
     }
 
@@ -342,7 +316,15 @@ const DonHangMuaVao: React.FC = () => {
       (item) => !item.maLo || !item.soLuong || !item.donGia
     );
     if (hasEmptyProduct) {
-      message.error('Vui lòng điền đầy đủ thông tin sản phẩm');
+      message.error('Vui lòng điền đầy đủ thông tin lô hàng');
+      return;
+    }
+
+    const hasInvalidNumber = createForm.chiTietDonHang.some(
+      (item) => parseFloat(item.soLuong) <= 0 || parseFloat(item.donGia) <= 0
+    );
+    if (hasInvalidNumber) {
+      message.error('Số lượng và đơn giá phải lớn hơn 0');
       return;
     }
 
@@ -444,7 +426,7 @@ const DonHangMuaVao: React.FC = () => {
       dataIndex: 'tongGiaTri',
       key: 'tongGiaTri',
       width: 130,
-      render: (value: number) => `${value.toLocaleString('vi-VN')} đ`,
+      render: (value: number) => `${(value || 0).toLocaleString('vi-VN')} đ`,
     },
     {
       title: 'Trạng thái',
@@ -495,14 +477,14 @@ const DonHangMuaVao: React.FC = () => {
       dataIndex: 'donGia',
       key: 'donGia',
       width: 120,
-      render: (value: number) => `${value.toLocaleString('vi-VN')} đ`,
+      render: (value: number) => `${(value || 0).toLocaleString('vi-VN')} đ`,
     },
     {
       title: 'Thành tiền',
       dataIndex: 'thanhTien',
       key: 'thanhTien',
       width: 130,
-      render: (value: number) => `${value.toLocaleString('vi-VN')} đ`,
+      render: (value: number) => `${(value || 0).toLocaleString('vi-VN')} đ`,
     },
   ];
 
@@ -621,31 +603,9 @@ const DonHangMuaVao: React.FC = () => {
         onCancel={handleCloseDetailModal}
         width={900}
         footer={
-          selectedOrder?.trangThai === 'cho_xac_nhan' ? (
-            <Space>
-              <ModalButton onClick={handleCloseDetailModal}>
-                Đóng
-              </ModalButton>
-              <ModalButton
-                type="danger"
-                icon={<CloseCircleOutlined />}
-                onClick={() => handleUpdateStatus(selectedOrder.maDonHang, 'da_huy')}
-              >
-                Từ chối
-              </ModalButton>
-              <ModalButton
-                type="primary"
-                icon={<CheckCircleOutlined />}
-                onClick={() => handleUpdateStatus(selectedOrder.maDonHang, 'hoan_thanh')}
-              >
-                Xác nhận
-              </ModalButton>
-            </Space>
-          ) : (
-            <ModalButton onClick={handleCloseDetailModal}>
-              Đóng
-            </ModalButton>
-          )
+          <ModalButton onClick={handleCloseDetailModal}>
+            Đóng
+          </ModalButton>
         }
       >
         {detailLoading ? (
@@ -654,9 +614,9 @@ const DonHangMuaVao: React.FC = () => {
           <>
             {selectedOrder.trangThai === 'cho_xac_nhan' && (
               <Alert
-                message="Đơn hàng chờ xác nhận"
-                description="Vui lòng kiểm tra kỹ thông tin đơn hàng trước khi xác nhận hoặc từ chối."
-                type="warning"
+                message="Đơn hàng đang chờ nông dân xác nhận"
+                description="Đơn hàng này đang chờ nông dân xác nhận. Bạn không thể thao tác trên đơn hàng này."
+                type="info"
                 showIcon
                 style={{ marginBottom: 20 }}
               />
@@ -675,7 +635,7 @@ const DonHangMuaVao: React.FC = () => {
               </Descriptions.Item>
               <Descriptions.Item label="Tổng giá trị" span={2}>
                 <strong style={{ fontSize: 16, color: '#1890ff' }}>
-                  {selectedOrder.tongGiaTri.toLocaleString('vi-VN')} đ
+                  {(selectedOrder.tongGiaTri || 0).toLocaleString('vi-VN')} đ
                 </strong>
               </Descriptions.Item>
             </Descriptions>
@@ -799,28 +759,30 @@ const DonHangMuaVao: React.FC = () => {
                   })}
                 />
               </div>
-              <input
-                type="number"
-                value={item.soLuong}
-                onChange={(e) => handleProductChange(index, 'soLuong', e.target.value)}
+              <InputNumber
+                min={1}
+                value={item.soLuong ? parseFloat(item.soLuong) : undefined}
+                onChange={(value) => handleProductChange(index, 'soLuong', value?.toString() || '')}
                 placeholder="Số lượng"
-                style={{
-                  flex: 1,
-                  padding: '8px',
-                  border: '1px solid #d9d9d9',
-                  borderRadius: '4px',
+                style={{ flex: 1 }}
+                onKeyPress={(event) => {
+                  if (event.key === '-' || event.key === 'e') {
+                    event.preventDefault();
+                  }
                 }}
               />
-              <input
-                type="number"
-                value={item.donGia}
-                onChange={(e) => handleProductChange(index, 'donGia', e.target.value)}
-                placeholder="Đơn giá"
-                style={{
-                  flex: 1,
-                  padding: '8px',
-                  border: '1px solid #d9d9d9',
-                  borderRadius: '4px',
+              <InputNumber
+                min={1}
+                value={item.donGia ? parseFloat(item.donGia) : undefined}
+                onChange={(value) => handleProductChange(index, 'donGia', value?.toString() || '')}
+                placeholder="Đơn giá (đ)"
+                style={{ flex: 1 }}
+                formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                parser={(value) => value!.replace(/,/g, '') as unknown as number}
+                onKeyPress={(event) => {
+                  if (event.key === '-' || event.key === 'e') {
+                    event.preventDefault();
+                  }
                 }}
               />
               {createForm.chiTietDonHang.length > 1 && (

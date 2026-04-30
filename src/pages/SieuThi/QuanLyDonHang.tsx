@@ -17,9 +17,9 @@ interface DonHang {
   loaiDon: string;
   loaiNguoiBan: string;
   loaiNguoiMua: string;
-  ngayTao: string;
+  ngayDat: string;
   trangThai: string;
-  tongTien: number;
+  tongGiaTri: number;
   ghiChu?: string;
 }
 
@@ -102,16 +102,16 @@ const QuanLyDonHang: React.FC = () => {
       width: 150,
     },
     {
-      title: 'Ngày tạo',
-      dataIndex: 'ngayTao',
-      key: 'ngayTao',
+      title: 'Ngày đặt',
+      dataIndex: 'ngayDat',
+      key: 'ngayDat',
       width: 120,
-      render: (date: string) => dayjs(date).format('DD/MM/YYYY'),
+      render: (date: string) => date ? dayjs(date).format('DD/MM/YYYY') : '-',
     },
     {
       title: 'Tổng tiền',
-      dataIndex: 'tongTien',
-      key: 'tongTien',
+      dataIndex: 'tongGiaTri',
+      key: 'tongGiaTri',
       width: 120,
       render: (value: number) => `${value?.toLocaleString() || 0} đ`,
     },
