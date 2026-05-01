@@ -14,6 +14,7 @@ import {
   AppstoreOutlined,
   SafetyOutlined,
   TruckOutlined,
+  KeyOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Button, Menu } from 'antd';
@@ -54,6 +55,11 @@ const Sidebar: React.FC = () => {
       key: '/admin/quan-ly-nguoi-dung', 
       icon: <UserOutlined />, 
       label: 'Quản lý người dùng' 
+    },
+    { 
+      key: '/admin/quan-ly-tai-khoan', 
+      icon: <KeyOutlined />, 
+      label: 'Quản lý tài khoản' 
     },
     { 
       key: '/admin/reports', 

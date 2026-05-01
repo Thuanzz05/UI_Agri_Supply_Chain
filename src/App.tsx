@@ -30,6 +30,7 @@ import QuanLyKhoSieuThi from './pages/SieuThi/QuanLyKho';
 import ThongTinCaNhanSieuThi from './pages/SieuThi/ThongTinCaNhan';
 import TruyXuatNguonGoc from './pages/SieuThi/TruyXuatNguonGoc';
 import QuanLyNguoiDung from './pages/Admin/QuanLyNguoiDung';
+import QuanLyTaiKhoan from './pages/Admin/QuanLyTaiKhoan';
 import ProtectedRoute from './components/ProtectedRoute';
 import 'antd/dist/reset.css';
 
@@ -65,6 +66,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <QuanLyNguoiDung />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/quan-ly-tai-khoan" 
+            element={
+              <ProtectedRoute>
+                <QuanLyTaiKhoan />
               </ProtectedRoute>
             } 
           />

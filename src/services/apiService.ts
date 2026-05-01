@@ -1051,5 +1051,49 @@ export const apiService = {
       throw error;
     }
   },
+
+  // ==================== API Quản lý tài khoản ====================
+
+  // Lấy danh sách tài khoản
+  async getAllAccounts(params?: { page?: number; limit?: number; loaiTaiKhoan?: string }) {
+    try {
+      const response = await apiClient.get('/api-admin/TaiKhoan', { params });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Khóa/Mở khóa tài khoản
+  async toggleAccountStatus(id: number) {
+    try {
+      const response = await apiClient.put(`/api-admin/TaiKhoan/${id}/toggle-status`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Đổi mật khẩu tài khoản
+  async changeAccountPassword(id: number, matKhauMoi: string) {
+    try {
+      const response = await apiClient.put(`/api-admin/TaiKhoan/${id}/change-password`, {
+        matKhauMoi
+      });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Xóa tài khoản
+  async deleteAccount(id: number) {
+    try {
+      const response = await apiClient.delete(`/api-admin/TaiKhoan/${id}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
 };
 
