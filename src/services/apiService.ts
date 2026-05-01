@@ -379,6 +379,25 @@ export const apiService = {
     }
   },
 
+  // Lấy hồ sơ đối tác theo loại người dùng để hiển thị thông tin liên hệ công khai
+  async getPublicProfile(loaiNguoi: string, id: number) {
+    const normalizedType = (loaiNguoi || '').toLowerCase();
+
+    if (['nongdan', 'nong_dan', 'farmer'].includes(normalizedType)) {
+      return apiService.getFarmerById(id);
+    }
+
+    if (['daily', 'dai_ly', 'agent'].includes(normalizedType)) {
+      return apiService.getAgentById(id);
+    }
+
+    if (['sieuthi', 'sieu_thi', 'supermarket'].includes(normalizedType)) {
+      return apiService.getSupermarketById(id);
+    }
+
+    return null;
+  },
+
   // Cập nhật thông tin siêu thị
   async updateSupermarketInfo(id: number, supermarketData: any) {
     try {

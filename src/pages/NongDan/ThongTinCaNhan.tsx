@@ -5,6 +5,7 @@ import { AdminLayout } from '../../components/Layout';
 import { authService } from '../../services/authService';
 import { apiService } from '../../services/apiService';
 import { ActionButton } from '../../components/ActionButton';
+import { buildSocialUpdatePayload, getSocialLinks, validateOptionalSocialUrl } from '../../utils/socialLinks';
 
 const ThongTinCaNhan: React.FC = () => {
   const [form] = Form.useForm();
@@ -28,6 +29,7 @@ const ThongTinCaNhan: React.FC = () => {
       // Gọi API lấy thông tin nông dân
       const response = await apiService.getFarmerById(user.maNongDan);
       const data = response.data || response;
+      const socialLinks = getSocialLinks(data);
       
       setUserInfo(data);
       form.setFieldsValue({
@@ -35,8 +37,8 @@ const ThongTinCaNhan: React.FC = () => {
         soDienThoai: data.soDienThoai,
         email: data.email,
         diaChi: data.diaChi,
-        facebook: data.facebook || '',
-        tiktok: data.tiktok || '',
+        facebook: socialLinks.facebook,
+        tiktok: socialLinks.tiktok,
       });
     } catch (error: any) {
       console.error('Error loading user info:', error);
@@ -56,7 +58,7 @@ const ThongTinCaNhan: React.FC = () => {
         return;
       }
 
-      await apiService.updateFarmerInfo(user.maNongDan, values);
+      await apiService.updateFarmerInfo(user.maNongDan, buildSocialUpdatePayload(values));
       message.success('Cập nhật thông tin thành công');
       loadUserInfo();
     } catch (error: any) {
@@ -66,6 +68,8 @@ const ThongTinCaNhan: React.FC = () => {
       setLoading(false);
     }
   };
+
+  const socialLinks = getSocialLinks(userInfo);
 
   return (
     <AdminLayout>
@@ -109,9 +113,9 @@ const ThongTinCaNhan: React.FC = () => {
               </div>
               <div style={{ marginBottom: 16 }}>
                 <FacebookOutlined style={{ marginRight: 8, color: '#1877F2' }} />
-                {userInfo?.facebook ? (
-                  <a href={userInfo.facebook} target="_blank" rel="noopener noreferrer">
-                    {userInfo.facebook}
+                {socialLinks.facebook ? (
+                  <a href={socialLinks.facebook} target="_blank" rel="noopener noreferrer">
+                    {socialLinks.facebook}
                   </a>
                 ) : (
                   <span style={{ color: '#8c8c8c' }}>Chưa cập nhật</span>
@@ -119,9 +123,9 @@ const ThongTinCaNhan: React.FC = () => {
               </div>
               <div>
                 <VideoCameraOutlined style={{ marginRight: 8, color: '#000000' }} />
-                {userInfo?.tiktok ? (
-                  <a href={userInfo.tiktok} target="_blank" rel="noopener noreferrer">
-                    {userInfo.tiktok}
+                {socialLinks.tiktok ? (
+                  <a href={socialLinks.tiktok} target="_blank" rel="noopener noreferrer">
+                    {socialLinks.tiktok}
                   </a>
                 ) : (
                   <span style={{ color: '#8c8c8c' }}>Chưa cập nhật</span>
@@ -195,7 +199,7 @@ const ThongTinCaNhan: React.FC = () => {
                 label="Facebook"
                 name="facebook"
                 rules={[
-                  { type: 'url', message: 'Vui lòng nhập đường dẫn Facebook hợp lệ!' }
+                  { validator: validateOptionalSocialUrl }
                 ]}
               >
                 <Input 
@@ -209,7 +213,7 @@ const ThongTinCaNhan: React.FC = () => {
                 label="TikTok"
                 name="tiktok"
                 rules={[
-                  { type: 'url', message: 'Vui lòng nhập đường dẫn TikTok hợp lệ!' }
+                  { validator: validateOptionalSocialUrl }
                 ]}
               >
                 <Input 

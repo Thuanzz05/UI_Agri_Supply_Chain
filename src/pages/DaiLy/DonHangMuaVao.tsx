@@ -33,6 +33,7 @@ import type { NongDan } from '../../types/nongDan';
 import type { LoNongSan } from '../../types/loNongSan';
 import { ModalButton } from '../../components/ModalButton';
 import { ActionButton } from '../../components/ActionButton';
+import SocialLinks from '../../components/SocialLinks';
 import dayjs from 'dayjs';
 
 interface DonHangTableItem extends DonHang {
@@ -89,6 +90,7 @@ const DonHangMuaVao: React.FC = () => {
   // Modal chi tiết
   const [isDetailModalOpen, setIsDetailModalOpen] = React.useState(false);
   const [selectedOrder, setSelectedOrder] = React.useState<DonHang | null>(null);
+  const [counterpartyProfile, setCounterpartyProfile] = React.useState<unknown>(null);
   const [detailLoading, setDetailLoading] = React.useState(false);
 
   // Modal tạo đơn
@@ -152,8 +154,6 @@ const DonHangMuaVao: React.FC = () => {
     setLoadingBatches(true);
     
     try {
-      const userStr = localStorage.getItem('user');
-
       const [farmersResponse, batchesResponse] = await Promise.all([
         apiService.getAllFarmers(),
         // Lấy tất cả lô hàng available để tạo đơn hàng
@@ -231,9 +231,21 @@ const DonHangMuaVao: React.FC = () => {
   const showDetailModal = async (order: DonHangTableItem) => {
     setIsDetailModalOpen(true);
     setDetailLoading(true);
+    setCounterpartyProfile(null);
     try {
       const response = await apiService.getAgentOrderFromFarmerById(order.maDonHang);
-      setSelectedOrder(response.data);
+      const data = response.data || response;
+      setSelectedOrder(data);
+
+      try {
+        const profileResponse = await apiService.getPublicProfile(
+          data.loaiNguoiBan || order.loaiNguoiBan || 'nongdan',
+          data.maNguoiBan || order.maNguoiBan,
+        );
+        setCounterpartyProfile(profileResponse?.data || profileResponse);
+      } catch {
+        setCounterpartyProfile(null);
+      }
     } catch (error: any) {
       message.error(getApiErrorMessage(error, 'Không thể tải chi tiết đơn hàng'));
       setIsDetailModalOpen(false);
@@ -245,6 +257,7 @@ const DonHangMuaVao: React.FC = () => {
   const handleCloseDetailModal = () => {
     setIsDetailModalOpen(false);
     setSelectedOrder(null);
+    setCounterpartyProfile(null);
   };
 
 
@@ -630,6 +643,9 @@ const DonHangMuaVao: React.FC = () => {
                 </Tag>
               </Descriptions.Item>
               <Descriptions.Item label="Nông dân">{selectedOrder.tenNguoiBan}</Descriptions.Item>
+              <Descriptions.Item label="Facebook/TikTok">
+                <SocialLinks data={counterpartyProfile || selectedOrder} showEmpty />
+              </Descriptions.Item>
               <Descriptions.Item label="Ngày đặt">
                 {dayjs(selectedOrder.ngayDat).format('DD/MM/YYYY HH:mm')}
               </Descriptions.Item>

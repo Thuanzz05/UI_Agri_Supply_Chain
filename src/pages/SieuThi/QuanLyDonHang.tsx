@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Tag, Space, message, Card, Statistic, Row, Col, Select, Modal, Descriptions, Popconfirm, Spin } from 'antd';
+import { Table, Tag, message, Card, Statistic, Row, Col, Select, Modal, Descriptions, Popconfirm, Spin } from 'antd';
 import { ShoppingCartOutlined, ClockCircleOutlined, CheckCircleOutlined, CloseCircleOutlined, EyeOutlined, ReloadOutlined } from '@ant-design/icons';
 import { AdminLayout } from '../../components/Layout';
 import { authService } from '../../services/authService';
 import { apiService } from '../../services/apiService';
 import { ActionButton } from '../../components/ActionButton';
 import { ModalButton } from '../../components/ModalButton';
+import SocialLinks from '../../components/SocialLinks';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
 
@@ -58,6 +59,7 @@ const QuanLyDonHang: React.FC = () => {
   // Modal chi tiết
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<DonHang | null>(null);
+  const [counterpartyProfile, setCounterpartyProfile] = useState<unknown>(null);
   const [detailLoading, setDetailLoading] = useState(false);
 
   useEffect(() => {
@@ -89,10 +91,20 @@ const QuanLyDonHang: React.FC = () => {
   const showDetailModal = async (record: DonHang) => {
     setIsDetailModalOpen(true);
     setDetailLoading(true);
+    setCounterpartyProfile(null);
     try {
       const response = await apiService.getSupermarketOrderById(record.maDonHang);
       const data = response?.data || response;
       setSelectedOrder(data);
+      try {
+        const profileResponse = await apiService.getPublicProfile(
+          data.loaiNguoiBan || record.loaiNguoiBan || 'daily',
+          data.maNguoiBan || record.maNguoiBan,
+        );
+        setCounterpartyProfile(profileResponse?.data || profileResponse);
+      } catch {
+        setCounterpartyProfile(null);
+      }
     } catch (error: any) {
       setSelectedOrder(record);
     } finally {
@@ -103,6 +115,7 @@ const QuanLyDonHang: React.FC = () => {
   const handleCloseDetailModal = () => {
     setIsDetailModalOpen(false);
     setSelectedOrder(null);
+    setCounterpartyProfile(null);
   };
 
   const handleConfirmOrder = async (id: number) => {
@@ -408,6 +421,9 @@ const QuanLyDonHang: React.FC = () => {
                 </Tag>
               </Descriptions.Item>
               <Descriptions.Item label="Đại lý">{selectedOrder.tenNguoiBan}</Descriptions.Item>
+              <Descriptions.Item label="Facebook/TikTok">
+                <SocialLinks data={counterpartyProfile || selectedOrder} showEmpty />
+              </Descriptions.Item>
               <Descriptions.Item label="Ngày đặt">
                 {selectedOrder.ngayDat ? dayjs(selectedOrder.ngayDat).format('DD/MM/YYYY HH:mm') : '--'}
               </Descriptions.Item>

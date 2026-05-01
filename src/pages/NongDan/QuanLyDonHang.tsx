@@ -29,6 +29,7 @@ import { apiService } from '../../services/apiService';
 import type { ChiTietDonHang, DonHang } from '../../types/donHang';
 import { ModalButton } from '../../components/ModalButton';
 import { ActionButton } from '../../components/ActionButton';
+import SocialLinks from '../../components/SocialLinks';
 import dayjs from 'dayjs';
 
 interface DonHangTableItem extends DonHang {
@@ -89,6 +90,7 @@ const QuanLyDonHangNongDan: React.FC = () => {
   // Modal chi tiết
   const [isDetailModalOpen, setIsDetailModalOpen] = React.useState(false);
   const [selectedOrder, setSelectedOrder] = React.useState<DonHang | null>(null);
+  const [counterpartyProfile, setCounterpartyProfile] = React.useState<unknown>(null);
   const [detailLoading, setDetailLoading] = React.useState(false);
 
   const fetchOrders = async () => {
@@ -136,9 +138,21 @@ const QuanLyDonHangNongDan: React.FC = () => {
   const showDetailModal = async (order: DonHangTableItem) => {
     setIsDetailModalOpen(true);
     setDetailLoading(true);
+    setCounterpartyProfile(null);
     try {
       const response = await apiService.getFarmerOrderById(order.maDonHang);
-      setSelectedOrder(response.data);
+      const data = response.data || response;
+      setSelectedOrder(data);
+
+      try {
+        const profileResponse = await apiService.getPublicProfile(
+          data.loaiNguoiMua || order.loaiNguoiMua || 'daily',
+          data.maNguoiMua || order.maNguoiMua,
+        );
+        setCounterpartyProfile(profileResponse?.data || profileResponse);
+      } catch {
+        setCounterpartyProfile(null);
+      }
     } catch (error: any) {
       message.error(getApiErrorMessage(error, 'Không thể tải chi tiết đơn hàng'));
       setIsDetailModalOpen(false);
@@ -150,6 +164,7 @@ const QuanLyDonHangNongDan: React.FC = () => {
   const handleCloseDetailModal = () => {
     setIsDetailModalOpen(false);
     setSelectedOrder(null);
+    setCounterpartyProfile(null);
   };
 
   const handleUpdateStatus = async (maDonHang: number, trangThai: string) => {
@@ -454,6 +469,9 @@ const QuanLyDonHangNongDan: React.FC = () => {
                 </Tag>
               </Descriptions.Item>
               <Descriptions.Item label="Người mua">{selectedOrder.tenNguoiMua}</Descriptions.Item>
+              <Descriptions.Item label="Facebook/TikTok">
+                <SocialLinks data={counterpartyProfile || selectedOrder} showEmpty />
+              </Descriptions.Item>
               <Descriptions.Item label="Ngày đặt">
                 {dayjs(selectedOrder.ngayDat).format('DD/MM/YYYY HH:mm')}
               </Descriptions.Item>

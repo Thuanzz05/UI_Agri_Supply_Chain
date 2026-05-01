@@ -28,6 +28,7 @@ import {
 } from '@ant-design/icons';
 import { AdminLayout } from '../../components/Layout';
 import { apiService } from '../../services/apiService';
+import SocialLinks from '../../components/SocialLinks';
 import dayjs from 'dayjs';
 
 const { Title, Text, Paragraph } = Typography;
@@ -52,6 +53,8 @@ interface TraceabilityData {
   tenNongDan: string;
   soDienThoaiNongDan: string;
   diaChiNongDan: string;
+  facebookNongDan?: string;
+  tiktokNongDan?: string;
   // Kiểm định
   kiemDinh?: {
     maKiemDinh: number;
@@ -278,6 +281,9 @@ const TruyXuatNguonGoc: React.FC = () => {
                       <Text type="secondary">{traceData.diaChiNongDan}</Text>
                     </div>
                   )}
+                  <div style={{ marginTop: 8 }}>
+                    <SocialLinks data={traceData} showEmpty />
+                  </div>
                 </div>
                 <Divider style={{ margin: '12px 0' }} />
                 <div>

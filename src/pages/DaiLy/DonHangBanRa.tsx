@@ -31,6 +31,7 @@ import { apiService } from '../../services/apiService';
 import type { ChiTietDonHang, DonHang } from '../../types/donHang';
 import { ModalButton } from '../../components/ModalButton';
 import { ActionButton } from '../../components/ActionButton';
+import SocialLinks from '../../components/SocialLinks';
 import dayjs from 'dayjs';
 
 interface DonHangTableItem extends DonHang {
@@ -102,6 +103,7 @@ const DonHangBanRa: React.FC = () => {
   const [filterStatus, setFilterStatus] = React.useState<string>('all');
   const [isDetailModalOpen, setIsDetailModalOpen] = React.useState(false);
   const [selectedOrder, setSelectedOrder] = React.useState<DonHang | null>(null);
+  const [counterpartyProfile, setCounterpartyProfile] = React.useState<unknown>(null);
   const [detailLoading, setDetailLoading] = React.useState(false);
 
   // Modal tạo đơn
@@ -161,9 +163,21 @@ const DonHangBanRa: React.FC = () => {
   const showDetailModal = async (order: DonHangTableItem) => {
     setIsDetailModalOpen(true);
     setDetailLoading(true);
+    setCounterpartyProfile(null);
     try {
       const response = await apiService.getAgentOrderToSupermarketById(order.maDonHang);
-      setSelectedOrder(response.data);
+      const data = response.data || response;
+      setSelectedOrder(data);
+
+      try {
+        const profileResponse = await apiService.getPublicProfile(
+          data.loaiNguoiMua || order.loaiNguoiMua || 'sieuthi',
+          data.maNguoiMua || order.maNguoiMua,
+        );
+        setCounterpartyProfile(profileResponse?.data || profileResponse);
+      } catch {
+        setCounterpartyProfile(null);
+      }
     } catch (error: any) {
       message.error(getApiErrorMessage(error, 'Không thể tải chi tiết đơn hàng'));
       setIsDetailModalOpen(false);
@@ -175,6 +189,7 @@ const DonHangBanRa: React.FC = () => {
   const handleCloseDetailModal = () => {
     setIsDetailModalOpen(false);
     setSelectedOrder(null);
+    setCounterpartyProfile(null);
   };
 
   // Fetch danh sách siêu thị và tồn kho khi mở modal
@@ -566,6 +581,9 @@ const DonHangBanRa: React.FC = () => {
                 </Tag>
               </Descriptions.Item>
               <Descriptions.Item label="Siêu thị">{selectedOrder.tenNguoiMua}</Descriptions.Item>
+              <Descriptions.Item label="Facebook/TikTok">
+                <SocialLinks data={counterpartyProfile || selectedOrder} showEmpty />
+              </Descriptions.Item>
               <Descriptions.Item label="Ngày đặt">
                 {dayjs(selectedOrder.ngayDat).format('DD/MM/YYYY HH:mm')}
               </Descriptions.Item>
