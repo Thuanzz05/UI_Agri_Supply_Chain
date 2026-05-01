@@ -162,7 +162,6 @@ const QuanLyVanChuyen: React.FC = () => {
       dataIndex: 'maVanChuyen',
       key: 'maVanChuyen',
       width: 80,
-      fixed: 'left',
     },
     {
       title: 'Sản phẩm',
@@ -175,36 +174,27 @@ const QuanLyVanChuyen: React.FC = () => {
       title: 'Điểm đi',
       dataIndex: 'diemDi',
       key: 'diemDi',
-      width: 150,
       ellipsis: true,
     },
     {
       title: 'Điểm đến',
       dataIndex: 'diemDen',
       key: 'diemDen',
-      width: 150,
       ellipsis: true,
     },
     {
       title: 'Ngày bắt đầu',
       dataIndex: 'ngayBatDau',
       key: 'ngayBatDau',
-      width: 120,
+      width: 110,
       render: (date: string) => dayjs(date).format('DD/MM/YYYY'),
     },
     {
       title: 'Ngày kết thúc',
       dataIndex: 'ngayKetThuc',
       key: 'ngayKetThuc',
-      width: 120,
+      width: 110,
       render: (date: string) => date ? dayjs(date).format('DD/MM/YYYY') : '-',
-    },
-    {
-      title: 'Mã QR',
-      dataIndex: 'maQR',
-      key: 'maQR',
-      width: 120,
-      render: (text: string) => text || '-',
     },
     {
       title: 'Trạng thái',
@@ -221,7 +211,6 @@ const QuanLyVanChuyen: React.FC = () => {
       title: 'Thao tác',
       key: 'actions',
       width: 150,
-      fixed: 'right',
       render: (_, record) => (
         <Space>
           <ModalButton
@@ -311,7 +300,6 @@ const QuanLyVanChuyen: React.FC = () => {
           dataSource={filteredVanChuyens}
           rowKey="maVanChuyen"
           loading={loading}
-          scroll={{ x: 1400 }}
           pagination={{
             pageSize: 10,
             showSizeChanger: true,

@@ -1,11 +1,15 @@
 import React from 'react';
 import {
+  Alert,
+  Button,
   Card,
   Col,
   Descriptions,
+  InputNumber,
   Modal,
   Row,
   Select,
+  Space,
   Statistic,
   Table,
   Tag,
@@ -13,10 +17,12 @@ import {
 } from 'antd';
 import type { TableProps } from 'antd';
 import {
+  CheckCircleOutlined,
   DollarOutlined,
   EyeOutlined,
   FileTextOutlined,
   PlusOutlined,
+  ReloadOutlined,
   ShoppingCartOutlined,
 } from '@ant-design/icons';
 import { AdminLayout } from '../../components/Layout';
@@ -29,6 +35,23 @@ import dayjs from 'dayjs';
 
 interface DonHangTableItem extends DonHang {
   key: string;
+}
+
+interface SieuThiOption {
+  maSieuThi: number;
+  tenSieuThi: string;
+  diaChi?: string;
+}
+
+interface TonKhoItem {
+  maKho: number;
+  maLo: number;
+  soLuong: number;
+  tenKho: string;
+  tenSanPham: string;
+  donViTinh: string;
+  maQR: string;
+  ngayCapNhat: string;
 }
 
 const getTrangThaiColor = (trangThai: string) => {
@@ -80,6 +103,20 @@ const DonHangBanRa: React.FC = () => {
   const [isDetailModalOpen, setIsDetailModalOpen] = React.useState(false);
   const [selectedOrder, setSelectedOrder] = React.useState<DonHang | null>(null);
   const [detailLoading, setDetailLoading] = React.useState(false);
+
+  // Modal tạo đơn
+  const [isCreateModalOpen, setIsCreateModalOpen] = React.useState(false);
+  const [createLoading, setCreateLoading] = React.useState(false);
+  const [createForm, setCreateForm] = React.useState({
+    maSieuThi: '',
+    chiTietDonHang: [{ maLo: '', soLuong: '', donGia: '' }],
+  });
+
+  // Danh sách siêu thị và tồn kho
+  const [supermarkets, setSupermarkets] = React.useState<SieuThiOption[]>([]);
+  const [inventoryItems, setInventoryItems] = React.useState<TonKhoItem[]>([]);
+  const [loadingSupermarkets, setLoadingSupermarkets] = React.useState(false);
+  const [loadingInventory, setLoadingInventory] = React.useState(false);
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -138,6 +175,141 @@ const DonHangBanRa: React.FC = () => {
   const handleCloseDetailModal = () => {
     setIsDetailModalOpen(false);
     setSelectedOrder(null);
+  };
+
+  // Fetch danh sách siêu thị và tồn kho khi mở modal
+  const fetchSupermarketsAndInventory = async () => {
+    setLoadingSupermarkets(true);
+    setLoadingInventory(true);
+
+    try {
+      const [supermarketsResponse, inventoryResponse] = await Promise.all([
+        apiService.getAllSupermarkets(),
+        apiService.getAllInventory(),
+      ]);
+
+      // Xử lý danh sách siêu thị
+      const smData = supermarketsResponse?.data || supermarketsResponse;
+      if (smData) {
+        setSupermarkets(Array.isArray(smData) ? smData : []);
+      }
+
+      // Xử lý tồn kho - chỉ lấy tồn kho có số lượng > 0
+      const invData = inventoryResponse?.data || inventoryResponse;
+      if (invData) {
+        const items = Array.isArray(invData) ? invData : [];
+        setInventoryItems(items.filter((item: TonKhoItem) => item.soLuong > 0));
+      }
+    } catch (error: any) {
+      message.error(getApiErrorMessage(error, 'Không thể tải dữ liệu'));
+    } finally {
+      setLoadingSupermarkets(false);
+      setLoadingInventory(false);
+    }
+  };
+
+  // Handlers cho modal tạo đơn
+  const showCreateModal = () => {
+    setIsCreateModalOpen(true);
+    setCreateForm({
+      maSieuThi: '',
+      chiTietDonHang: [{ maLo: '', soLuong: '', donGia: '' }],
+    });
+    fetchSupermarketsAndInventory();
+  };
+
+  const handleCloseCreateModal = () => {
+    setIsCreateModalOpen(false);
+    setCreateForm({
+      maSieuThi: '',
+      chiTietDonHang: [{ maLo: '', soLuong: '', donGia: '' }],
+    });
+  };
+
+  const handleAddProduct = () => {
+    setCreateForm({
+      ...createForm,
+      chiTietDonHang: [...createForm.chiTietDonHang, { maLo: '', soLuong: '', donGia: '' }],
+    });
+  };
+
+  const handleRemoveProduct = (index: number) => {
+    const newChiTiet = createForm.chiTietDonHang.filter((_, i) => i !== index);
+    setCreateForm({ ...createForm, chiTietDonHang: newChiTiet });
+  };
+
+  const handleProductChange = (index: number, field: string, value: string) => {
+    const newChiTiet = [...createForm.chiTietDonHang];
+    newChiTiet[index] = { ...newChiTiet[index], [field]: value };
+    setCreateForm({ ...createForm, chiTietDonHang: newChiTiet });
+  };
+
+  const handleCreateOrder = async () => {
+    // Validation
+    if (!createForm.maSieuThi) {
+      message.error('Vui lòng chọn siêu thị');
+      return;
+    }
+
+    const hasEmptyProduct = createForm.chiTietDonHang.some(
+      (item) => !item.maLo || !item.soLuong || !item.donGia
+    );
+    if (hasEmptyProduct) {
+      message.error('Vui lòng điền đầy đủ thông tin sản phẩm');
+      return;
+    }
+
+    const hasInvalidNumber = createForm.chiTietDonHang.some(
+      (item) => parseFloat(item.soLuong) <= 0 || parseFloat(item.donGia) <= 0
+    );
+    if (hasInvalidNumber) {
+      message.error('Số lượng và đơn giá phải lớn hơn 0');
+      return;
+    }
+
+    // Kiểm tra số lượng không vượt quá tồn kho
+    for (const item of createForm.chiTietDonHang) {
+      const invItem = inventoryItems.find((inv) => inv.maLo.toString() === item.maLo);
+      if (invItem && parseFloat(item.soLuong) > invItem.soLuong) {
+        message.error(
+          `Số lượng "${invItem.tenSanPham}" (${item.soLuong}) vượt quá tồn kho (${invItem.soLuong} ${invItem.donViTinh})`
+        );
+        return;
+      }
+    }
+
+    setCreateLoading(true);
+    try {
+      const userStr = localStorage.getItem('user');
+      if (!userStr) {
+        message.error('Vui lòng đăng nhập lại');
+        return;
+      }
+
+      const user = JSON.parse(userStr);
+      const maDaiLy = user.maDaiLy || (user as any).MaDaiLy;
+
+      await apiService.createAgentOrderToSupermarket({
+        loaiDon: 'daily_to_sieuthi',
+        maNguoiBan: maDaiLy,
+        loaiNguoiBan: 'daily',
+        maNguoiMua: parseInt(createForm.maSieuThi),
+        loaiNguoiMua: 'sieuthi',
+        chiTietDonHang: createForm.chiTietDonHang.map((item) => ({
+          maLo: parseInt(item.maLo),
+          soLuong: parseFloat(item.soLuong),
+          donGia: parseFloat(item.donGia),
+        })),
+      });
+
+      message.success('Tạo đơn hàng và sinh vận chuyển thành công!');
+      handleCloseCreateModal();
+      await fetchOrders();
+    } catch (error: any) {
+      message.error(getApiErrorMessage(error, 'Không thể tạo đơn hàng'));
+    } finally {
+      setCreateLoading(false);
+    }
   };
 
   const filteredOrders = React.useMemo(() => {
@@ -204,7 +376,7 @@ const DonHangBanRa: React.FC = () => {
       dataIndex: 'tongGiaTri',
       key: 'tongGiaTri',
       width: 130,
-      render: (value: number) => `${value.toLocaleString('vi-VN')} đ`,
+      render: (value: number) => `${(value || 0).toLocaleString('vi-VN')} đ`,
     },
     {
       title: 'Trạng thái',
@@ -255,14 +427,14 @@ const DonHangBanRa: React.FC = () => {
       dataIndex: 'donGia',
       key: 'donGia',
       width: 120,
-      render: (value: number) => `${value.toLocaleString('vi-VN')} đ`,
+      render: (value: number) => `${(value || 0).toLocaleString('vi-VN')} đ`,
     },
     {
       title: 'Thành tiền',
       dataIndex: 'thanhTien',
       key: 'thanhTien',
       width: 130,
-      render: (value: number) => `${value.toLocaleString('vi-VN')} đ`,
+      render: (value: number) => `${(value || 0).toLocaleString('vi-VN')} đ`,
     },
   ];
 
@@ -297,7 +469,7 @@ const DonHangBanRa: React.FC = () => {
             <Statistic
               title="Hoàn thành"
               value={completedCount}
-              prefix={<FileTextOutlined />}
+              prefix={<CheckCircleOutlined />}
             />
           </Card>
         </Col>
@@ -337,9 +509,22 @@ const DonHangBanRa: React.FC = () => {
               { label: 'Đã hủy', value: 'da_huy' },
             ]}
           />
-          <ActionButton type="primary" icon={<PlusOutlined />}>
-            Tạo đơn hàng
-          </ActionButton>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <ActionButton 
+              icon={<ReloadOutlined />} 
+              onClick={fetchOrders} 
+              loading={loading}
+            >
+              Làm mới
+            </ActionButton>
+            <ActionButton
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={showCreateModal}
+            >
+              Tạo đơn hàng
+            </ActionButton>
+          </div>
         </div>
 
         <Table<DonHangTableItem>
@@ -386,7 +571,7 @@ const DonHangBanRa: React.FC = () => {
               </Descriptions.Item>
               <Descriptions.Item label="Tổng giá trị" span={2}>
                 <strong style={{ fontSize: 16, color: '#1890ff' }}>
-                  {selectedOrder.tongGiaTri.toLocaleString('vi-VN')} đ
+                  {(selectedOrder.tongGiaTri || 0).toLocaleString('vi-VN')} đ
                 </strong>
               </Descriptions.Item>
             </Descriptions>
@@ -403,6 +588,135 @@ const DonHangBanRa: React.FC = () => {
             </div>
           </>
         ) : null}
+      </Modal>
+
+      {/* Modal tạo đơn hàng bán ra */}
+      <Modal
+        title="Tạo đơn hàng bán cho siêu thị"
+        open={isCreateModalOpen}
+        onCancel={handleCloseCreateModal}
+        width={750}
+        footer={
+          <Space>
+            <ModalButton onClick={handleCloseCreateModal}>
+              Hủy
+            </ModalButton>
+            <ModalButton
+              type="primary"
+              onClick={handleCreateOrder}
+              loading={createLoading}
+            >
+              Tạo đơn hàng
+            </ModalButton>
+          </Space>
+        }
+      >
+        <Alert
+          message="Lưu ý"
+          description="Khi tạo đơn hàng thành công, hệ thống sẽ tự động sinh phiếu vận chuyển (đang vận chuyển). Khi vận chuyển hoàn thành, tồn kho bên đại lý sẽ giảm và tồn kho bên siêu thị sẽ tăng tương ứng."
+          type="info"
+          showIcon
+          style={{ marginBottom: 20 }}
+        />
+
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ display: 'block', marginBottom: 8 }}>
+            Chọn siêu thị: <span style={{ color: 'red' }}>*</span>
+          </label>
+          <Select
+            showSearch
+            placeholder="Tìm và chọn siêu thị"
+            style={{ width: '100%' }}
+            value={createForm.maSieuThi || undefined}
+            onChange={(value) => setCreateForm({ ...createForm, maSieuThi: value })}
+            loading={loadingSupermarkets}
+            filterOption={(input, option) =>
+              (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+            }
+            options={supermarkets.map((sm) => ({
+              value: sm.maSieuThi?.toString(),
+              label: `${sm.maSieuThi} - ${sm.tenSieuThi || 'Chưa có tên'}${
+                sm.diaChi ? ` (${sm.diaChi})` : ''
+              }`,
+            }))}
+          />
+        </div>
+
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ display: 'block', marginBottom: 8 }}>
+            Sản phẩm từ kho: <span style={{ color: 'red' }}>*</span>
+          </label>
+          {createForm.chiTietDonHang.map((item, index) => (
+            <div
+              key={index}
+              style={{
+                display: 'flex',
+                gap: 8,
+                marginBottom: 8,
+                alignItems: 'flex-start',
+              }}
+            >
+              <div style={{ flex: 2 }}>
+                <Select
+                  showSearch
+                  placeholder="Chọn sản phẩm từ kho"
+                  style={{ width: '100%' }}
+                  value={item.maLo || undefined}
+                  onChange={(value) => handleProductChange(index, 'maLo', value)}
+                  loading={loadingInventory}
+                  filterOption={(input, option) =>
+                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                  }
+                  options={inventoryItems.map((inv) => ({
+                    value: inv.maLo?.toString(),
+                    label: `Lô ${inv.maLo} - ${inv.tenSanPham || 'N/A'} (${inv.soLuong} ${inv.donViTinh || 'kg'}) - Kho: ${inv.tenKho}`,
+                  }))}
+                />
+              </div>
+              <InputNumber
+                min={1}
+                value={item.soLuong ? parseFloat(item.soLuong) : undefined}
+                onChange={(value) => handleProductChange(index, 'soLuong', value?.toString() || '')}
+                placeholder="Số lượng"
+                style={{ flex: 1 }}
+                onKeyPress={(event) => {
+                  if (event.key === '-' || event.key === 'e') {
+                    event.preventDefault();
+                  }
+                }}
+              />
+              <InputNumber
+                min={1}
+                value={item.donGia ? parseFloat(item.donGia) : undefined}
+                onChange={(value) => handleProductChange(index, 'donGia', value?.toString() || '')}
+                placeholder="Đơn giá (đ)"
+                style={{ flex: 1 }}
+                formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                parser={(value) => value!.replace(/,/g, '') as unknown as number}
+                onKeyPress={(event) => {
+                  if (event.key === '-' || event.key === 'e') {
+                    event.preventDefault();
+                  }
+                }}
+              />
+              {createForm.chiTietDonHang.length > 1 && (
+                <Button danger size="small" onClick={() => handleRemoveProduct(index)}>
+                  Xóa
+                </Button>
+              )}
+            </div>
+          ))}
+          <Button
+            type="dashed"
+            onClick={handleAddProduct}
+            block
+            size="small"
+            icon={<PlusOutlined />}
+            style={{ marginTop: 8 }}
+          >
+            Thêm sản phẩm
+          </Button>
+        </div>
       </Modal>
     </AdminLayout>
   );
