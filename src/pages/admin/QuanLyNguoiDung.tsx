@@ -72,6 +72,7 @@ interface UserDetail {
 
 const QuanLyNguoiDung: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [filterType, setFilterType] = useState<string>('');
@@ -86,26 +87,37 @@ const QuanLyNguoiDung: React.FC = () => {
 
   useEffect(() => {
     fetchUsers();
-  }, [pagination.current, pagination.pageSize, filterType]);
+  }, [filterType]);
+
+  useEffect(() => {
+    // Filter dữ liệu theo search text
+    if (searchText) {
+      const filtered = users.filter(user => 
+        user.tenDangNhap.toLowerCase().includes(searchText.toLowerCase()) ||
+        user.hoTen.toLowerCase().includes(searchText.toLowerCase()) ||
+        user.soDienThoai.includes(searchText)
+      );
+      setFilteredUsers(filtered);
+    } else {
+      setFilteredUsers(users);
+    }
+  }, [searchText, users]);
 
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const params: any = {
-        page: pagination.current,
-        limit: pagination.pageSize,
-      };
+      const params: any = {};
       if (filterType) {
         params.loaiNguoiDung = filterType;
       }
       const response = await apiService.getAllUsers(params);
       const data = response?.data || [];
-      const paginationData = response?.pagination || {};
       
       setUsers(data);
+      setFilteredUsers(data);
       setPagination({
         ...pagination,
-        total: paginationData.total || 0,
+        total: response?.total || 0,
       });
     } catch (error: any) {
       message.error('Không thể tải danh sách người dùng');
@@ -133,11 +145,6 @@ const QuanLyNguoiDung: React.FC = () => {
     } finally {
       setDetailLoading(false);
     }
-  };
-
-  const handleSearch = () => {
-    setPagination({ ...pagination, current: 1 });
-    fetchUsers();
   };
 
   const getLoaiNguoiDungTag = (loai: string) => {
@@ -345,12 +352,12 @@ const QuanLyNguoiDung: React.FC = () => {
       <Card>
         <Space style={{ marginBottom: 16 }} wrap>
           <Input
-            placeholder="Tìm kiếm theo tên, SĐT..."
+            placeholder="Tìm theo tên, SĐT, email..."
             prefix={<SearchOutlined />}
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
-            onPressEnter={handleSearch}
-            style={{ width: 250 }}
+            style={{ width: 300 }}
+            allowClear
           />
           <Select
             placeholder="Lọc theo loại"
@@ -363,20 +370,17 @@ const QuanLyNguoiDung: React.FC = () => {
             <Option value="daily">Đại lý</Option>
             <Option value="sieuthi">Siêu thị</Option>
           </Select>
-          <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
-            Tìm kiếm
-          </Button>
         </Space>
 
         <Table
           columns={columns}
-          dataSource={users}
+          dataSource={filteredUsers}
           rowKey="id"
           loading={loading}
           pagination={{
             current: pagination.current,
             pageSize: pagination.pageSize,
-            total: pagination.total,
+            total: filteredUsers.length,
             showSizeChanger: true,
             showTotal: (total) => `Tổng ${total} người dùng`,
             onChange: (page, pageSize) => {
