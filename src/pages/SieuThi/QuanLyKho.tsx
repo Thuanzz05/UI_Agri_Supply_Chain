@@ -1,31 +1,43 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Tag, message, Card, Statistic, Row, Col } from 'antd';
-import { HomeOutlined, InboxOutlined, EnvironmentOutlined } from '@ant-design/icons';
+import { Table, Tag, message, Card, Statistic, Row, Col, Button } from 'antd';
+import { HomeOutlined, InboxOutlined, ReloadOutlined, DatabaseOutlined } from '@ant-design/icons';
 import { AdminLayout } from '../../components/Layout';
 import { authService } from '../../services/authService';
 import { apiService } from '../../services/apiService';
 import type { ColumnsType } from 'antd/es/table';
+import dayjs from 'dayjs';
+
+interface TonKho {
+  maKho: number;
+  maLo: number;
+  soLuong: number;
+  ngayCapNhat: string;
+  tenKho?: string;
+  tenSanPham?: string;
+  donViTinh?: string;
+  maQR?: string;
+}
 
 interface Kho {
   maKho: number;
+  tenKho: string;
+  loaiKho: string;
   maChuSoHuu: number;
   loaiChuSoHuu: string;
-  tenKho: string;
-  diaChi: string;
-  sucChua: number;
-  trangThai: string;
-  ghiChu?: string;
+  diaChi?: string;
+  tenChuSoHuu?: string;
 }
 
 const QuanLyKho: React.FC = () => {
+  const [tonKhos, setTonKhos] = useState<TonKho[]>([]);
   const [khos, setKhos] = useState<Kho[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    loadKhos();
+    loadData();
   }, []);
 
-  const loadKhos = async () => {
+  const loadData = async () => {
     try {
       setLoading(true);
       const user = authService.getStoredUser();
@@ -35,142 +47,137 @@ const QuanLyKho: React.FC = () => {
         return;
       }
 
-      const response = await apiService.getSupermarketWarehouses(user.maSieuThi);
-      const data = response.data || response;
-      setKhos(Array.isArray(data) ? data : []);
+      // Load cả kho hàng và tồn kho
+      const [khoRes, tonKhoRes] = await Promise.allSettled([
+        apiService.getSupermarketWarehouses(user.maSieuThi),
+        apiService.getSupermarketInventory(user.maSieuThi),
+      ]);
+
+      if (khoRes.status === 'fulfilled') {
+        const data = khoRes.value?.data || khoRes.value;
+        setKhos(Array.isArray(data) ? data : []);
+      }
+
+      if (tonKhoRes.status === 'fulfilled') {
+        const data = tonKhoRes.value?.data || tonKhoRes.value;
+        setTonKhos(Array.isArray(data) ? data : []);
+      }
     } catch (error: any) {
-      console.error('Error loading warehouses:', error);
-      message.error('Không thể tải danh sách kho');
-      setKhos([]);
+      console.error('Error loading data:', error);
+      message.error('Không thể tải dữ liệu kho hàng');
     } finally {
       setLoading(false);
     }
   };
 
-  const getStatusColor = (status: string) => {
-    const statusMap: Record<string, string> = {
-      'hoat_dong': 'green',
-      'bao_tri': 'orange',
-      'ngung_hoat_dong': 'red',
-    };
-    return statusMap[status] || 'default';
-  };
+  const totalSoLuong = tonKhos.reduce((sum, tk) => sum + (tk.soLuong || 0), 0);
 
-  const getStatusText = (status: string) => {
-    const statusMap: Record<string, string> = {
-      'hoat_dong': 'Hoạt động',
-      'bao_tri': 'Bảo trì',
-      'ngung_hoat_dong': 'Ngừng hoạt động',
-    };
-    return statusMap[status] || status;
-  };
-
-  const statistics = {
-    total: khos.length,
-    active: khos.filter(k => k.trangThai === 'hoat_dong').length,
-    totalCapacity: khos.reduce((sum, k) => sum + (k.sucChua || 0), 0),
-  };
-
-  const columns: ColumnsType<Kho> = [
-    {
-      title: 'Mã kho',
-      dataIndex: 'maKho',
-      key: 'maKho',
-      width: 80,
-      fixed: 'left',
-    },
+  const tonKhoColumns: ColumnsType<TonKho> = [
     {
       title: 'Tên kho',
       dataIndex: 'tenKho',
       key: 'tenKho',
-      width: 200,
+      render: (text: string) => text || '--',
     },
     {
-      title: 'Địa chỉ',
-      dataIndex: 'diaChi',
-      key: 'diaChi',
-      width: 250,
-      ellipsis: true,
+      title: 'Sản phẩm',
+      dataIndex: 'tenSanPham',
+      key: 'tenSanPham',
+      render: (text: string) => <strong>{text || '--'}</strong>,
     },
     {
-      title: 'Sức chứa (m³)',
-      dataIndex: 'sucChua',
-      key: 'sucChua',
-      width: 120,
-      render: (value: number) => value?.toLocaleString() || 0,
+      title: 'Mã lô',
+      dataIndex: 'maLo',
+      key: 'maLo',
+      width: 80,
     },
     {
-      title: 'Trạng thái',
-      dataIndex: 'trangThai',
-      key: 'trangThai',
+      title: 'Mã QR',
+      dataIndex: 'maQR',
+      key: 'maQR',
+      width: 110,
+      render: (text: string) => text ? <Tag color="blue">{text}</Tag> : '--',
+    },
+    {
+      title: 'Số lượng',
+      key: 'soLuong',
       width: 130,
-      render: (status: string) => (
-        <Tag color={getStatusColor(status)}>
-          {getStatusText(status)}
-        </Tag>
+      render: (_, record) => (
+        <strong style={{ color: record.soLuong > 0 ? '#52c41a' : '#ff4d4f' }}>
+          {record.soLuong} {record.donViTinh || ''}
+        </strong>
       ),
     },
     {
-      title: 'Ghi chú',
-      dataIndex: 'ghiChu',
-      key: 'ghiChu',
-      width: 200,
-      ellipsis: true,
+      title: 'Ngày cập nhật',
+      dataIndex: 'ngayCapNhat',
+      key: 'ngayCapNhat',
+      width: 140,
+      render: (date: string) => date ? dayjs(date).format('DD/MM/YYYY HH:mm') : '--',
     },
   ];
 
   return (
     <AdminLayout>
       <div className="page-header">
-        <h1>Quản lý Kho hàng</h1>
-        <p>Quản lý kho hàng của siêu thị</p>
+        <h1>Kho hàng & Tồn kho</h1>
+        <p>Quản lý kho hàng và theo dõi tồn kho của siêu thị</p>
       </div>
 
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-        <Col xs={24} sm={12} lg={8}>
+        <Col xs={24} sm={8}>
           <Card>
             <Statistic
               title="Tổng số kho"
-              value={statistics.total}
+              value={khos.length}
               prefix={<HomeOutlined />}
               valueStyle={{ color: '#1890ff' }}
             />
           </Card>
         </Col>
-        <Col xs={24} sm={12} lg={8}>
+        <Col xs={24} sm={8}>
           <Card>
             <Statistic
-              title="Kho hoạt động"
-              value={statistics.active}
+              title="Số mặt hàng tồn kho"
+              value={tonKhos.length}
               prefix={<InboxOutlined />}
               valueStyle={{ color: '#52c41a' }}
             />
           </Card>
         </Col>
-        <Col xs={24} sm={12} lg={8}>
+        <Col xs={24} sm={8}>
           <Card>
             <Statistic
-              title="Tổng sức chứa"
-              value={statistics.totalCapacity}
-              suffix="m³"
-              prefix={<EnvironmentOutlined />}
+              title="Tổng số lượng"
+              value={totalSoLuong}
+              prefix={<DatabaseOutlined />}
               valueStyle={{ color: '#faad14' }}
             />
           </Card>
         </Col>
       </Row>
 
-      <Card>
+      <Card
+        title="Danh sách tồn kho"
+        extra={
+          <Button
+            icon={<ReloadOutlined />}
+            onClick={loadData}
+            loading={loading}
+          >
+            Làm mới
+          </Button>
+        }
+      >
         <Table
-          columns={columns}
-          dataSource={khos}
-          rowKey="maKho"
+          columns={tonKhoColumns}
+          dataSource={tonKhos}
+          rowKey={(record) => `${record.maKho}-${record.maLo}`}
           loading={loading}
-          scroll={{ x: 1000 }}
           pagination={{
             pageSize: 10,
             showSizeChanger: true,
-            showTotal: (total) => `Tổng ${total} kho`,
+            showTotal: (total) => `Tổng ${total} mặt hàng`,
           }}
         />
       </Card>
