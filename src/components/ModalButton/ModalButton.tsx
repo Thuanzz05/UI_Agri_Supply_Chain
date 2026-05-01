@@ -4,7 +4,7 @@ import './ModalButton.css';
 interface ModalButtonProps {
   children: React.ReactNode;
   onClick?: () => void;
-  type?: 'default' | 'primary' | 'danger';
+  type?: 'default' | 'primary' | 'danger' | 'success';
   htmlType?: 'button' | 'submit' | 'reset';
   loading?: boolean;
   disabled?: boolean;
@@ -20,7 +20,7 @@ const ModalButton: React.FC<ModalButtonProps> = ({
   disabled = false,
   icon,
 }) => {
-  const className = `modal-btn ${type === 'primary' ? 'modal-btn-primary' : ''} ${type === 'danger' ? 'modal-btn-danger' : ''}`;
+  const className = `modal-btn modal-btn-${type}`;
 
   return (
     <button

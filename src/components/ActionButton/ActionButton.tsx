@@ -4,7 +4,7 @@ import './ActionButton.css';
 interface ActionButtonProps {
   children: React.ReactNode;
   onClick?: () => void;
-  type?: 'default' | 'primary' | 'danger';
+  type?: 'default' | 'primary' | 'danger' | 'success';
   loading?: boolean;
   disabled?: boolean;
   icon?: React.ReactNode;

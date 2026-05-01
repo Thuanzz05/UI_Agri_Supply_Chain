@@ -1,7 +1,7 @@
 .action-btn {
-  height: 32px;
-  padding: 0 15px;
-  font-size: 14px;
+  height: 28px;
+  padding: 0 12px;
+  font-size: 13px;
   border-radius: 6px;
   border: 1px solid #d9d9d9;
   background: white;
@@ -12,8 +12,11 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 5px;
   white-space: nowrap;
+  line-height: 1;
+  box-sizing: border-box;
+  vertical-align: middle;
 }
 
 .action-btn:hover {
@@ -35,6 +38,17 @@
 .action-btn-primary:hover:not(:disabled) {
   background: #4096ff;
   border-color: #4096ff;
+}
+
+.action-btn-success {
+  background: #52c41a;
+  border-color: #52c41a;
+  color: white;
+}
+
+.action-btn-success:hover:not(:disabled) {
+  background: #73d13d;
+  border-color: #73d13d;
 }
 
 .action-btn-danger {
