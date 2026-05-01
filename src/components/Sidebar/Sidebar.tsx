@@ -182,6 +182,11 @@ const Sidebar: React.FC = () => {
       label: 'Kho hàng' 
     },
     { 
+      key: '/supermarket/traceability', 
+      icon: <SafetyOutlined />, 
+      label: 'Truy xuất nguồn gốc' 
+    },
+    { 
       key: '/supermarket/profile', 
       icon: <UserOutlined />, 
       label: 'Thông tin cá nhân' 

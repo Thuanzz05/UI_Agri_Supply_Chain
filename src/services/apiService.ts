@@ -412,11 +412,80 @@ export const apiService = {
     throw lastError;
   },
 
+  // Lấy chi tiết đơn hàng siêu thị theo ID
+  async getSupermarketOrderById(id: number) {
+    const routes = [
+      `/api-daily/don-hang-sieu-thi/get-by-id/${id}`,
+      `/api/don-hang-sieu-thi/get-by-id/${id}`
+    ];
+    
+    let lastError: any = null;
+    for (const route of routes) {
+      try {
+        const response = await apiClient.get(route);
+        return response.data;
+      } catch (error: any) {
+        lastError = error;
+        const status = error?.response?.status;
+        if (status !== 404) {
+          throw error;
+        }
+      }
+    }
+    throw lastError;
+  },
+
+  // Cập nhật trạng thái đơn hàng siêu thị (xác nhận/hủy)
+  async updateSupermarketOrderStatus(id: number, trangThai: string) {
+    const routes = [
+      `/api-daily/don-hang-sieu-thi/update-trang-thai/${id}`,
+      `/api/don-hang-sieu-thi/update-trang-thai/${id}`
+    ];
+    
+    let lastError: any = null;
+    for (const route of routes) {
+      try {
+        const response = await apiClient.put(route, { trangThai });
+        return response.data;
+      } catch (error: any) {
+        lastError = error;
+        const status = error?.response?.status;
+        if (status !== 404) {
+          throw error;
+        }
+      }
+    }
+    throw lastError;
+  },
+
   // Lấy kho hàng của siêu thị
   async getSupermarketWarehouses(maSieuThi: number) {
     const routes = [
       `/api-sieuthi/kho/get-by-sieu-thi/${maSieuThi}`,
       `/api/kho/get-by-sieu-thi/${maSieuThi}`
+    ];
+    
+    let lastError: any = null;
+    for (const route of routes) {
+      try {
+        const response = await apiClient.get(route);
+        return response.data;
+      } catch (error: any) {
+        lastError = error;
+        const status = error?.response?.status;
+        if (status !== 404) {
+          throw error;
+        }
+      }
+    }
+    throw lastError;
+  },
+
+  // Lấy tồn kho của siêu thị
+  async getSupermarketInventory(maSieuThi: number) {
+    const routes = [
+      `/api-sieuthi/ton-kho/get-by-sieu-thi/${maSieuThi}`,
+      `/api/ton-kho/get-by-sieu-thi/${maSieuThi}`
     ];
     
     let lastError: any = null;
@@ -845,6 +914,57 @@ export const apiService = {
     for (const route of routes) {
       try {
         const response = await apiClient.put(route);
+        return response.data;
+      } catch (error: any) {
+        lastError = error;
+        const status = error?.response?.status;
+        if (status !== 404) {
+          throw error;
+        }
+      }
+    }
+    throw lastError;
+  },
+
+  // ==================== API Siêu thị ====================
+
+  // Lấy tất cả siêu thị
+  async getAllSupermarkets() {
+    const routes = [
+      `/api-sieuthi/sieu-thi/get-all`,
+      `/api/sieu-thi/get-all`
+    ];
+    
+    let lastError: any = null;
+    for (const route of routes) {
+      try {
+        const response = await apiClient.get(route);
+        return response.data;
+      } catch (error: any) {
+        lastError = error;
+        const status = error?.response?.status;
+        if (status !== 404) {
+          throw error;
+        }
+      }
+    }
+    throw lastError;
+  },
+
+  // ==================== API Truy xuất nguồn gốc ====================
+
+  // Truy xuất nguồn gốc sản phẩm (theo mã QR hoặc mã lô)
+  async traceProduct(keyword: string) {
+    const routes = [
+      `/api-sieuthi/truy-xuat/trace/${keyword}`,
+      `/api-daily/truy-xuat/trace/${keyword}`,
+      `/api/truy-xuat/trace/${keyword}`
+    ];
+    
+    let lastError: any = null;
+    for (const route of routes) {
+      try {
+        const response = await apiClient.get(route);
         return response.data;
       } catch (error: any) {
         lastError = error;
