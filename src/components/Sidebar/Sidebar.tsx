@@ -51,9 +51,9 @@ const Sidebar: React.FC = () => {
       label: 'Dashboard' 
     },
     { 
-      key: '/admin/users', 
+      key: '/admin/quan-ly-nguoi-dung', 
       icon: <UserOutlined />, 
-      label: 'Người dùng' 
+      label: 'Quản lý người dùng' 
     },
     { 
       key: '/admin/reports', 

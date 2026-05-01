@@ -29,6 +29,7 @@ import QuanLyDonHangSieuThi from './pages/SieuThi/QuanLyDonHang';
 import QuanLyKhoSieuThi from './pages/SieuThi/QuanLyKho';
 import ThongTinCaNhanSieuThi from './pages/SieuThi/ThongTinCaNhan';
 import TruyXuatNguonGoc from './pages/SieuThi/TruyXuatNguonGoc';
+import QuanLyNguoiDung from './pages/Admin/QuanLyNguoiDung';
 import ProtectedRoute from './components/ProtectedRoute';
 import 'antd/dist/reset.css';
 
@@ -56,6 +57,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Users />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/quan-ly-nguoi-dung" 
+            element={
+              <ProtectedRoute>
+                <QuanLyNguoiDung />
               </ProtectedRoute>
             } 
           />

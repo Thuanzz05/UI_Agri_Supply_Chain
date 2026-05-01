@@ -995,4 +995,61 @@ export const apiService = {
     }
     throw lastError;
   },
+
+  // ==================== API Admin - Quản lý người dùng ====================
+
+  // Lấy tất cả người dùng
+  async getAllUsers(params?: { page?: number; limit?: number; loaiNguoiDung?: string }) {
+    try {
+      const response = await apiClient.get('/api-admin/user', { params });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Lấy chi tiết nông dân
+  async getNongDanDetail(id: number) {
+    try {
+      const response = await apiClient.get(`/api-admin/user/nongdan/${id}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Lấy chi tiết đại lý
+  async getDaiLyDetail(id: number) {
+    try {
+      const response = await apiClient.get(`/api-admin/user/daily/${id}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Lấy chi tiết siêu thị
+  async getSieuThiDetail(id: number) {
+    try {
+      const response = await apiClient.get(`/api-admin/user/sieuthi/${id}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Tìm kiếm người dùng
+  async searchUsers(keyword: string, loaiNguoiDung?: string) {
+    try {
+      const params: any = { keyword };
+      if (loaiNguoiDung) {
+        params.loaiNguoiDung = loaiNguoiDung;
+      }
+      const response = await apiClient.get('/api-admin/user/search', { params });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
 };
+
