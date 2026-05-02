@@ -47,6 +47,11 @@ const KiemDinhChatLuong: React.FC = () => {
   const [searchText, setSearchText] = React.useState('');
   const [filterStatus, setFilterStatus] = React.useState<string>('all');
   const [data, setData] = React.useState<DataType[]>([]);
+  const [stats, setStats] = React.useState({
+    choKiemDinh: 0,
+    datChuanCount: 0,
+    khongDatCount: 0
+  });
   
   // Modal kiểm định
   const [isModalOpen, setIsModalOpen] = React.useState(false);
@@ -69,9 +74,8 @@ const KiemDinhChatLuong: React.FC = () => {
         return;
       }
       
+      // Fetch lots data
       const response = await apiService.getLoHangKiemDinhByDaiLy(maDaiLy);
-      
-      // API trả về { success, message, data, count }
       const apiData = response.data || response;
       const formattedData = apiData.map((item: LoHangKiemDinh) => ({
         ...item,
@@ -81,6 +85,12 @@ const KiemDinhChatLuong: React.FC = () => {
       }));
       
       setData(formattedData);
+
+      // Fetch stats
+      const statsResponse = await apiService.getKiemDinhStats(maDaiLy);
+      if (statsResponse.success) {
+        setStats(statsResponse.data);
+      }
     } catch (error: any) {
       console.error('Lỗi khi tải dữ liệu:', error);
       message.error('Không thể tải dữ liệu kiểm định: ' + (error.response?.data?.message || error.message));
@@ -205,10 +215,6 @@ const KiemDinhChatLuong: React.FC = () => {
     },
   ];
 
-  const choKiemDinhCount = data.filter(item => item.trangThaiKiemDinh === 'cho_kiem_dinh').length;
-  const datCount = data.filter(item => item.trangThaiKiemDinh === 'dat').length;
-  const khongDatCount = data.filter(item => item.trangThaiKiemDinh === 'khong_dat').length;
-
   return (
     <AdminLayout>
       <div className="page-header">
@@ -221,7 +227,7 @@ const KiemDinhChatLuong: React.FC = () => {
           <Card>
             <Statistic
               title="Chờ kiểm định"
-              value={choKiemDinhCount}
+              value={stats.choKiemDinh}
               prefix={<SafetyOutlined style={{ color: '#fa8c16' }} />}
             />
           </Card>
@@ -230,7 +236,7 @@ const KiemDinhChatLuong: React.FC = () => {
           <Card>
             <Statistic
               title="Đạt chuẩn"
-              value={datCount}
+              value={stats.datChuanCount}
               prefix={<CheckCircleOutlined style={{ color: '#52c41a' }} />}
             />
           </Card>
@@ -239,7 +245,7 @@ const KiemDinhChatLuong: React.FC = () => {
           <Card>
             <Statistic
               title="Không đạt"
-              value={khongDatCount}
+              value={stats.khongDatCount}
               prefix={<CloseCircleOutlined style={{ color: '#f5222d' }} />}
             />
           </Card>

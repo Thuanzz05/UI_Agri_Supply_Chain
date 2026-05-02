@@ -42,7 +42,23 @@ const QuanLyKho: React.FC = () => {
   const fetchWarehouses = async () => {
     setLoading(true);
     try {
-      const response = await apiService.getAllWarehouses();
+      const userStr = localStorage.getItem('user');
+      if (!userStr) {
+        message.error('Vui lòng đăng nhập lại');
+        setData([]);
+        return;
+      }
+
+      const user = JSON.parse(userStr);
+      const maDaiLy = user.MaDaiLy || user.maDaiLy;
+      
+      if (!maDaiLy) {
+        message.warning('Phiên đăng nhập cũ. Vui lòng đăng xuất và đăng nhập lại để cập nhật thông tin');
+        setData([]);
+        return;
+      }
+
+      const response = await apiService.getWarehousesByAgent(maDaiLy);
       
       if (response && response.data) {
         const warehouses = Array.isArray(response.data) ? response.data : [];

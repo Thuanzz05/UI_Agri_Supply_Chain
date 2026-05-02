@@ -281,6 +281,16 @@ export const apiService = {
     }
   },
 
+  // Lấy tồn kho theo đại lý
+  async getInventoryByDaiLy(maDaiLy: number) {
+    try {
+      const response = await apiClient.get(`/api-daily/ton-kho/get-by-dai-ly/${maDaiLy}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
   // Điều chỉnh số lượng tồn kho
   async adjustInventory(maKho: number, maLo: number, soLuongMoi: number) {
     const routes = Array.from(new Set([
@@ -1136,6 +1146,70 @@ export const apiService = {
   async getFarmerOrderStats(maNongDan: number) {
     try {
       const response = await apiClient.get(`/api-nongdan/Dashboard/order-stats/${maNongDan}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Lấy tồn kho theo kho
+  async getTonKhoByKho(maKho: number) {
+    try {
+      const response = await apiClient.get(`/api-daily/ton-kho/get-by-kho/${maKho}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Lấy thống kê kiểm định theo đại lý
+  async getKiemDinhStats(maDaiLy: number) {
+    try {
+      const response = await apiClient.get(`/api-daily/kiem-dinh/stats/${maDaiLy}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Lấy thống kê vận chuyển theo đại lý
+  async getTransportStats(maDaiLy: number) {
+    try {
+      const response = await apiClient.get(`/api-daily/van-chuyen/stats/${maDaiLy}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // ==================== API Dashboard Đại Lý ====================
+  
+  // Lấy thống kê dashboard đại lý
+  async getAgentDashboardStats(maDaiLy: number) {
+    try {
+      const response = await apiClient.get(`/api-daily/Dashboard/stats/${maDaiLy}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Lấy đơn hàng gần đây của đại lý
+  async getAgentRecentOrders(maDaiLy: number, limit: number = 5) {
+    try {
+      const response = await apiClient.get(`/api-daily/Dashboard/recent-orders/${maDaiLy}`, {
+        params: { limit }
+      });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Lấy thống kê đơn hàng của đại lý
+  async getAgentOrderStats(maDaiLy: number) {
+    try {
+      const response = await apiClient.get(`/api-daily/Dashboard/order-stats/${maDaiLy}`);
       return response.data;
     } catch (error) {
       throw error;

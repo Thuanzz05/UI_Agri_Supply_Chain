@@ -3,19 +3,16 @@ import {
   Alert,
   Button,
   Card,
-  Col,
   Form,
   Input,
   InputNumber,
   Modal,
-  Row,
-  Statistic,
   Table,
   Tag,
   message,
 } from 'antd';
 import type { TableProps } from 'antd';
-import { DatabaseOutlined, EditOutlined, QrcodeOutlined, SearchOutlined, ShopOutlined, WarningOutlined } from '@ant-design/icons';
+import { EditOutlined, SearchOutlined, WarningOutlined } from '@ant-design/icons';
 import { AdminLayout } from '../../components/Layout';
 import { CustomPagination } from '../../components/CustomPagination';
 import { apiService } from '../../services/apiService';
@@ -86,11 +83,46 @@ const TonKhoDaiLyPage: React.FC = () => {
   const fetchInventory = async () => {
     setLoading(true);
     try {
-      const response = await apiService.getAllInventory();
-      const items = Array.isArray(response?.data) ? response.data : [];
+      const userStr = localStorage.getItem('user');
+      if (!userStr) {
+        message.error('Vui lòng đăng nhập lại');
+        setInventory([]);
+        return;
+      }
+
+      const user = JSON.parse(userStr);
+      const maDaiLy = user.MaDaiLy || user.maDaiLy;
+      
+      if (!maDaiLy) {
+        message.warning('Phiên đăng nhập cũ. Vui lòng đăng xuất và đăng nhập lại để cập nhật thông tin');
+        setInventory([]);
+        return;
+      }
+
+      // Lấy danh sách kho của đại lý
+      const warehousesResponse = await apiService.getWarehousesByAgent(maDaiLy);
+      const warehouses = Array.isArray(warehousesResponse?.data) ? warehousesResponse.data : [];
+      
+      if (warehouses.length === 0) {
+        setInventory([]);
+        return;
+      }
+
+      // Lấy tồn kho từ tất cả kho của đại lý
+      let allItems: TonKhoDaiLy[] = [];
+      for (const warehouse of warehouses) {
+        try {
+          const response = await apiService.getTonKhoByKho(warehouse.maKho);
+          const items = Array.isArray(response?.data) ? response.data : [];
+          allItems = allItems.concat(items);
+        } catch (error) {
+          // Bỏ qua lỗi từ kho riêng lẻ
+          continue;
+        }
+      }
 
       // Chỉ hiển thị tồn kho có số lượng > 0
-      const filteredItems = items.filter((item: TonKhoDaiLy) => item.soLuong > 0);
+      const filteredItems = allItems.filter((item: TonKhoDaiLy) => item.soLuong > 0);
 
       setInventory(
         filteredItems.map((item: TonKhoDaiLy) => ({
@@ -170,21 +202,6 @@ const TonKhoDaiLyPage: React.FC = () => {
     return filteredInventory.slice(startIndex, startIndex + pageSize);
   }, [currentPage, filteredInventory, pageSize]);
 
-  const totalQuantity = React.useMemo(
-    () => filteredInventory.reduce((sum, item) => sum + item.soLuong, 0),
-    [filteredInventory],
-  );
-
-  const totalWarehouses = React.useMemo(
-    () => new Set(filteredInventory.map((item) => item.maKho)).size,
-    [filteredInventory],
-  );
-
-  const totalProducts = React.useMemo(
-    () => new Set(filteredInventory.map((item) => item.tenSanPham)).size,
-    [filteredInventory],
-  );
-
   const columns: TableProps<TonKhoTableItem>['columns'] = [
     {
       title: 'Mã kho',
@@ -263,24 +280,6 @@ const TonKhoDaiLyPage: React.FC = () => {
         showIcon
         style={{ marginBottom: 24 }}
       />
-
-      <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-        <Col xs={24} sm={12} lg={8}>
-          <Card>
-            <Statistic title="Tổng số lượng tồn" value={totalQuantity} suffix="đơn vị" prefix={<DatabaseOutlined />} />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} lg={8}>
-          <Card>
-            <Statistic title="Số kho có hàng" value={totalWarehouses} prefix={<ShopOutlined />} />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} lg={8}>
-          <Card>
-            <Statistic title="Số sản phẩm" value={totalProducts} prefix={<QrcodeOutlined />} />
-          </Card>
-        </Col>
-      </Row>
 
       <Card>
         <div

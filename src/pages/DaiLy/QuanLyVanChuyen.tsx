@@ -31,6 +31,11 @@ const QuanLyVanChuyen: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [editingVanChuyen, setEditingVanChuyen] = useState<VanChuyen | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [stats, setStats] = useState({
+    tongVanChuyen: 0,
+    dangVanChuyen: 0,
+    hoanThanh: 0
+  });
   const [form] = Form.useForm();
 
   useEffect(() => {
@@ -68,6 +73,12 @@ const QuanLyVanChuyen: React.FC = () => {
         list = response;
       }
       setVanChuyens(list);
+
+      // Fetch stats
+      const statsResponse = await apiService.getTransportStats(maDaiLy);
+      if (statsResponse.success) {
+        setStats(statsResponse.data);
+      }
     } catch (error: any) {
       console.error('Error loading transports:', error);
       message.error('Không thể tải danh sách vận chuyển');
@@ -149,12 +160,6 @@ const QuanLyVanChuyen: React.FC = () => {
   const filteredVanChuyens = filterStatus === 'all' 
     ? vanChuyens 
     : vanChuyens.filter(vc => vc.trangThai === filterStatus);
-
-  const statistics = {
-    total: vanChuyens.length,
-    inProgress: vanChuyens.filter(vc => vc.trangThai === 'dang_van_chuyen').length,
-    completed: vanChuyens.filter(vc => vc.trangThai === 'hoan_thanh').length,
-  };
 
   const columns: ColumnsType<VanChuyen> = [
     {
@@ -245,7 +250,7 @@ const QuanLyVanChuyen: React.FC = () => {
           <Card>
             <Statistic
               title="Tổng vận chuyển"
-              value={statistics.total}
+              value={stats.tongVanChuyen}
               prefix={<TruckOutlined />}
               valueStyle={{ color: '#1890ff' }}
             />
@@ -255,7 +260,7 @@ const QuanLyVanChuyen: React.FC = () => {
           <Card>
             <Statistic
               title="Đang vận chuyển"
-              value={statistics.inProgress}
+              value={stats.dangVanChuyen}
               prefix={<ClockCircleOutlined />}
               valueStyle={{ color: '#faad14' }}
             />
@@ -265,7 +270,7 @@ const QuanLyVanChuyen: React.FC = () => {
           <Card>
             <Statistic
               title="Hoàn thành"
-              value={statistics.completed}
+              value={stats.hoanThanh}
               prefix={<CheckCircleOutlined />}
               valueStyle={{ color: '#52c41a' }}
             />
