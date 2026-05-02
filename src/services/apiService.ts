@@ -1107,5 +1107,39 @@ export const apiService = {
       throw error;
     }
   },
+
+  // ==================== API Dashboard Nông Dân ====================
+  
+  // Lấy thống kê dashboard nông dân
+  async getFarmerDashboardStats(maNongDan: number) {
+    try {
+      const response = await apiClient.get(`/api-nongdan/Dashboard/stats/${maNongDan}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Lấy đơn hàng gần đây của nông dân
+  async getFarmerRecentOrders(maNongDan: number, limit: number = 5) {
+    try {
+      const response = await apiClient.get(`/api-nongdan/Dashboard/recent-orders/${maNongDan}`, {
+        params: { limit }
+      });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Lấy thống kê đơn hàng của nông dân
+  async getFarmerOrderStats(maNongDan: number) {
+    try {
+      const response = await apiClient.get(`/api-nongdan/Dashboard/order-stats/${maNongDan}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
 };
 

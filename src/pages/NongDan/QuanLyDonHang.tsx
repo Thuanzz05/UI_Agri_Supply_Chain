@@ -86,6 +86,12 @@ const QuanLyDonHangNongDan: React.FC = () => {
   const [loading, setLoading] = React.useState(false);
   const [orders, setOrders] = React.useState<DonHangTableItem[]>([]);
   const [filterStatus, setFilterStatus] = React.useState<string>('all');
+  const [stats, setStats] = React.useState({
+    tongDonHang: 0,
+    choXacNhan: 0,
+    hoanThanh: 0,
+    tongGiaTri: 0
+  });
   
   // Modal chi tiết
   const [isDetailModalOpen, setIsDetailModalOpen] = React.useState(false);
@@ -131,8 +137,28 @@ const QuanLyDonHangNongDan: React.FC = () => {
     }
   };
 
+  const fetchOrderStats = async () => {
+    try {
+      const userStr = localStorage.getItem('user');
+      if (!userStr) return;
+
+      const user = JSON.parse(userStr);
+      const maNongDan = user.maNongDan || user.MaNongDan;
+      
+      if (!maNongDan) return;
+
+      const response = await apiService.getFarmerOrderStats(maNongDan);
+      if (response.success) {
+        setStats(response.data);
+      }
+    } catch (error: any) {
+      console.error('Error fetching order stats:', error);
+    }
+  };
+
   React.useEffect(() => {
     fetchOrders();
+    fetchOrderStats();
   }, []);
 
   const showDetailModal = async (order: DonHangTableItem) => {
@@ -186,6 +212,7 @@ const QuanLyDonHangNongDan: React.FC = () => {
           );
           handleCloseDetailModal();
           await fetchOrders();
+          await fetchOrderStats();
         } catch (error: any) {
           message.error(getApiErrorMessage(error, 'Không thể cập nhật trạng thái đơn hàng'));
         }
@@ -215,21 +242,6 @@ const QuanLyDonHangNongDan: React.FC = () => {
     const startIndex = (currentPage - 1) * pageSize;
     return filteredOrders.slice(startIndex, startIndex + pageSize);
   }, [currentPage, filteredOrders, pageSize]);
-
-  const totalValue = React.useMemo(
-    () => filteredOrders.reduce((sum, order) => sum + order.tongGiaTri, 0),
-    [filteredOrders],
-  );
-
-  const pendingCount = React.useMemo(
-    () => orders.filter((order) => order.trangThai === 'cho_xac_nhan').length,
-    [orders],
-  );
-
-  const completedCount = React.useMemo(
-    () => orders.filter((order) => order.trangThai === 'hoan_thanh').length,
-    [orders],
-  );
 
   const columns: TableProps<DonHangTableItem>['columns'] = [
     {
@@ -331,7 +343,7 @@ const QuanLyDonHangNongDan: React.FC = () => {
           <Card>
             <Statistic
               title="Tổng đơn hàng"
-              value={filteredOrders.length}
+              value={stats.tongDonHang}
               prefix={<FileTextOutlined />}
             />
           </Card>
@@ -340,7 +352,7 @@ const QuanLyDonHangNongDan: React.FC = () => {
           <Card>
             <Statistic
               title="Chờ xác nhận"
-              value={pendingCount}
+              value={stats.choXacNhan}
               prefix={<ShoppingCartOutlined />}
               valueStyle={{ color: '#faad14' }}
             />
@@ -350,7 +362,7 @@ const QuanLyDonHangNongDan: React.FC = () => {
           <Card>
             <Statistic
               title="Hoàn thành"
-              value={completedCount}
+              value={stats.hoanThanh}
               prefix={<CheckCircleOutlined />}
               valueStyle={{ color: '#52c41a' }}
             />
@@ -360,7 +372,7 @@ const QuanLyDonHangNongDan: React.FC = () => {
           <Card>
             <Statistic
               title="Tổng giá trị"
-              value={totalValue}
+              value={stats.tongGiaTri}
               prefix={<DollarOutlined />}
               suffix="đ"
             />
