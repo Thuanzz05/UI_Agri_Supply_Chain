@@ -9,7 +9,6 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/admin/Dashboard';
 import Users from './pages/admin/Users';
-import Reports from './pages/admin/Reports';
 import QuanLyKho from './pages/DaiLy/QuanLyKho';
 import DonHangMuaVao from './pages/DaiLy/DonHangMuaVao';
 import DonHangBanRa from './pages/DaiLy/DonHangBanRa';
@@ -74,14 +73,6 @@ function App() {
             element={
               <ProtectedRoute>
                 <QuanLyTaiKhoan />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/admin/reports" 
-            element={
-              <ProtectedRoute>
-                <Reports />
               </ProtectedRoute>
             } 
           />

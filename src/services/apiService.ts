@@ -1095,5 +1095,17 @@ export const apiService = {
       throw error;
     }
   },
+
+  // ==================== API Dashboard Admin ====================
+  
+  // Lấy thống kê tổng quan
+  async getDashboardStats() {
+    try {
+      const response = await apiClient.get('/api-admin/Dashboard/stats');
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
 };
 

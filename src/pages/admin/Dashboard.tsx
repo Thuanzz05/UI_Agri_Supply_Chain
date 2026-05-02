@@ -1,101 +1,55 @@
-import React from 'react';
-import { Card, Row, Col, Table } from 'antd';
-import type { TableProps } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Card, Row, Col, Spin, message } from 'antd';
 import { 
   TrophyOutlined, 
   TeamOutlined, 
   ShopOutlined, 
-  DollarOutlined 
+  UserOutlined 
 } from '@ant-design/icons';
 import { AdminLayout } from '../../components/Layout';
+import { apiService } from '../../services/apiService';
 import './Dashboard.css';
 
-interface DataType {
-  key: string;
-  id: string;
-  farm: string;
-  product: string;
-  quantity: string;
-  status: string;
-  date: string;
+interface DashboardStats {
+  tongNongDan: number;
+  tongDaiLy: number;
+  tongSieuThi: number;
+  tongTaiKhoan: number;
+  tongLoNongSan: number;
+  tongDonHang: number;
+  tongKiemDinh: number;
 }
 
 const Dashboard: React.FC = () => {
-  // Dữ liệu mẫu cho bảng
-  const data: DataType[] = [
-    {
-      key: '1',
-      id: 'ORD001',
-      farm: 'Trang trại Xanh',
-      product: 'Rau cải xanh',
-      quantity: '100kg',
-      status: 'Đang vận chuyển',
-      date: '2024-01-15'
-    },
-    {
-      key: '2',
-      id: 'ORD002',
-      farm: 'Trang trại Organic',
-      product: 'Cà chua cherry',
-      quantity: '50kg',
-      status: 'Hoàn thành',
-      date: '2024-01-14'
-    },
-    {
-      key: '3',
-      id: 'ORD003',
-      farm: 'Trang trại Sạch',
-      product: 'Xà lách',
-      quantity: '75kg',
-      status: 'Đang xử lý',
-      date: '2024-01-13'
-    }
-  ];
+  const [loading, setLoading] = useState(false);
+  const [stats, setStats] = useState<DashboardStats>({
+    tongNongDan: 0,
+    tongDaiLy: 0,
+    tongSieuThi: 0,
+    tongTaiKhoan: 0,
+    tongLoNongSan: 0,
+    tongDonHang: 0,
+    tongKiemDinh: 0,
+  });
 
-  const columns: TableProps<DataType>['columns'] = [
-    {
-      title: 'Mã đơn',
-      dataIndex: 'id',
-      key: 'id',
-      width: 80,
-    },
-    {
-      title: 'Trang trại',
-      dataIndex: 'farm',
-      key: 'farm',
-      width: 120,
-      ellipsis: true,
-    },
-    {
-      title: 'Sản phẩm',
-      dataIndex: 'product',
-      key: 'product',
-      width: 120,
-    },
-    {
-      title: 'Số lượng',
-      dataIndex: 'quantity',
-      key: 'quantity',
-      width: 80,
-    },
-    {
-      title: 'Trạng thái',
-      dataIndex: 'status',
-      key: 'status',
-      width: 120,
-      render: (_, { status }) => (
-        <span className={`status ${status === 'Hoàn thành' ? 'completed' : status === 'Đang vận chuyển' ? 'shipping' : 'processing'}`}>
-          {status}
-        </span>
-      ),
-    },
-    {
-      title: 'Ngày tạo',
-      dataIndex: 'date',
-      key: 'date',
-      width: 100,
-    },
-  ];
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    setLoading(true);
+    try {
+      const statsResponse = await apiService.getDashboardStats();
+
+      if (statsResponse?.data) {
+        setStats(statsResponse.data);
+      }
+    } catch (error: any) {
+      message.error('Không thể tải dữ liệu dashboard');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <AdminLayout>
@@ -104,75 +58,113 @@ const Dashboard: React.FC = () => {
         <p>Tổng quan hệ thống quản lý chuỗi cung ứng nông sản</p>
       </div>
       
-      {/* Stats Cards */}
-      <Row gutter={[24, 24]} style={{ marginBottom: '32px' }}>
-        <Col xs={24} sm={12} lg={6}>
-          <Card className="stat-card">
-            <div className="stat-content">
-              <div className="stat-icon">
-                <ShopOutlined style={{ fontSize: '24px', color: '#52c41a' }} />
+      <Spin spinning={loading}>
+        {/* Stats Cards */}
+        <Row gutter={[24, 24]} style={{ marginBottom: '32px' }}>
+          <Col xs={24} sm={12} lg={6}>
+            <Card className="stat-card">
+              <div className="stat-content">
+                <div className="stat-icon">
+                  <UserOutlined style={{ fontSize: '24px', color: '#52c41a' }} />
+                </div>
+                <div>
+                  <div className="stat-number">{stats.tongNongDan}</div>
+                  <div className="stat-label">Nông dân</div>
+                </div>
               </div>
-              <div>
-                <div className="stat-number">1,234</div>
-                <div className="stat-label">Trang trại</div>
+            </Card>
+          </Col>
+          <Col xs={24} sm={12} lg={6}>
+            <Card className="stat-card">
+              <div className="stat-content">
+                <div className="stat-icon">
+                  <ShopOutlined style={{ fontSize: '24px', color: '#1890ff' }} />
+                </div>
+                <div>
+                  <div className="stat-number">{stats.tongDaiLy}</div>
+                  <div className="stat-label">Đại lý</div>
+                </div>
               </div>
-            </div>
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <Card className="stat-card">
-            <div className="stat-content">
-              <div className="stat-icon">
-                <TrophyOutlined style={{ fontSize: '24px', color: '#1890ff' }} />
+            </Card>
+          </Col>
+          <Col xs={24} sm={12} lg={6}>
+            <Card className="stat-card">
+              <div className="stat-content">
+                <div className="stat-icon">
+                  <ShopOutlined style={{ fontSize: '24px', color: '#fa8c16' }} />
+                </div>
+                <div>
+                  <div className="stat-number">{stats.tongSieuThi}</div>
+                  <div className="stat-label">Siêu thị</div>
+                </div>
               </div>
-              <div>
-                <div className="stat-number">5,678</div>
-                <div className="stat-label">Sản phẩm</div>
+            </Card>
+          </Col>
+          <Col xs={24} sm={12} lg={6}>
+            <Card className="stat-card">
+              <div className="stat-content">
+                <div className="stat-icon">
+                  <TeamOutlined style={{ fontSize: '24px', color: '#722ed1' }} />
+                </div>
+                <div>
+                  <div className="stat-number">{stats.tongTaiKhoan}</div>
+                  <div className="stat-label">Tổng tài khoản</div>
+                </div>
               </div>
-            </div>
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <Card className="stat-card">
-            <div className="stat-content">
-              <div className="stat-icon">
-                <TeamOutlined style={{ fontSize: '24px', color: '#fa8c16' }} />
-              </div>
-              <div>
-                <div className="stat-number">890</div>
-                <div className="stat-label">Đơn hàng</div>
-              </div>
-            </div>
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <Card className="stat-card">
-            <div className="stat-content">
-              <div className="stat-icon">
-                <DollarOutlined style={{ fontSize: '24px', color: '#f5222d' }} />
-              </div>
-              <div>
-                <div className="stat-number">99.5%</div>
-                <div className="stat-label">Độ tin cậy</div>
-              </div>
-            </div>
-          </Card>
-        </Col>
-      </Row>
+            </Card>
+          </Col>
+        </Row>
 
-      {/* Charts and Tables */}
-      <Row gutter={[24, 24]}>
-        <Col xs={24}>
-          <Card title="Đơn hàng gần đây" className="table-card">
-            <Table<DataType>
-              columns={columns} 
-              dataSource={data} 
-              pagination={false}
-              size="small"
-            />
-          </Card>
-        </Col>
-      </Row>
+        {/* Welcome Card with Illustration */}
+        <Row gutter={[24, 24]}>
+          <Col xs={24}>
+            <Card 
+              style={{ 
+                background: '#ffffff',
+                border: '1px solid #f0f0f0',
+                borderRadius: '12px',
+                minHeight: '300px'
+              }}
+            >
+              <Row align="middle" style={{ minHeight: '250px' }}>
+                <Col xs={24} md={12}>
+                  <div style={{ padding: '40px' }}>
+                    <h2 style={{ color: '#2E7D32', fontSize: '32px', marginBottom: '16px', fontWeight: 600 }}>
+                      Chào mừng đến với AgriChain Admin
+                    </h2>
+                    <p style={{ fontSize: '16px', color: '#666', lineHeight: '1.6' }}>
+                      Quản lý toàn bộ hệ thống chuỗi cung ứng nông sản một cách hiệu quả và minh bạch. 
+                      Theo dõi hoạt động của nông dân, đại lý và siêu thị trong hệ thống.
+                    </p>
+                  </div>
+                </Col>
+                <Col xs={24} md={12}>
+                  <div style={{ 
+                    display: 'flex', 
+                    justifyContent: 'center', 
+                    alignItems: 'center',
+                    padding: '40px'
+                  }}>
+                    <img 
+                      src="https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=500&h=400&fit=crop" 
+                      alt="Agriculture Dashboard"
+                      style={{
+                        width: '100%',
+                        maxWidth: '400px',
+                        height: 'auto',
+                        borderRadius: '8px',
+                        objectFit: 'cover'
+                      }}
+                    />
+                  </div>
+                </Col>
+              </Row>
+            </Card>
+          </Col>
+        </Row>
+
+        {/* Charts and Tables */}
+      </Spin>
     </AdminLayout>
   );
 };

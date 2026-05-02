@@ -62,11 +62,6 @@ const Sidebar: React.FC = () => {
       label: 'Quản lý tài khoản' 
     },
     { 
-      key: '/admin/reports', 
-      icon: <FileTextOutlined />, 
-      label: 'Báo cáo' 
-    },
-    { 
       type: 'divider'
     },
     { 
