@@ -1,6 +1,7 @@
 import React from 'react';
-import { Card, Form, Input, message, Avatar, Row, Col, Divider } from 'antd';
-import { UserOutlined, PhoneOutlined, MailOutlined, HomeOutlined, SaveOutlined, FacebookOutlined } from '@ant-design/icons';
+import { Card, Form, Input, message, Avatar, Row, Col, Divider, Upload } from 'antd';
+import type { UploadFile, UploadProps } from 'antd';
+import { UserOutlined, PhoneOutlined, MailOutlined, HomeOutlined, SaveOutlined, FacebookOutlined, CameraOutlined } from '@ant-design/icons';
 import { TikTokIcon } from '../../components/TikTokIcon';
 import { AdminLayout } from '../../components/Layout';
 import { authService } from '../../services/authService';
@@ -12,6 +13,8 @@ const ThongTinCaNhan: React.FC = () => {
   const [form] = Form.useForm();
   const [loading, setLoading] = React.useState(false);
   const [userInfo, setUserInfo] = React.useState<any>(null);
+  const [fileList, setFileList] = React.useState<UploadFile[]>([]);
+  const [imageBase64, setImageBase64] = React.useState<string>('');
 
   React.useEffect(() => {
     loadUserInfo();
@@ -27,12 +30,22 @@ const ThongTinCaNhan: React.FC = () => {
         return;
       }
 
-      // Gọi API lấy thông tin nông dân
       const response = await apiService.getFarmerById(user.maNongDan);
       const data = response.data || response;
       const socialLinks = getSocialLinks(data);
       
       setUserInfo(data);
+      setImageBase64(data.anhDaiDien || '');
+      
+      if (data.anhDaiDien) {
+        setFileList([{
+          uid: '-1',
+          name: 'avatar.png',
+          status: 'done',
+          url: data.anhDaiDien,
+        }]);
+      }
+      
       form.setFieldsValue({
         hoTen: data.hoTen,
         soDienThoai: data.soDienThoai,
@@ -49,6 +62,37 @@ const ThongTinCaNhan: React.FC = () => {
     }
   };
 
+  const handleUploadChange: UploadProps['onChange'] = ({ fileList: newFileList }) => {
+    setFileList(newFileList);
+    
+    if (newFileList.length > 0 && newFileList[0].originFileObj) {
+      const file = newFileList[0].originFileObj;
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        setImageBase64(reader.result as string);
+      };
+    } else if (newFileList.length === 0) {
+      setImageBase64('');
+    }
+  };
+
+  const beforeUpload = (file: File) => {
+    const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/jpg' || file.type === 'image/gif' || file.type === 'image/webp';
+    if (!isJpgOrPng) {
+      message.error('Chỉ được tải lên file ảnh (JPG, PNG, GIF, WEBP)!');
+      return Upload.LIST_IGNORE;
+    }
+    
+    const isLt5M = file.size / 1024 / 1024 < 5;
+    if (!isLt5M) {
+      message.error('Ảnh phải nhỏ hơn 5MB!');
+      return Upload.LIST_IGNORE;
+    }
+    
+    return false;
+  };
+
   const handleSubmit = async (values: any) => {
     try {
       setLoading(true);
@@ -59,7 +103,12 @@ const ThongTinCaNhan: React.FC = () => {
         return;
       }
 
-      await apiService.updateFarmerInfo(user.maNongDan, buildSocialUpdatePayload(values));
+      const updateData = {
+        ...buildSocialUpdatePayload(values),
+        anhDaiDien: imageBase64 || null
+      };
+
+      await apiService.updateFarmerInfo(user.maNongDan, updateData);
       message.success('Cập nhật thông tin thành công');
       loadUserInfo();
     } catch (error: any) {
@@ -83,11 +132,41 @@ const ThongTinCaNhan: React.FC = () => {
         <Col xs={24} lg={8}>
           <Card>
             <div style={{ textAlign: 'center', padding: '20px 0' }}>
-              <Avatar 
-                size={120} 
-                icon={<UserOutlined />}
-                style={{ backgroundColor: '#52c41a', marginBottom: 20 }}
-              />
+              <div style={{ position: 'relative', display: 'inline-block' }}>
+                <Avatar 
+                  size={120} 
+                  icon={<UserOutlined />}
+                  src={imageBase64 || userInfo?.anhDaiDien}
+                  style={{ backgroundColor: imageBase64 || userInfo?.anhDaiDien ? 'transparent' : '#52c41a', marginBottom: 20 }}
+                />
+                <Upload
+                  listType="picture"
+                  fileList={[]}
+                  onChange={handleUploadChange}
+                  beforeUpload={beforeUpload}
+                  maxCount={1}
+                  accept="image/*"
+                  showUploadList={false}
+                >
+                  <div style={{
+                    position: 'absolute',
+                    bottom: 20,
+                    right: 0,
+                    background: '#52c41a',
+                    borderRadius: '50%',
+                    width: 36,
+                    height: 36,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    border: '3px solid white',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                  }}>
+                    <CameraOutlined style={{ color: 'white', fontSize: 16 }} />
+                  </div>
+                </Upload>
+              </div>
               <h2 style={{ marginBottom: 8 }}>{userInfo?.hoTen || 'Chưa có tên'}</h2>
               <p style={{ color: '#8c8c8c', marginBottom: 4 }}>
                 Mã nông dân: {userInfo?.maNongDan}
