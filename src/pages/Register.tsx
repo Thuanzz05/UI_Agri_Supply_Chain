@@ -73,34 +73,35 @@ const Register: React.FC = () => {
         </Col>
         
         <Col xs={24} sm={24} md={12} className="register-form-col">
-          <Card className="register-card">
-            <div className="register-header">
-              <Title level={3}>Đăng ký tài khoản</Title>
-              <Text type="secondary">Tạo tài khoản mới để bắt đầu</Text>
-            </div>
-            
-            <Form
-              form={form}
-              name="register"
-              onFinish={onFinish}
-              layout="vertical"
-              size="large"
-              scrollToFirstError
-            >
-              <Form.Item
-                name="loaiTaiKhoan"
-                label="Loại tài khoản"
-                rules={[{ required: true, message: 'Vui lòng chọn loại tài khoản!' }]}
+          <div style={{ width: '100%', maxWidth: '420px' }}>
+            <Card className="register-card">
+              <div className="register-header">
+                <Title level={3}>Đăng ký tài khoản</Title>
+                <Text type="secondary">Tạo tài khoản mới để bắt đầu</Text>
+              </div>
+              
+              <Form
+                form={form}
+                name="register"
+                onFinish={onFinish}
+                layout="vertical"
+                size="large"
+                scrollToFirstError
               >
-                <Select
-                  placeholder="Chọn loại tài khoản"
-                  suffixIcon={<TeamOutlined />}
+                <Form.Item
+                  name="loaiTaiKhoan"
+                  label="Loại tài khoản"
+                  rules={[{ required: true, message: 'Vui lòng chọn loại tài khoản!' }]}
                 >
-                  <Select.Option value="nongdan">Nông dân</Select.Option>
-                  <Select.Option value="daily">Đại lý</Select.Option>
-                  <Select.Option value="sieuthi">Siêu thị</Select.Option>
-                </Select>
-              </Form.Item>
+                  <Select
+                    placeholder="Chọn loại tài khoản"
+                    suffixIcon={<TeamOutlined />}
+                  >
+                    <Select.Option value="nongdan">Nông dân</Select.Option>
+                    <Select.Option value="daily">Đại lý</Select.Option>
+                    <Select.Option value="sieuthi">Siêu thị</Select.Option>
+                  </Select>
+                </Form.Item>
 
               <Form.Item
                 name="tenDangNhap"
@@ -229,6 +230,7 @@ const Register: React.FC = () => {
               </div>
             </Form>
           </Card>
+          </div>
         </Col>
       </Row>
     </div>
