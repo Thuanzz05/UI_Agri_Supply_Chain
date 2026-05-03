@@ -1,6 +1,6 @@
 import React from 'react';
-import { Card, Table, Space, Input, message, Modal, Form } from 'antd';
-import type { TableProps } from 'antd';
+import { Card, Space, Input, message, Modal, Form, Empty, Upload } from 'antd';
+import type { UploadFile, UploadProps } from 'antd';
 import { 
   PlusOutlined, 
   SearchOutlined,
@@ -13,6 +13,7 @@ import { apiService } from '../../services/apiService';
 import type { DuLieuFormSanPham } from '../../types/sanPham';
 import { ModalButton } from '../../components/ModalButton';
 import { ActionButton } from '../../components/ActionButton';
+import './QuanLySanPham.css';
 
 interface DataType {
   key: string;
@@ -20,6 +21,7 @@ interface DataType {
   tenSanPham: string;
   donViTinh: string;
   moTa: string;
+  hinhAnh?: string;
 }
 
 const QuanLySanPham: React.FC = () => {
@@ -36,27 +38,27 @@ const QuanLySanPham: React.FC = () => {
   const [editingProduct, setEditingProduct] = React.useState<DataType | null>(null);
   const [form] = Form.useForm();
   const [searchText, setSearchText] = React.useState('');
+  const [fileList, setFileList] = React.useState<UploadFile[]>([]);
+  const [imageBase64, setImageBase64] = React.useState<string>('');
 
   // 2.2: Tạo function để gọi API lấy dữ liệu
   const fetchProducts = async () => {
-    setLoading(true); // Bật loading
+    setLoading(true);
     try {
       const response = await apiService.getFarmerProducts();
       
-      // 2.3: Kiểm tra và map dữ liệu từ API
       if (response && response.data) {
         const products = Array.isArray(response.data) ? response.data : [];
         
-        // 2.4: Chuyển đổi dữ liệu từ API sang format của bảng
         const mappedData: DataType[] = products.map((product: any) => ({
           key: product.maSanPham?.toString(),
           maSanPham: product.maSanPham,
           tenSanPham: product.tenSanPham,
           donViTinh: product.donViTinh,
-          moTa: product.moTa
+          moTa: product.moTa,
+          hinhAnh: product.hinhAnh
         }));
         
-        // 2.5: Cập nhật state với dữ liệu đã map
         setData(mappedData);
       } else {
         setData([]);
@@ -65,11 +67,11 @@ const QuanLySanPham: React.FC = () => {
       message.error('Không thể tải danh sách sản phẩm');
       setData([]);
     } finally {
-      setLoading(false); // Tắt loading
+      setLoading(false);
     }
   };
 
-  // 2.6: Gọi API khi component được mount (hiển thị lần đầu)
+  // 2.6: Gọi API khi component được mount
   React.useEffect(() => {
     fetchProducts();
   }, []);
@@ -78,6 +80,8 @@ const QuanLySanPham: React.FC = () => {
   const showModal = () => {
     setIsEditMode(false);
     setEditingProduct(null);
+    setFileList([]);
+    setImageBase64('');
     form.resetFields();
     setIsModalOpen(true);
   };
@@ -86,6 +90,19 @@ const QuanLySanPham: React.FC = () => {
   const showEditModal = (record: DataType) => {
     setIsEditMode(true);
     setEditingProduct(record);
+    setImageBase64(record.hinhAnh || '');
+    
+    if (record.hinhAnh) {
+      setFileList([{
+        uid: '-1',
+        name: 'image.png',
+        status: 'done',
+        url: record.hinhAnh,
+      }]);
+    } else {
+      setFileList([]);
+    }
+    
     form.setFieldsValue({
       tenSanPham: record.tenSanPham,
       donViTinh: record.donViTinh,
@@ -99,27 +116,69 @@ const QuanLySanPham: React.FC = () => {
     setIsModalOpen(false);
     setIsEditMode(false);
     setEditingProduct(null);
+    setFileList([]);
+    setImageBase64('');
     form.resetFields();
+  };
+
+  // Hàm xử lý upload ảnh
+  const handleUploadChange: UploadProps['onChange'] = ({ fileList: newFileList }) => {
+    setFileList(newFileList);
+    
+    if (newFileList.length > 0 && newFileList[0].originFileObj) {
+      const file = newFileList[0].originFileObj;
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        setImageBase64(reader.result as string);
+      };
+    } else if (newFileList.length === 0) {
+      setImageBase64('');
+    }
+  };
+
+  // Hàm xử lý trước khi upload
+  const beforeUpload = (file: File) => {
+    const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/jpg' || file.type === 'image/gif' || file.type === 'image/webp';
+    if (!isJpgOrPng) {
+      message.error('Chỉ được tải lên file ảnh (JPG, PNG, GIF, WEBP)!');
+      return Upload.LIST_IGNORE;
+    }
+    
+    const isLt5M = file.size / 1024 / 1024 < 5;
+    if (!isLt5M) {
+      message.error('Ảnh phải nhỏ hơn 5MB!');
+      return Upload.LIST_IGNORE;
+    }
+    
+    return false; // Prevent auto upload
   };
 
   // Hàm xử lý submit form (thêm hoặc sửa)
   const handleSubmit = async (values: DuLieuFormSanPham) => {
     try {
       setLoading(true);
+      
+      const productData = {
+        ...values,
+        hinhAnh: imageBase64 || null
+      };
+      
       if (isEditMode && editingProduct) {
-        // Sửa sản phẩm
-        await apiService.updateFarmerProduct(editingProduct.maSanPham, values);
+        await apiService.updateFarmerProduct(editingProduct.maSanPham, productData);
         message.success('Cập nhật sản phẩm thành công!');
       } else {
-        // Thêm sản phẩm mới
-        await apiService.addFarmerProduct(values);
+        await apiService.addFarmerProduct(productData);
         message.success('Thêm sản phẩm thành công!');
       }
+      
       setIsModalOpen(false);
       form.resetFields();
       setIsEditMode(false);
       setEditingProduct(null);
-      fetchProducts(); // Tải lại danh sách sản phẩm
+      setFileList([]);
+      setImageBase64('');
+      fetchProducts();
     } catch (error: any) {
       message.error(error.response?.data?.message || 'Không thể lưu sản phẩm');
     } finally {
@@ -173,58 +232,6 @@ const QuanLySanPham: React.FC = () => {
     return filteredData.slice(startIndex, endIndex);
   }, [filteredData, currentPage, pageSize]);
 
-  
-  const columns: TableProps<DataType>['columns'] = [
-    {
-      title: 'Mã SP',
-      dataIndex: 'maSanPham',
-      key: 'maSanPham',
-      width: 80,
-    },
-    {
-      title: 'Tên sản phẩm',
-      dataIndex: 'tenSanPham',
-      key: 'tenSanPham',
-      width: 200,
-    },
-    {
-      title: 'Đơn vị tính',
-      dataIndex: 'donViTinh',
-      key: 'donViTinh',
-      width: 100,
-    },
-    {
-      title: 'Mô tả',
-      dataIndex: 'moTa',
-      key: 'moTa',
-      width: 300,
-      ellipsis: true,
-    },
-    {
-      title: 'Thao tác',
-      key: 'action',
-      width: 150,
-      render: (_, record) => (
-        <Space size="small">
-          <ActionButton 
-            type="default" 
-            icon={<EditOutlined />}
-            onClick={() => showEditModal(record)}
-          >
-            Sửa
-          </ActionButton>
-          <ActionButton 
-            type="danger" 
-            icon={<DeleteOutlined />}
-            onClick={() => handleDelete(record)}
-          >
-            Xóa
-          </ActionButton>
-        </Space>
-      ),
-    },
-  ];
-
   return (
     <AdminLayout>
       <div className="page-header">
@@ -232,14 +239,13 @@ const QuanLySanPham: React.FC = () => {
         <p>Quản lý sản phẩm nông sản của trang trại</p>
       </div>
       
-      <Card>
+      <div style={{ padding: '24px 0' }}>
         <div style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
           marginBottom: '24px',
-          padding: '16px 0',
-          borderBottom: '1px solid #f0f0f0'
+          gap: '16px'
         }}>
           <Input
             placeholder="Tìm kiếm sản phẩm..."
@@ -257,28 +263,85 @@ const QuanLySanPham: React.FC = () => {
             Thêm sản phẩm
           </ActionButton>
         </div>
-        
-        <Table<DataType>
-          columns={columns} 
-          dataSource={paginatedData}
-          pagination={false}
-          scroll={{ x: 800 }}
-          loading={loading}
-        />
-        
-        <CustomPagination
-          current={currentPage}
-          total={filteredData.length}
-          pageSize={pageSize}
-          onChange={(page, size) => {
-            setCurrentPage(page);
-            setPageSize(size || 10);
-          }}
-          showTotal={(total, range) => 
-            `${range[0]}-${range[1]} của ${total} sản phẩm`
-          }
-        />
-      </Card>
+
+        {paginatedData.length === 0 ? (
+          <Empty description="Không có sản phẩm nào" />
+        ) : (
+          <>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '16px' }}>
+              {paginatedData.map((product) => (
+                  <Card 
+                    key={product.key}
+                    className="product-card"
+                    cover={
+                      product.hinhAnh ? (
+                        <div className="product-card-image">
+                          <img 
+                            src={product.hinhAnh} 
+                            alt={product.tenSanPham} 
+                          />
+                        </div>
+                      ) : (
+                        <div className="product-card-image" style={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          justifyContent: 'center',
+                          background: '#f0f0f0',
+                          color: '#999'
+                        }}>
+                          <div style={{ textAlign: 'center' }}>
+                            <PlusOutlined style={{ fontSize: '32px', marginBottom: '8px' }} />
+                            <div>Chưa có ảnh</div>
+                          </div>
+                        </div>
+                      )
+                    }
+                    hoverable
+                  >
+                    <h3 style={{ marginBottom: '12px', color: '#2E7D32' }}>{product.tenSanPham}</h3>
+                    <div style={{ marginBottom: '12px', fontSize: '14px', color: '#666' }}>
+                      <strong>Đơn vị tính:</strong> {product.donViTinh}
+                    </div>
+                    <div style={{ marginBottom: '16px', fontSize: '13px', color: '#999', maxHeight: '60px', overflow: 'hidden' }}>
+                      <strong>Mô tả:</strong> {product.moTa}
+                    </div>
+                    <Space style={{ width: '100%', justifyContent: 'flex-end' }}>
+                      <ActionButton 
+                        type="default" 
+                        icon={<EditOutlined />}
+                        onClick={() => showEditModal(product)}
+                      >
+                        Sửa
+                      </ActionButton>
+                      <ActionButton 
+                        type="danger" 
+                        icon={<DeleteOutlined />}
+                        onClick={() => handleDelete(product)}
+                      >
+                        Xóa
+                      </ActionButton>
+                    </Space>
+                  </Card>
+              ))}
+            </div>
+
+            <div style={{ marginTop: '24px' }}>
+              <CustomPagination
+                current={currentPage}
+                total={filteredData.length}
+                pageSize={pageSize}
+                onChange={(page, size) => {
+                  setCurrentPage(page);
+                  setPageSize(size || 10);
+                }}
+                showTotal={(total, range) => 
+                  `${range[0]}-${range[1]} của ${total} sản phẩm`
+                }
+              />
+            </div>
+          </>
+        )}
+      </div>
 
       {/* Modal thêm/sửa sản phẩm */}
       <Modal
@@ -313,6 +376,33 @@ const QuanLySanPham: React.FC = () => {
             ]}
           >
             <Input placeholder="Ví dụ: kg, tấn, thùng..." />
+          </Form.Item>
+
+          <Form.Item
+            label="Hình ảnh sản phẩm"
+          >
+            <Upload
+              listType="picture-card"
+              fileList={fileList}
+              onChange={handleUploadChange}
+              beforeUpload={beforeUpload}
+              maxCount={1}
+              accept="image/*"
+              onRemove={() => {
+                setImageBase64('');
+                setFileList([]);
+              }}
+            >
+              {fileList.length === 0 && (
+                <div>
+                  <PlusOutlined />
+                  <div style={{ marginTop: 8 }}>Tải ảnh lên</div>
+                </div>
+              )}
+            </Upload>
+            <div style={{ color: '#999', fontSize: '12px', marginTop: '8px' }}>
+              Chỉ chấp nhận file ảnh (JPG, PNG, GIF, WEBP), tối đa 5MB
+            </div>
           </Form.Item>
 
           <Form.Item

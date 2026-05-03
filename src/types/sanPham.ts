@@ -3,10 +3,12 @@ export interface SanPham {
   tenSanPham: string;
   donViTinh: string;
   moTa: string;
+  hinhAnh?: string;
 }
 
 export interface DuLieuFormSanPham {
   tenSanPham: string;
   donViTinh: string;
   moTa: string;
+  hinhAnh?: string;
 }

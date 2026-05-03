@@ -1,15 +1,16 @@
 import React from 'react';
-import { Card, Table, message, Modal, Form, Input, Space } from 'antd';
-import type { TableProps } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined } from '@ant-design/icons';
+import { Card, message, Modal, Form, Input, Space, Row, Col, Empty, Upload } from 'antd';
+import type { UploadFile, UploadProps } from 'antd';
+import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, EnvironmentOutlined } from '@ant-design/icons';
 import { AdminLayout } from '../../components/Layout';
 import { CustomPagination } from '../../components/CustomPagination';
 import { apiService } from '../../services/apiService';
 import type { DuLieuFormTrangTrai } from '../../types/trangTrai';
 import { ModalButton } from '../../components/ModalButton';
 import { ActionButton } from '../../components/ActionButton';
+import './QuanLyTrangTrai.css';
 
-// Định nghĩa kiểu dữ liệu cho bảng
+  // Định nghĩa kiểu dữ liệu cho bảng
 interface DataType {
   key: string;
   maTrangTrai: number;
@@ -18,6 +19,7 @@ interface DataType {
   diaChi: string;
   soChungNhan: string;
   tenNongDan: string;
+  hinhAnh?: string;
 }
 
 const QuanLyTrangTrai: React.FC = () => {
@@ -35,8 +37,10 @@ const QuanLyTrangTrai: React.FC = () => {
   const [isEditMode, setIsEditMode] = React.useState(false);
   const [editingFarm, setEditingFarm] = React.useState<DataType | null>(null);
   const [form] = Form.useForm();
+  const [fileList, setFileList] = React.useState<UploadFile[]>([]);
+  const [imageBase64, setImageBase64] = React.useState<string>('');
 
-  // Function gọi API lấy danh sách trang trại của nông dân đang đăng nhập
+  // Function gọi API lấy danh sách trang trại
   const fetchFarms = async () => {
     setLoading(true);
     try {
@@ -56,7 +60,6 @@ const QuanLyTrangTrai: React.FC = () => {
         return;
       }
 
-      // Gọi API lấy trang trại theo nông dân
       const response = await apiService.getFarmsByFarmer(maNongDan.toString());
       
       if (response && response.data) {
@@ -69,7 +72,8 @@ const QuanLyTrangTrai: React.FC = () => {
           tenTrangTrai: farm.tenTrangTrai,
           diaChi: farm.diaChi,
           soChungNhan: farm.soChungNhan,
-          tenNongDan: farm.tenNongDan
+          tenNongDan: farm.tenNongDan,
+          hinhAnh: farm.hinhAnh
         }));
         
         setData(mappedData);
@@ -93,6 +97,8 @@ const QuanLyTrangTrai: React.FC = () => {
   const showModal = () => {
     setIsEditMode(false);
     setEditingFarm(null);
+    setFileList([]);
+    setImageBase64('');
     form.resetFields();
     setIsModalOpen(true);
   };
@@ -101,6 +107,19 @@ const QuanLyTrangTrai: React.FC = () => {
   const showEditModal = (record: DataType) => {
     setIsEditMode(true);
     setEditingFarm(record);
+    setImageBase64(record.hinhAnh || '');
+    
+    if (record.hinhAnh) {
+      setFileList([{
+        uid: '-1',
+        name: 'image.png',
+        status: 'done',
+        url: record.hinhAnh,
+      }]);
+    } else {
+      setFileList([]);
+    }
+    
     form.setFieldsValue({
       tenTrangTrai: record.tenTrangTrai,
       diaChi: record.diaChi,
@@ -114,7 +133,42 @@ const QuanLyTrangTrai: React.FC = () => {
     setIsModalOpen(false);
     setIsEditMode(false);
     setEditingFarm(null);
+    setFileList([]);
+    setImageBase64('');
     form.resetFields();
+  };
+
+  // Hàm xử lý upload ảnh
+  const handleUploadChange: UploadProps['onChange'] = ({ fileList: newFileList }) => {
+    setFileList(newFileList);
+    
+    if (newFileList.length > 0 && newFileList[0].originFileObj) {
+      const file = newFileList[0].originFileObj;
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        setImageBase64(reader.result as string);
+      };
+    } else if (newFileList.length === 0) {
+      setImageBase64('');
+    }
+  };
+
+  // Hàm xử lý trước khi upload
+  const beforeUpload = (file: File) => {
+    const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/jpg' || file.type === 'image/gif' || file.type === 'image/webp';
+    if (!isJpgOrPng) {
+      message.error('Chỉ được tải lên file ảnh (JPG, PNG, GIF, WEBP)!');
+      return Upload.LIST_IGNORE;
+    }
+    
+    const isLt5M = file.size / 1024 / 1024 < 5;
+    if (!isLt5M) {
+      message.error('Ảnh phải nhỏ hơn 5MB!');
+      return Upload.LIST_IGNORE;
+    }
+    
+    return false; // Prevent auto upload
   };
 
   // Hàm xử lý submit form thêm/sửa trang trại
@@ -136,20 +190,16 @@ const QuanLyTrangTrai: React.FC = () => {
         return;
       }
       
+      const farmData = {
+        ...values,
+        maNongDan: isEditMode && editingFarm ? editingFarm.maNongDan : maNongDan,
+        hinhAnh: imageBase64 || null
+      };
+      
       if (isEditMode && editingFarm) {
-        // Sửa trang trại
-        const farmData = {
-          ...values,
-          maNongDan: editingFarm.maNongDan
-        };
         await apiService.updateFarm(editingFarm.maTrangTrai, farmData);
         message.success('Cập nhật trang trại thành công!');
       } else {
-        // Thêm trang trại mới
-        const farmData = {
-          ...values,
-          maNongDan: maNongDan
-        };
         await apiService.addFarm(farmData);
         message.success('Thêm trang trại thành công!');
       }
@@ -157,10 +207,11 @@ const QuanLyTrangTrai: React.FC = () => {
       setIsModalOpen(false);
       setIsEditMode(false);
       setEditingFarm(null);
+      setFileList([]);
+      setImageBase64('');
       form.resetFields();
       fetchFarms();
     } catch (error: any) {
-      console.error('Error saving farm:', error);
       message.error(error.response?.data?.message || 'Không thể lưu trang trại');
     } finally {
       setLoading(false);
@@ -214,72 +265,20 @@ const QuanLyTrangTrai: React.FC = () => {
     return filteredData.slice(startIndex, endIndex);
   }, [filteredData, currentPage, pageSize]);
 
-  // Định nghĩa các cột của bảng
-  const columns: TableProps<DataType>['columns'] = [
-    {
-      title: 'Mã TT',
-      dataIndex: 'maTrangTrai',
-      key: 'maTrangTrai',
-      width: 80,
-    },
-    {
-      title: 'Tên trang trại',
-      dataIndex: 'tenTrangTrai',
-      key: 'tenTrangTrai',
-      width: 250,
-    },
-    {
-      title: 'Địa chỉ',
-      dataIndex: 'diaChi',
-      key: 'diaChi',
-      width: 300,
-    },
-    {
-      title: 'Số chứng nhận',
-      dataIndex: 'soChungNhan',
-      key: 'soChungNhan',
-      width: 150,
-    },
-    {
-      title: 'Thao tác',
-      key: 'action',
-      width: 150,
-      render: (_, record) => (
-        <Space size="small">
-          <ActionButton 
-            type="default" 
-            icon={<EditOutlined />}
-            onClick={() => showEditModal(record)}
-          >
-            Sửa
-          </ActionButton>
-          <ActionButton 
-            type="danger" 
-            icon={<DeleteOutlined />}
-            onClick={() => handleDelete(record)}
-          >
-            Xóa
-          </ActionButton>
-        </Space>
-      ),
-    },
-  ];
-
   return (
     <AdminLayout>
       <div className="page-header">
-        <h1>Quản lý trang trại</h1>
-        <p>Quản lý thông tin các trang trại</p>
+        <h1>Quản lý Trang Trại</h1>
+        <p>Quản lý thông tin các trang trại của bạn</p>
       </div>
-      
-      <Card>
+
+      <div style={{ padding: '24px 0' }}>
         <div style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
           marginBottom: '24px',
-          padding: '16px 0',
-          borderBottom: '1px solid #f0f0f0'
+          gap: '16px'
         }}>
           <Input
             placeholder="Tìm kiếm trang trại..."
@@ -297,28 +296,87 @@ const QuanLyTrangTrai: React.FC = () => {
             Thêm trang trại
           </ActionButton>
         </div>
-        
-        <Table<DataType>
-          columns={columns} 
-          dataSource={paginatedData}
-          pagination={false}
-          scroll={{ x: 800 }}
-          loading={loading}
-        />
-        
-        <CustomPagination
-          current={currentPage}
-          total={filteredData.length}
-          pageSize={pageSize}
-          onChange={(page, size) => {
-            setCurrentPage(page);
-            setPageSize(size || 10);
-          }}
-          showTotal={(total, range) => 
-            `${range[0]}-${range[1]} của ${total} trang trại`
-          }
-        />
-      </Card>
+
+        {paginatedData.length === 0 ? (
+          <Empty description="Không có trang trại nào" />
+        ) : (
+          <>
+            <Row gutter={[24, 24]}>
+              {paginatedData.map((farm) => (
+                <Col xs={24} sm={12} lg={8} key={farm.key}>
+                  <Card 
+                    className="farm-card"
+                    cover={
+                      farm.hinhAnh ? (
+                        <div className="farm-card-image">
+                          <img 
+                            src={farm.hinhAnh} 
+                            alt={farm.tenTrangTrai} 
+                          />
+                        </div>
+                      ) : (
+                        <div className="farm-card-image" style={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          justifyContent: 'center',
+                          background: '#f0f0f0',
+                          color: '#999'
+                        }}>
+                          <div style={{ textAlign: 'center' }}>
+                            <PlusOutlined style={{ fontSize: '32px', marginBottom: '8px' }} />
+                            <div>Chưa có ảnh</div>
+                          </div>
+                        </div>
+                      )
+                    }
+                    hoverable
+                  >
+                    <h3 style={{ marginBottom: '12px', color: '#2E7D32' }}>{farm.tenTrangTrai}</h3>
+                    <div style={{ marginBottom: '12px', fontSize: '14px', color: '#666' }}>
+                      <EnvironmentOutlined style={{ marginRight: '8px' }} />
+                      {farm.diaChi}
+                    </div>
+                    <div style={{ marginBottom: '16px', fontSize: '13px', color: '#999' }}>
+                      <strong>Số chứng nhận:</strong> {farm.soChungNhan}
+                    </div>
+                    <Space style={{ width: '100%', justifyContent: 'flex-end' }}>
+                      <ActionButton 
+                        type="default" 
+                        icon={<EditOutlined />}
+                        onClick={() => showEditModal(farm)}
+                      >
+                        Sửa
+                      </ActionButton>
+                      <ActionButton 
+                        type="danger" 
+                        icon={<DeleteOutlined />}
+                        onClick={() => handleDelete(farm)}
+                      >
+                        Xóa
+                      </ActionButton>
+                    </Space>
+                  </Card>
+                </Col>
+              ))}
+            </Row>
+
+            <div style={{ marginTop: '24px' }}>
+              <CustomPagination
+                current={currentPage}
+                total={filteredData.length}
+                pageSize={pageSize}
+                onChange={(page, size) => {
+                  setCurrentPage(page);
+                  setPageSize(size || 10);
+                }}
+                showTotal={(total, range) => 
+                  `${range[0]}-${range[1]} của ${total} trang trại`
+                }
+              />
+            </div>
+          </>
+        )}
+      </div>
 
       {/* Modal thêm/sửa trang trại */}
       <Modal
@@ -363,6 +421,33 @@ const QuanLyTrangTrai: React.FC = () => {
             ]}
           >
             <Input placeholder="Ví dụ: VG001234" />
+          </Form.Item>
+
+          <Form.Item
+            label="Hình ảnh trang trại"
+          >
+            <Upload
+              listType="picture-card"
+              fileList={fileList}
+              onChange={handleUploadChange}
+              beforeUpload={beforeUpload}
+              maxCount={1}
+              accept="image/*"
+              onRemove={() => {
+                setImageBase64('');
+                setFileList([]);
+              }}
+            >
+              {fileList.length === 0 && (
+                <div>
+                  <PlusOutlined />
+                  <div style={{ marginTop: 8 }}>Tải ảnh lên</div>
+                </div>
+              )}
+            </Upload>
+            <div style={{ color: '#999', fontSize: '12px', marginTop: '8px' }}>
+              Chỉ chấp nhận file ảnh (JPG, PNG, GIF, WEBP), tối đa 5MB
+            </div>
           </Form.Item>
 
           <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
