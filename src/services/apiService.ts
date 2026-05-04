@@ -418,6 +418,16 @@ export const apiService = {
     }
   },
 
+  // Lấy thống kê dashboard siêu thị
+  async getSupermarketDashboardStats(maSieuThi: number) {
+    try {
+      const response = await apiClient.get(`/api-sieuthi/dashboard/${maSieuThi}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
   // Lấy đơn hàng của siêu thị (mua từ đại lý)
   async getSupermarketOrders(maSieuThi: number) {
     const routes = [

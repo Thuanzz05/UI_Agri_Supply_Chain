@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Tag, message, Card, Statistic, Row, Col, Select, Modal, Descriptions, Popconfirm, Spin } from 'antd';
+import { Table, Tag, message, Card, Statistic, Row, Col, Select, Modal, Descriptions, Spin } from 'antd';
 import { ShoppingCartOutlined, ClockCircleOutlined, CheckCircleOutlined, CloseCircleOutlined, EyeOutlined, ReloadOutlined } from '@ant-design/icons';
 import { AdminLayout } from '../../components/Layout';
 import { authService } from '../../services/authService';
@@ -275,7 +275,7 @@ const QuanLyDonHang: React.FC = () => {
               title="Tổng đơn hàng"
               value={statistics.total}
               prefix={<ShoppingCartOutlined />}
-              valueStyle={{ color: '#1890ff' }}
+              styles={{ value: { color: '#1890ff' } }}
             />
           </Card>
         </Col>
@@ -285,7 +285,7 @@ const QuanLyDonHang: React.FC = () => {
               title="Chờ xác nhận"
               value={statistics.pending}
               prefix={<ClockCircleOutlined />}
-              valueStyle={{ color: '#faad14' }}
+              styles={{ value: { color: '#faad14' } }}
             />
           </Card>
         </Col>
@@ -295,7 +295,7 @@ const QuanLyDonHang: React.FC = () => {
               title="Hoàn thành"
               value={statistics.completed}
               prefix={<CheckCircleOutlined />}
-              valueStyle={{ color: '#52c41a' }}
+              styles={{ value: { color: '#52c41a' } }}
             />
           </Card>
         </Col>
@@ -305,7 +305,7 @@ const QuanLyDonHang: React.FC = () => {
               title="Đã hủy"
               value={statistics.cancelled}
               prefix={<CloseCircleOutlined />}
-              valueStyle={{ color: '#ff4d4f' }}
+              styles={{ value: { color: '#ff4d4f' } }}
             />
           </Card>
         </Col>
@@ -369,37 +369,43 @@ const QuanLyDonHang: React.FC = () => {
             </ModalButton>
             {selectedOrder?.trangThai === 'cho_xac_nhan' && (
               <>
-                <Popconfirm
-                  title="Hủy đơn hàng"
-                  description="Bạn có chắc muốn hủy đơn hàng này?"
-                  onConfirm={() => {
-                    if (selectedOrder) {
-                      handleCancelOrder(selectedOrder.maDonHang);
-                    }
+                <ModalButton 
+                  type="danger"
+                  onClick={() => {
+                    Modal.confirm({
+                      title: 'Hủy đơn hàng',
+                      content: 'Bạn có chắc muốn hủy đơn hàng này?',
+                      okText: 'Hủy đơn',
+                      cancelText: 'Không',
+                      okButtonProps: { danger: true },
+                      onOk: () => {
+                        if (selectedOrder) {
+                          handleCancelOrder(selectedOrder.maDonHang);
+                        }
+                      },
+                    });
                   }}
-                  okText="Hủy đơn"
-                  cancelText="Không"
-                  okButtonProps={{ danger: true }}
                 >
-                  <ModalButton type="danger">
-                    Hủy đơn hàng
-                  </ModalButton>
-                </Popconfirm>
-                <Popconfirm
-                  title="Xác nhận đơn hàng"
-                  description="Bạn có chắc muốn xác nhận đơn hàng này?"
-                  onConfirm={() => {
-                    if (selectedOrder) {
-                      handleConfirmOrder(selectedOrder.maDonHang);
-                    }
+                  Hủy đơn hàng
+                </ModalButton>
+                <ModalButton 
+                  type="success"
+                  onClick={() => {
+                    Modal.confirm({
+                      title: 'Xác nhận đơn hàng',
+                      content: 'Bạn có chắc muốn xác nhận đơn hàng này?',
+                      okText: 'Xác nhận',
+                      cancelText: 'Không',
+                      onOk: () => {
+                        if (selectedOrder) {
+                          handleConfirmOrder(selectedOrder.maDonHang);
+                        }
+                      },
+                    });
                   }}
-                  okText="Xác nhận"
-                  cancelText="Không"
                 >
-                  <ModalButton type="success">
-                    Xác nhận đơn hàng
-                  </ModalButton>
-                </Popconfirm>
+                  Xác nhận đơn hàng
+                </ModalButton>
               </>
             )}
           </div>
@@ -407,7 +413,7 @@ const QuanLyDonHang: React.FC = () => {
       >
         {detailLoading ? (
           <div style={{ textAlign: 'center', padding: '40px 0' }}>
-            <Spin tip="Đang tải chi tiết..." />
+            <Spin description="Đang tải chi tiết..." />
           </div>
         ) : selectedOrder ? (
           <>

@@ -46,7 +46,7 @@ const SocialLinks: React.FC<SocialLinksProps> = ({
   }
 
   return (
-    <Space direction={direction} size={8} wrap>
+    <Space orientation={direction} size={8} wrap>
       {items.map((item) => (
         <a key={item.key} href={item.url} target="_blank" rel="noopener noreferrer">
           {item.icon}

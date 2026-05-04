@@ -1,0 +1,32 @@
+.truy-xuat-search-card {
+  margin-bottom: 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+}
+
+.truy-xuat-search-container {
+  text-align: center;
+  padding: 20px 0;
+}
+
+.truy-xuat-qr-icon {
+  font-size: 48px;
+  color: #fff;
+  margin-bottom: 16px;
+}
+
+.truy-xuat-title {
+  color: #000 !important;
+  margin-bottom: 16px;
+}
+
+.truy-xuat-search-wrapper {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.truy-xuat-hint-text {
+  color: rgba(255, 255, 255, 0.8);
+  margin-top: 12px;
+  display: block;
+}

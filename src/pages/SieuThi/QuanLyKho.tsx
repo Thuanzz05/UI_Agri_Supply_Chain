@@ -83,7 +83,7 @@ const QuanLyKho: React.FC = () => {
       title: 'Sản phẩm',
       dataIndex: 'tenSanPham',
       key: 'tenSanPham',
-      render: (text: string) => <strong>{text || '--'}</strong>,
+      render: (text: string) => text || '--',
     },
     {
       title: 'Mã lô',

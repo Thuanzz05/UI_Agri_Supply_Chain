@@ -30,6 +30,7 @@ import { AdminLayout } from '../../components/Layout';
 import { apiService } from '../../services/apiService';
 import SocialLinks from '../../components/SocialLinks';
 import dayjs from 'dayjs';
+import './TruyXuatNguonGoc.css';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -163,19 +164,13 @@ const TruyXuatNguonGoc: React.FC = () => {
       </div>
 
       {/* Ô tìm kiếm */}
-      <Card
-        style={{
-          marginBottom: 24,
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          border: 'none',
-        }}
-      >
-        <div style={{ textAlign: 'center', padding: '20px 0' }}>
-          <QrcodeOutlined style={{ fontSize: 48, color: '#fff', marginBottom: 16 }} />
-          <Title level={3} style={{ color: '#fff', marginBottom: 16 }}>
+      <Card className="truy-xuat-search-card">
+        <div className="truy-xuat-search-container">
+          <QrcodeOutlined className="truy-xuat-qr-icon" />
+          <Title level={3} className="truy-xuat-title">
             Nhập mã QR sản phẩm
           </Title>
-          <div style={{ maxWidth: 500, margin: '0 auto' }}>
+          <div className="truy-xuat-search-wrapper">
             <Input.Search
               placeholder="Ví dụ: QR001"
               size="large"
@@ -191,7 +186,7 @@ const TruyXuatNguonGoc: React.FC = () => {
               style={{ width: '100%' }}
             />
           </div>
-          <Text style={{ color: 'rgba(255,255,255,0.8)', marginTop: 12, display: 'block' }}>
+          <Text className="truy-xuat-hint-text">
             Nhập mã QR trên sản phẩm để tra cứu thông tin nguồn gốc, kiểm định và vận chuyển
           </Text>
         </div>
