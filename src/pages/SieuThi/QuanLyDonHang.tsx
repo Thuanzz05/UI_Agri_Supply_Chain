@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Tag, message, Card, Statistic, Row, Col, Select, Modal, Descriptions, Spin } from 'antd';
-import { ShoppingCartOutlined, ClockCircleOutlined, CheckCircleOutlined, CloseCircleOutlined, EyeOutlined, ReloadOutlined } from '@ant-design/icons';
+import { Table, Tag, message, Card, Statistic, Row, Col, Select, Modal, Descriptions, Spin, Button } from 'antd';
+import { ShoppingCartOutlined, ClockCircleOutlined, CheckCircleOutlined, CloseCircleOutlined, EyeOutlined, ReloadOutlined, MessageOutlined } from '@ant-design/icons';
 import { AdminLayout } from '../../components/Layout';
 import { authService } from '../../services/authService';
 import { apiService } from '../../services/apiService';
@@ -8,6 +8,7 @@ import { ActionButton } from '../../components/ActionButton';
 import { ModalButton } from '../../components/ModalButton';
 import SocialLinks from '../../components/SocialLinks';
 import type { ColumnsType } from 'antd/es/table';
+import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 
 interface ChiTietDonHang {
@@ -52,6 +53,7 @@ const getApiErrorMessage = (error: any, fallbackMessage: string) => {
 };
 
 const QuanLyDonHang: React.FC = () => {
+  const navigate = useNavigate();
   const [donHangs, setDonHangs] = useState<DonHang[]>([]);
   const [loading, setLoading] = useState(false);
   const [filterStatus, setFilterStatus] = useState<string>('all');
@@ -138,6 +140,22 @@ const QuanLyDonHang: React.FC = () => {
     } catch (error: any) {
       message.error(getApiErrorMessage(error, 'Không thể hủy đơn hàng'));
     }
+  };
+
+  const handleChatWithSupplier = () => {
+    if (!selectedOrder) return;
+    
+    // Lưu thông tin đối tác vào localStorage để trang chat có thể dùng
+    const chatInfo = {
+      maNguoi: selectedOrder.maNguoiBan,
+      loaiNguoi: selectedOrder.loaiNguoiBan || 'daily',
+      tenNguoi: selectedOrder.tenNguoiBan,
+    };
+    localStorage.setItem('pendingChat', JSON.stringify(chatInfo));
+    
+    // Chuyển đến trang chat
+    navigate('/supermarket/messages');
+    message.info(`Đang mở chat với ${selectedOrder.tenNguoiBan}`);
   };
 
   const getStatusColor = (status: string) => {
@@ -426,7 +444,20 @@ const QuanLyDonHang: React.FC = () => {
                   {getStatusText(selectedOrder.trangThai)}
                 </Tag>
               </Descriptions.Item>
-              <Descriptions.Item label="Đại lý">{selectedOrder.tenNguoiBan}</Descriptions.Item>
+              <Descriptions.Item label="Đại lý">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span>{selectedOrder.tenNguoiBan}</span>
+                  <Button
+                    type="link"
+                    size="small"
+                    icon={<MessageOutlined />}
+                    onClick={handleChatWithSupplier}
+                    style={{ padding: 0 }}
+                  >
+                    Nhắn tin
+                  </Button>
+                </div>
+              </Descriptions.Item>
               <Descriptions.Item label="Facebook/TikTok">
                 <SocialLinks data={counterpartyProfile || selectedOrder} showEmpty />
               </Descriptions.Item>

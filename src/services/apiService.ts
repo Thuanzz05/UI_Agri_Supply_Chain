@@ -1225,5 +1225,93 @@ export const apiService = {
       throw error;
     }
   },
+
+  // ============ API CHAT/TIN NHẮN ============
+  
+  // Lấy danh sách cuộc trò chuyện
+  async getConversations(maNguoi: number, loaiNguoi: string) {
+    try {
+      const response = await apiClient.get('/api-admin/chat/conversations', {
+        params: { maNguoi, loaiNguoi }
+      });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Lấy tin nhắn trong cuộc trò chuyện
+  async getMessages(maCuocTroChuyen: number) {
+    try {
+      const response = await apiClient.get(`/api-admin/chat/conversations/${maCuocTroChuyen}/messages`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Gửi tin nhắn
+  async sendMessage(maNguoiGui: number, loaiNguoiGui: string, data: {
+    maCuocTroChuyen?: number;
+    maNguoiNhan: number;
+    loaiNguoiNhan: string;
+    noiDung: string;
+  }) {
+    try {
+      const response = await apiClient.post('/api-admin/chat/messages', data, {
+        params: { maNguoiGui, loaiNguoiGui }
+      });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Đánh dấu đã đọc
+  async markMessagesAsRead(maNguoi: number, loaiNguoi: string, maCuocTroChuyen: number) {
+    try {
+      const response = await apiClient.put('/api-admin/chat/messages/read', 
+        { maCuocTroChuyen },
+        { params: { maNguoi, loaiNguoi } }
+      );
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Đếm tin nhắn chưa đọc
+  async getUnreadCount(maNguoi: number, loaiNguoi: string) {
+    try {
+      const response = await apiClient.get('/api-admin/chat/unread-count', {
+        params: { maNguoi, loaiNguoi }
+      });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Lấy danh sách người dùng có thể nhắn tin
+  async getAvailableUsers(loaiNguoi: string) {
+    try {
+      const response = await apiClient.get('/api-admin/chat/users', {
+        params: { loaiNguoi }
+      });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Xóa cuộc trò chuyện
+  async deleteConversation(maCuocTroChuyen: number) {
+    try {
+      const response = await apiClient.delete(`/api-admin/chat/conversations/${maCuocTroChuyen}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
 };
 

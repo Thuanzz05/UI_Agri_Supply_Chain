@@ -1,6 +1,7 @@
 import React from 'react';
 import {
   Alert,
+  Button,
   Card,
   Col,
   Descriptions,
@@ -13,6 +14,8 @@ import {
   Tag,
   message,
 } from 'antd';
+import { MessageOutlined } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
 import type { TableProps } from 'antd';
 import {
   CheckCircleOutlined,
@@ -81,6 +84,7 @@ const getApiErrorMessage = (error: any, fallbackMessage: string) => {
 };
 
 const QuanLyDonHangNongDan: React.FC = () => {
+  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = React.useState(1);
   const [pageSize, setPageSize] = React.useState(10);
   const [loading, setLoading] = React.useState(false);
@@ -218,6 +222,19 @@ const QuanLyDonHangNongDan: React.FC = () => {
         }
       },
     });
+  };
+
+  const handleChatWithBuyer = () => {
+    if (!selectedOrder) return;
+    
+    const chatInfo = {
+      maNguoi: selectedOrder.maNguoiMua,
+      loaiNguoi: selectedOrder.loaiNguoiMua || 'daily',
+      tenNguoi: selectedOrder.tenNguoiMua,
+    };
+    localStorage.setItem('pendingChat', JSON.stringify(chatInfo));
+    navigate('/farmer/messages');
+    message.info(`Đang mở chat với ${selectedOrder.tenNguoiMua}`);
   };
 
   const filteredOrders = React.useMemo(() => {
@@ -480,7 +497,20 @@ const QuanLyDonHangNongDan: React.FC = () => {
                   {getTrangThaiText(selectedOrder.trangThai)}
                 </Tag>
               </Descriptions.Item>
-              <Descriptions.Item label="Người mua">{selectedOrder.tenNguoiMua}</Descriptions.Item>
+              <Descriptions.Item label="Người mua">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span>{selectedOrder.tenNguoiMua}</span>
+                  <Button
+                    type="link"
+                    size="small"
+                    icon={<MessageOutlined />}
+                    onClick={handleChatWithBuyer}
+                    style={{ padding: 0 }}
+                  >
+                    Nhắn tin
+                  </Button>
+                </div>
+              </Descriptions.Item>
               <Descriptions.Item label="Facebook/TikTok">
                 <SocialLinks data={counterpartyProfile || selectedOrder} showEmpty />
               </Descriptions.Item>

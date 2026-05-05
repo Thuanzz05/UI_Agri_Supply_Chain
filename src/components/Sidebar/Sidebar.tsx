@@ -15,6 +15,7 @@ import {
   SafetyOutlined,
   TruckOutlined,
   KeyOutlined,
+  MessageOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Button, Menu } from 'antd';
@@ -99,6 +100,11 @@ const Sidebar: React.FC = () => {
       label: 'Đơn hàng' 
     },
     { 
+      key: '/chat', 
+      icon: <MessageOutlined />, 
+      label: 'Tin nhắn' 
+    },
+    { 
       key: '/farmer/profile', 
       icon: <UserOutlined />, 
       label: 'Thông tin cá nhân' 
@@ -151,6 +157,11 @@ const Sidebar: React.FC = () => {
       label: 'Vận chuyển' 
     },
     { 
+      key: '/chat', 
+      icon: <MessageOutlined />, 
+      label: 'Tin nhắn' 
+    },
+    { 
       key: '/agent/profile', 
       icon: <UserOutlined />, 
       label: 'Thông tin cá nhân' 
@@ -186,6 +197,11 @@ const Sidebar: React.FC = () => {
       key: '/supermarket/traceability', 
       icon: <SafetyOutlined />, 
       label: 'Truy xuất nguồn gốc' 
+    },
+    { 
+      key: '/chat', 
+      icon: <MessageOutlined />, 
+      label: 'Tin nhắn' 
     },
     { 
       key: '/supermarket/profile', 

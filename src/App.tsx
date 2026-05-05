@@ -30,6 +30,7 @@ import ThongTinCaNhanSieuThi from './pages/SieuThi/ThongTinCaNhan';
 import TruyXuatNguonGoc from './pages/SieuThi/TruyXuatNguonGoc';
 import QuanLyNguoiDung from './pages/Admin/QuanLyNguoiDung';
 import QuanLyTaiKhoan from './pages/Admin/QuanLyTaiKhoan';
+import TinNhan from './pages/Chat/TinNhan';
 import ProtectedRoute from './components/ProtectedRoute';
 import 'antd/dist/reset.css';
 
@@ -125,6 +126,14 @@ function App() {
             } 
           />
           <Route 
+            path="/farmer/messages" 
+            element={
+              <ProtectedRoute>
+                <TinNhan />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
             path="/agent/dashboard" 
             element={
               <ProtectedRoute>
@@ -189,6 +198,14 @@ function App() {
             } 
           />
           <Route 
+            path="/agent/messages" 
+            element={
+              <ProtectedRoute>
+                <TinNhan />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
             path="/supermarket/dashboard" 
             element={
               <ProtectedRoute>
@@ -225,6 +242,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <ThongTinCaNhanSieuThi />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/supermarket/messages" 
+            element={
+              <ProtectedRoute>
+                <TinNhan />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/chat" 
+            element={
+              <ProtectedRoute>
+                <TinNhan />
               </ProtectedRoute>
             } 
           />

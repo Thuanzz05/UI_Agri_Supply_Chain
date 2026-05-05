@@ -18,6 +18,7 @@ import {
 import type { TableProps } from 'antd';
 import {
   CheckCircleOutlined,
+  MessageOutlined,
   DollarOutlined,
   EyeOutlined,
   FileTextOutlined,
@@ -32,6 +33,7 @@ import type { ChiTietDonHang, DonHang } from '../../types/donHang';
 import type { NongDan } from '../../types/nongDan';
 import type { LoNongSan } from '../../types/loNongSan';
 import { ModalButton } from '../../components/ModalButton';
+import { useNavigate } from 'react-router-dom';
 import { ActionButton } from '../../components/ActionButton';
 import SocialLinks from '../../components/SocialLinks';
 import dayjs from 'dayjs';
@@ -81,6 +83,7 @@ const getApiErrorMessage = (error: any, fallbackMessage: string) => {
 };
 
 const DonHangMuaVao: React.FC = () => {
+  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = React.useState(1);
   const [pageSize, setPageSize] = React.useState(10);
   const [loading, setLoading] = React.useState(false);
@@ -258,6 +261,19 @@ const DonHangMuaVao: React.FC = () => {
     setIsDetailModalOpen(false);
     setSelectedOrder(null);
     setCounterpartyProfile(null);
+  };
+
+  const handleChatWithFarmer = () => {
+    if (!selectedOrder) return;
+    
+    const chatInfo = {
+      maNguoi: selectedOrder.maNguoiBan,
+      loaiNguoi: selectedOrder.loaiNguoiBan || 'nongdan',
+      tenNguoi: selectedOrder.tenNguoiBan,
+    };
+    localStorage.setItem('pendingChat', JSON.stringify(chatInfo));
+    navigate('/agent/messages');
+    message.info(`Đang mở chat với ${selectedOrder.tenNguoiBan}`);
   };
 
 
@@ -642,7 +658,20 @@ const DonHangMuaVao: React.FC = () => {
                   {getTrangThaiText(selectedOrder.trangThai)}
                 </Tag>
               </Descriptions.Item>
-              <Descriptions.Item label="Nông dân">{selectedOrder.tenNguoiBan}</Descriptions.Item>
+              <Descriptions.Item label="Nông dân">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span>{selectedOrder.tenNguoiBan}</span>
+                  <Button
+                    type="link"
+                    size="small"
+                    icon={<MessageOutlined />}
+                    onClick={handleChatWithFarmer}
+                    style={{ padding: 0 }}
+                  >
+                    Nhắn tin
+                  </Button>
+                </div>
+              </Descriptions.Item>
               <Descriptions.Item label="Facebook/TikTok">
                 <SocialLinks data={counterpartyProfile || selectedOrder} showEmpty />
               </Descriptions.Item>
