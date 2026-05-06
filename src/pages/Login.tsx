@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Form, Input, Button, Card, Typography, message, Select, Row, Col } from 'antd';
 import { UserOutlined, LockOutlined, LoginOutlined, TeamOutlined } from '@ant-design/icons';
-import { authService, type LoginRequest } from '../services/authService';
+import { authService, normalizeRoleToBackend, normalizeUserRole, type LoginRequest } from '../services/authService';
 import loginImage from '../assets/login.png';
 import './Login.css';
 
@@ -13,6 +13,28 @@ interface LoginFormData {
   matKhau: string;
   loaiTaiKhoan: string;
 }
+
+interface ApiLoginData {
+  maTaiKhoan?: number;
+  MaTaiKhoan?: number;
+  tenDangNhap?: string;
+  TenDangNhap?: string;
+  loaiTaiKhoan?: string;
+  LoaiTaiKhoan?: string;
+  maNongDan?: number;
+  MaNongDan?: number;
+  maDaiLy?: number;
+  MaDaiLy?: number;
+  maSieuThi?: number;
+  MaSieuThi?: number;
+}
+
+const DASHBOARD_BY_ROLE: Record<string, string> = {
+  Admin: '/admin/dashboard',
+  Farmer: '/farmer/dashboard',
+  Agent: '/agent/dashboard',
+  Supermarket: '/supermarket/dashboard',
+};
 
 const Login: React.FC = () => {
   const [form] = Form.useForm();
@@ -30,44 +52,32 @@ const Login: React.FC = () => {
       const response = await authService.login(loginData);
       
       if (response.success && response.data) {
+        const apiData = response.data as ApiLoginData;
+        const selectedRole = normalizeRoleToBackend(values.loaiTaiKhoan);
+        const apiRoleRaw = apiData.loaiTaiKhoan || apiData.LoaiTaiKhoan;
+        const apiRole = normalizeRoleToBackend(apiRoleRaw);
+
+        if (!apiRole || selectedRole !== apiRole) {
+          message.error('Loại tài khoản đã chọn không khớp với tài khoản đăng nhập!');
+          authService.logout();
+          return;
+        }
+
         message.success('Đăng nhập thành công!');
-        
-        // Lưu loại tài khoản đã chọn vào localStorage
-        const selectedRole = values.loaiTaiKhoan;
+
+        const appRole = normalizeUserRole(apiRole);
         const userData = {
-          maTaiKhoan: response.data.maTaiKhoan || (response.data as any).MaTaiKhoan,
-          tenDangNhap: response.data.tenDangNhap || (response.data as any).TenDangNhap,
-          loaiTaiKhoan: selectedRole, // Sử dụng loại tài khoản đã chọn
-          maNongDan: response.data.maNongDan || (response.data as any).MaNongDan,
-          maDaiLy: response.data.maDaiLy || (response.data as any).MaDaiLy,
-          maSieuThi: response.data.maSieuThi || (response.data as any).MaSieuThi
+          maTaiKhoan: apiData.maTaiKhoan ?? apiData.MaTaiKhoan,
+          tenDangNhap: apiData.tenDangNhap ?? apiData.TenDangNhap,
+          loaiTaiKhoan: appRole,
+          maNongDan: apiData.maNongDan ?? apiData.MaNongDan,
+          maDaiLy: apiData.maDaiLy ?? apiData.MaDaiLy,
+          maSieuThi: apiData.maSieuThi ?? apiData.MaSieuThi
         };
         
         localStorage.setItem('user', JSON.stringify(userData));
-        
-        // Redirect dựa trên loại tài khoản được chọn
-        if (selectedRole === 'Admin') {
-          navigate('/admin/dashboard');
-        } else if (selectedRole === 'Farmer') {
-          navigate('/farmer/dashboard');
-        } else if (selectedRole === 'Agent') {
-          navigate('/agent/dashboard');
-        } else if (selectedRole === 'Supermarket') {
-          navigate('/supermarket/dashboard');
-        } else {
-          // Mặc định redirect theo role từ API
-          if (response.data.loaiTaiKhoan === 'Admin') {
-            navigate('/admin/dashboard');
-          } else if (response.data.loaiTaiKhoan === 'Farmer') {
-            navigate('/farmer/dashboard');
-          } else if (response.data.loaiTaiKhoan === 'Agent') {
-            navigate('/agent/dashboard');
-          } else if (response.data.loaiTaiKhoan === 'Supermarket') {
-            navigate('/supermarket/dashboard');
-          } else {
-            navigate('/admin/dashboard');
-          }
-        }
+
+        navigate(DASHBOARD_BY_ROLE[appRole] ?? '/login');
       } else {
         message.error(response.message || 'Đăng nhập thất bại!');
       }
@@ -134,10 +144,10 @@ const Login: React.FC = () => {
                   suffixIcon={<TeamOutlined />}
                   size="large"
                 >
-                  <Select.Option value="Admin">Quản trị viên</Select.Option>
-                  <Select.Option value="Farmer">Nông dân</Select.Option>
-                  <Select.Option value="Agent">Đại lý</Select.Option>
-                  <Select.Option value="Supermarket">Siêu thị</Select.Option>
+                  <Select.Option value="admin">Quản trị viên</Select.Option>
+                  <Select.Option value="nongdan">Nông dân</Select.Option>
+                  <Select.Option value="daily">Đại lý</Select.Option>
+                  <Select.Option value="sieuthi">Siêu thị</Select.Option>
                 </Select>
               </Form.Item>
 

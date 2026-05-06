@@ -28,8 +28,8 @@ import QuanLyDonHangSieuThi from './pages/SieuThi/QuanLyDonHang';
 import QuanLyKhoSieuThi from './pages/SieuThi/QuanLyKho';
 import ThongTinCaNhanSieuThi from './pages/SieuThi/ThongTinCaNhan';
 import TruyXuatNguonGoc from './pages/SieuThi/TruyXuatNguonGoc';
-import QuanLyNguoiDung from './pages/Admin/QuanLyNguoiDung';
-import QuanLyTaiKhoan from './pages/Admin/QuanLyTaiKhoan';
+import QuanLyNguoiDung from './pages/admin/QuanLyNguoiDung';
+import QuanLyTaiKhoan from './pages/admin/QuanLyTaiKhoan';
 import TinNhan from './pages/Chat/TinNhan';
 import ProtectedRoute from './components/ProtectedRoute';
 import 'antd/dist/reset.css';
@@ -48,7 +48,7 @@ function App() {
           <Route 
             path="/admin/dashboard" 
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['Admin']}>
                 <Dashboard />
               </ProtectedRoute>
             } 
@@ -56,7 +56,7 @@ function App() {
           <Route 
             path="/admin/users" 
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['Admin']}>
                 <Users />
               </ProtectedRoute>
             } 
@@ -64,7 +64,7 @@ function App() {
           <Route 
             path="/admin/quan-ly-nguoi-dung" 
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['Admin']}>
                 <QuanLyNguoiDung />
               </ProtectedRoute>
             } 
@@ -72,7 +72,7 @@ function App() {
           <Route 
             path="/admin/quan-ly-tai-khoan" 
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['Admin']}>
                 <QuanLyTaiKhoan />
               </ProtectedRoute>
             } 
@@ -80,7 +80,7 @@ function App() {
           <Route 
             path="/farmer/dashboard" 
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['Farmer']}>
                 <DashboardNongDan />
               </ProtectedRoute>
             } 
@@ -88,7 +88,7 @@ function App() {
           <Route 
             path="/farmer/products" 
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['Farmer']}>
                 <QuanLySanPham />
               </ProtectedRoute>
             } 
@@ -96,7 +96,7 @@ function App() {
           <Route 
             path="/farmer/farms" 
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['Farmer']}>
                 <QuanLyTrangTrai />
               </ProtectedRoute>
             } 
@@ -104,7 +104,7 @@ function App() {
           <Route 
             path="/farmer/batches" 
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['Farmer']}>
                 <QuanLyLoNongSan />
               </ProtectedRoute>
             } 
@@ -112,7 +112,7 @@ function App() {
           <Route 
             path="/farmer/orders" 
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['Farmer']}>
                 <QuanLyDonHangNongDan />
               </ProtectedRoute>
             } 
@@ -120,7 +120,7 @@ function App() {
           <Route 
             path="/farmer/profile" 
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['Farmer']}>
                 <ThongTinCaNhanNongDan />
               </ProtectedRoute>
             } 
@@ -128,7 +128,7 @@ function App() {
           <Route 
             path="/farmer/messages" 
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['Farmer']}>
                 <TinNhan />
               </ProtectedRoute>
             } 
@@ -136,7 +136,7 @@ function App() {
           <Route 
             path="/agent/dashboard" 
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['Agent']}>
                 <DashboardDaiLy />
               </ProtectedRoute>
             } 
@@ -144,7 +144,7 @@ function App() {
           <Route 
             path="/agent/warehouses" 
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['Agent']}>
                 <QuanLyKho />
               </ProtectedRoute>
             } 
@@ -152,7 +152,7 @@ function App() {
           <Route 
             path="/agent/inventory" 
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['Agent']}>
                 <TonKhoDaiLy />
               </ProtectedRoute>
             } 
@@ -160,7 +160,7 @@ function App() {
           <Route 
             path="/agent/orders-in" 
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['Agent']}>
                 <DonHangMuaVao />
               </ProtectedRoute>
             } 
@@ -168,7 +168,7 @@ function App() {
           <Route 
             path="/agent/orders-out" 
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['Agent']}>
                 <DonHangBanRa />
               </ProtectedRoute>
             } 
@@ -176,7 +176,7 @@ function App() {
           <Route 
             path="/agent/quality-check" 
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['Agent']}>
                 <KiemDinhChatLuong />
               </ProtectedRoute>
             } 
@@ -184,7 +184,7 @@ function App() {
           <Route 
             path="/agent/transport" 
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['Agent']}>
                 <QuanLyVanChuyen />
               </ProtectedRoute>
             } 
@@ -192,7 +192,7 @@ function App() {
           <Route 
             path="/agent/profile" 
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['Agent']}>
                 <ThongTinCaNhanDaiLy />
               </ProtectedRoute>
             } 
@@ -200,7 +200,7 @@ function App() {
           <Route 
             path="/agent/messages" 
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['Agent']}>
                 <TinNhan />
               </ProtectedRoute>
             } 
@@ -208,7 +208,7 @@ function App() {
           <Route 
             path="/supermarket/dashboard" 
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['Supermarket']}>
                 <DashboardSieuThi />
               </ProtectedRoute>
             } 
@@ -216,7 +216,7 @@ function App() {
           <Route 
             path="/supermarket/orders" 
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['Supermarket']}>
                 <QuanLyDonHangSieuThi />
               </ProtectedRoute>
             } 
@@ -224,7 +224,7 @@ function App() {
           <Route 
             path="/supermarket/warehouses" 
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['Supermarket']}>
                 <QuanLyKhoSieuThi />
               </ProtectedRoute>
             } 
@@ -232,7 +232,7 @@ function App() {
           <Route 
             path="/supermarket/traceability" 
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['Supermarket']}>
                 <TruyXuatNguonGoc />
               </ProtectedRoute>
             } 
@@ -240,7 +240,7 @@ function App() {
           <Route 
             path="/supermarket/profile" 
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['Supermarket']}>
                 <ThongTinCaNhanSieuThi />
               </ProtectedRoute>
             } 
@@ -248,7 +248,7 @@ function App() {
           <Route 
             path="/supermarket/messages" 
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['Supermarket']}>
                 <TinNhan />
               </ProtectedRoute>
             } 
@@ -256,7 +256,7 @@ function App() {
           <Route 
             path="/chat" 
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['Admin', 'Farmer', 'Agent', 'Supermarket']}>
                 <TinNhan />
               </ProtectedRoute>
             } 

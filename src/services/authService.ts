@@ -55,6 +55,40 @@ export interface LoginResponse {
   };
 }
 
+const APP_TO_BACKEND_ROLE: Record<string, string> = {
+  admin: 'admin',
+  quantri: 'admin',
+  quan_tri: 'admin',
+  farmer: 'nongdan',
+  nongdan: 'nongdan',
+  nong_dan: 'nongdan',
+  agent: 'daily',
+  daily: 'daily',
+  dai_ly: 'daily',
+  supermarket: 'sieuthi',
+  sieuthi: 'sieuthi',
+  sieu_thi: 'sieuthi',
+};
+
+const BACKEND_TO_APP_ROLE: Record<string, string> = {
+  admin: 'Admin',
+  nongdan: 'Farmer',
+  daily: 'Agent',
+  sieuthi: 'Supermarket',
+};
+
+export const normalizeUserRole = (role?: string): string => {
+  if (!role) return '';
+  const backendRole = normalizeRoleToBackend(role);
+  return BACKEND_TO_APP_ROLE[backendRole] ?? role;
+};
+
+export const normalizeRoleToBackend = (role?: string): string => {
+  if (!role) return '';
+  const normalized = role.trim().toLowerCase();
+  return APP_TO_BACKEND_ROLE[normalized] ?? normalized;
+};
+
 export const authService = {
   async register(registerData: RegisterRequest): Promise<{ success: boolean; message: string }> {
     try {
