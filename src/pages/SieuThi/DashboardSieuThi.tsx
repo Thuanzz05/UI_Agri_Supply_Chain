@@ -138,7 +138,7 @@ const DashboardSieuThi: React.FC = () => {
               title="Sản phẩm trong kho"
               value={stats?.tongSanPhamTrongKho || 0}
               prefix={<ShopOutlined />}
-              styles={{ value: { color: '#52c41a' } }}
+              styles={{ content: { color: '#52c41a' } }}
             />
           </Card>
         </Col>
@@ -148,7 +148,7 @@ const DashboardSieuThi: React.FC = () => {
               title="Đơn hàng tháng này"
               value={stats?.tongDonHangThang || 0}
               prefix={<ShoppingCartOutlined />}
-              styles={{ value: { color: '#1890ff' } }}
+              styles={{ content: { color: '#1890ff' } }}
             />
           </Card>
         </Col>
@@ -158,7 +158,7 @@ const DashboardSieuThi: React.FC = () => {
               title="Chờ xác nhận"
               value={stats?.soDonChoXacNhan || 0}
               prefix={<ClockCircleOutlined />}
-              styles={{ value: { color: '#fa8c16' } }}
+              styles={{ content: { color: '#fa8c16' } }}
             />
           </Card>
         </Col>
@@ -168,7 +168,7 @@ const DashboardSieuThi: React.FC = () => {
               title="Đã hoàn thành"
               value={stats?.soDonHoanThanh || 0}
               prefix={<CheckCircleOutlined />}
-              styles={{ value: { color: '#52c41a' } }}
+              styles={{ content: { color: '#52c41a' } }}
             />
           </Card>
         </Col>

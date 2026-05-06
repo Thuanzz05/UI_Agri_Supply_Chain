@@ -102,13 +102,18 @@ const KiemDinhChatLuong: React.FC = () => {
   const showKiemDinhModal = (record: DataType) => {
     setSelectedLo(record);
     setIsModalOpen(true);
-    form.resetFields();
+    if (record.trangThaiKiemDinh === 'cho_kiem_dinh') {
+      setTimeout(() => form.resetFields(), 0);
+    }
   };
 
   const handleCancel = () => {
+    const shouldReset = selectedLo?.trangThaiKiemDinh === 'cho_kiem_dinh';
     setIsModalOpen(false);
     setSelectedLo(null);
-    form.resetFields();
+    if (shouldReset) {
+      form.resetFields();
+    }
   };
 
   const handleKiemDinh = async (values: any) => {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Layout, Input, Button, Avatar, Badge, Empty, message, Spin, Modal, List, Select, Popconfirm } from 'antd';
+import { Layout, Input, Button, Avatar, Badge, Empty, message, Spin, Modal, Select, Popconfirm } from 'antd';
 import { SendOutlined, UserOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import { authService } from '../../services/authService';
 import { apiService } from '../../services/apiService';
@@ -195,7 +195,6 @@ const TinNhan: React.FC = () => {
       if (!userInfo) return;
 
       await apiService.sendMessage(userInfo.maNguoi, userInfo.loaiNguoi, {
-        maCuocTroChuyen: null,
         maNguoiNhan: selectedUserId,
         loaiNguoiNhan: selectedUserType,
         noiDung: newChatMessage.trim(),

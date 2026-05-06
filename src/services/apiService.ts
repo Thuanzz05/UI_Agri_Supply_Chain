@@ -323,6 +323,32 @@ export const apiService = {
     throw lastError;
   },
 
+  // Chuyển kho nội bộ (đại lý)
+  async transferInventory(payload: {
+    maKhoNguon: number;
+    maKhoDich: number;
+    maLo: number;
+    soLuong: number;
+    ghiChu?: string;
+  }) {
+    try {
+      const response = await apiClient.post('/api-daily/chuyen-kho/create', payload);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Lịch sử chuyển kho theo đại lý
+  async getTransferHistoryByAgent(maDaiLy: number) {
+    try {
+      const response = await apiClient.get(`/api-daily/chuyen-kho/get-by-dai-ly/${maDaiLy}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
   // ============ API NÔNG DÂN ============
   
   // Lấy tất cả nông dân
@@ -943,7 +969,7 @@ export const apiService = {
   },
 
   // Hoàn thành vận chuyển
-  async completeTransport(id: number) {
+  async completeTransport(id: number, maKhoDich: number) {
     const routes = [
       `/api-daily/van-chuyen/hoan-thanh/${id}`,
       `/api/van-chuyen/hoan-thanh/${id}`
@@ -952,7 +978,9 @@ export const apiService = {
     let lastError: any = null;
     for (const route of routes) {
       try {
-        const response = await apiClient.put(route);
+        const response = await apiClient.put(route, null, {
+          params: { maKhoDich },
+        });
         return response.data;
       } catch (error: any) {
         lastError = error;

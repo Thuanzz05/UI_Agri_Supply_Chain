@@ -43,8 +43,14 @@ const getTrangThaiColor = (trangThai: string) => {
   switch (trangThai) {
     case 'cho_xac_nhan':
       return 'orange';
+    case 'cho_kiem_dinh':
+      return 'blue';
+    case 'dang_van_chuyen':
+      return 'cyan';
     case 'hoan_thanh':
       return 'green';
+    case 'tra_hang':
+      return 'volcano';
     case 'da_huy':
       return 'red';
     default:
@@ -56,8 +62,14 @@ const getTrangThaiText = (trangThai: string) => {
   switch (trangThai) {
     case 'cho_xac_nhan':
       return 'Chờ xác nhận';
+    case 'cho_kiem_dinh':
+      return 'Chờ kiểm định';
+    case 'dang_van_chuyen':
+      return 'Đang vận chuyển';
     case 'hoan_thanh':
       return 'Hoàn thành';
+    case 'tra_hang':
+      return 'Trả hàng';
     case 'da_huy':
       return 'Đã hủy';
     default:
@@ -199,19 +211,19 @@ const QuanLyDonHangNongDan: React.FC = () => {
 
   const handleUpdateStatus = async (maDonHang: number, trangThai: string) => {
     Modal.confirm({
-      title: trangThai === 'hoan_thanh' ? 'Xác nhận đơn hàng' : 'Từ chối đơn hàng',
-      content: trangThai === 'hoan_thanh' 
-        ? 'Bạn có chắc chắn muốn xác nhận đơn hàng này?' 
+      title: trangThai === 'cho_kiem_dinh' ? 'Xác nhận đơn hàng' : 'Từ chối đơn hàng',
+      content: trangThai === 'cho_kiem_dinh' 
+        ? 'Xác nhận đơn hàng này sẽ chuyển lô sang trạng thái chờ kiểm định. Bạn có chắc chắn không?' 
         : 'Bạn có chắc chắn muốn từ chối đơn hàng này?',
-      okText: trangThai === 'hoan_thanh' ? 'Xác nhận' : 'Từ chối',
-      okType: trangThai === 'hoan_thanh' ? 'primary' : 'danger',
+      okText: trangThai === 'cho_kiem_dinh' ? 'Xác nhận' : 'Từ chối',
+      okType: trangThai === 'cho_kiem_dinh' ? 'primary' : 'danger',
       cancelText: 'Hủy',
       onOk: async () => {
         try {
           await apiService.updateFarmerOrderStatus(maDonHang, trangThai);
           message.success(
-            trangThai === 'hoan_thanh' 
-              ? 'Xác nhận đơn hàng thành công' 
+            trangThai === 'cho_kiem_dinh' 
+              ? 'Đơn hàng đã chuyển sang chờ kiểm định' 
               : 'Từ chối đơn hàng thành công'
           );
           handleCloseDetailModal();
@@ -371,7 +383,7 @@ const QuanLyDonHangNongDan: React.FC = () => {
               title="Chờ xác nhận"
               value={stats.choXacNhan}
               prefix={<ShoppingCartOutlined />}
-              valueStyle={{ color: '#faad14' }}
+              styles={{ content: { color: '#faad14' } }}
             />
           </Card>
         </Col>
@@ -381,7 +393,7 @@ const QuanLyDonHangNongDan: React.FC = () => {
               title="Hoàn thành"
               value={stats.hoanThanh}
               prefix={<CheckCircleOutlined />}
-              valueStyle={{ color: '#52c41a' }}
+              styles={{ content: { color: '#52c41a' } }}
             />
           </Card>
         </Col>
@@ -417,7 +429,10 @@ const QuanLyDonHangNongDan: React.FC = () => {
             options={[
               { label: 'Tất cả trạng thái', value: 'all' },
               { label: 'Chờ xác nhận', value: 'cho_xac_nhan' },
+              { label: 'Chờ kiểm định', value: 'cho_kiem_dinh' },
+              { label: 'Đang vận chuyển', value: 'dang_van_chuyen' },
               { label: 'Hoàn thành', value: 'hoan_thanh' },
+              { label: 'Trả hàng', value: 'tra_hang' },
               { label: 'Đã hủy', value: 'da_huy' },
             ]}
           />
@@ -466,7 +481,7 @@ const QuanLyDonHangNongDan: React.FC = () => {
               <ModalButton
                 type="primary"
                 icon={<CheckCircleOutlined />}
-                onClick={() => handleUpdateStatus(selectedOrder.maDonHang, 'hoan_thanh')}
+                onClick={() => handleUpdateStatus(selectedOrder.maDonHang, 'cho_kiem_dinh')}
               >
                 Xác nhận
               </ModalButton>
@@ -482,7 +497,7 @@ const QuanLyDonHangNongDan: React.FC = () => {
           <>
             {selectedOrder.trangThai === 'cho_xac_nhan' && (
               <Alert
-                message="Đơn hàng chờ xác nhận"
+                title="Đơn hàng chờ xác nhận"
                 description="Vui lòng kiểm tra kỹ thông tin đơn hàng trước khi xác nhận hoặc từ chối."
                 type="warning"
                 showIcon
@@ -490,7 +505,7 @@ const QuanLyDonHangNongDan: React.FC = () => {
               />
             )}
 
-            <Descriptions bordered column={2} size="small">
+            <Descriptions bordered column={1} size="small">
               <Descriptions.Item label="Mã đơn hàng">{selectedOrder.maDonHang}</Descriptions.Item>
               <Descriptions.Item label="Trạng thái">
                 <Tag color={getTrangThaiColor(selectedOrder.trangThai)}>
@@ -517,7 +532,7 @@ const QuanLyDonHangNongDan: React.FC = () => {
               <Descriptions.Item label="Ngày đặt">
                 {dayjs(selectedOrder.ngayDat).format('DD/MM/YYYY HH:mm')}
               </Descriptions.Item>
-              <Descriptions.Item label="Tổng giá trị" span={2}>
+              <Descriptions.Item label="Tổng giá trị">
                 <strong style={{ fontSize: 16, color: '#1890ff' }}>
                   {selectedOrder.tongGiaTri.toLocaleString('vi-VN')} đ
                 </strong>

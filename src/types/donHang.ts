@@ -20,7 +20,7 @@ export interface DonHang {
   maNguoiMua: number;
   loaiNguoiMua: string; // 'daily', 'sieuthi'
   ngayDat: string;
-  trangThai: string; // 'cho_xac_nhan', 'hoan_thanh', 'da_huy'
+  trangThai: string; // 'cho_xac_nhan', 'cho_kiem_dinh', 'dang_van_chuyen', 'hoan_thanh', 'tra_hang', 'da_huy'
   tongGiaTri: number;
   tenNguoiBan?: string;
   tenNguoiMua?: string;

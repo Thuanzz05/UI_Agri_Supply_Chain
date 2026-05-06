@@ -7,6 +7,7 @@ import { ActionButton } from '../../components/ActionButton';
 import { ModalButton } from '../../components/ModalButton';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
+import type { Kho } from '../../types/kho';
 
 interface VanChuyen {
   maVanChuyen: number;
@@ -31,12 +32,24 @@ const QuanLyVanChuyen: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [editingVanChuyen, setEditingVanChuyen] = useState<VanChuyen | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [warehouses, setWarehouses] = useState<Kho[]>([]);
+  const [completeModalOpen, setCompleteModalOpen] = useState(false);
+  const [completingTransportId, setCompletingTransportId] = useState<number | null>(null);
+  const [selectedWarehouseId, setSelectedWarehouseId] = useState<number | null>(null);
   const [stats, setStats] = useState({
     tongVanChuyen: 0,
     dangVanChuyen: 0,
     hoanThanh: 0
   });
   const [form] = Form.useForm();
+
+  const getApiErrorMessage = (error: any, fallbackMessage: string) => {
+    const responseData = error?.response?.data;
+    if (typeof responseData === 'string' && responseData.trim()) return responseData;
+    if (typeof responseData?.message === 'string' && responseData.message.trim()) return responseData.message;
+    if (typeof responseData?.title === 'string' && responseData.title.trim()) return responseData.title;
+    return fallbackMessage;
+  };
 
   useEffect(() => {
     loadVanChuyens();
@@ -64,7 +77,10 @@ const QuanLyVanChuyen: React.FC = () => {
       }
 
       // Gọi API lấy vận chuyển theo đại lý
-      const response = await apiService.getTransportsByAgent(maDaiLy);
+      const [response, warehouseRes] = await Promise.all([
+        apiService.getTransportsByAgent(maDaiLy),
+        apiService.getWarehousesByAgent(String(maDaiLy)),
+      ]);
       // Backend trả về { success, data, count } - cần lấy data từ response
       let list: any[] = [];
       if (response && response.data) {
@@ -73,6 +89,9 @@ const QuanLyVanChuyen: React.FC = () => {
         list = response;
       }
       setVanChuyens(list);
+
+      const whData = warehouseRes?.data || warehouseRes;
+      setWarehouses(Array.isArray(whData) ? whData : []);
 
       // Fetch stats
       const statsResponse = await apiService.getTransportStats(maDaiLy);
@@ -105,13 +124,28 @@ const QuanLyVanChuyen: React.FC = () => {
   };
 
   const handleComplete = async (id: number) => {
+    setCompletingTransportId(id);
+    setSelectedWarehouseId(null);
+    setCompleteModalOpen(true);
+  };
+
+  const confirmComplete = async () => {
+    if (!completingTransportId) return;
+    if (!selectedWarehouseId) {
+      message.error('Vui lòng chọn kho đích để nhập hàng');
+      return;
+    }
+
     try {
-      await apiService.completeTransport(id);
+      await apiService.completeTransport(completingTransportId, selectedWarehouseId);
       message.success('Hoàn thành vận chuyển thành công');
+      setCompleteModalOpen(false);
+      setCompletingTransportId(null);
+      setSelectedWarehouseId(null);
       loadVanChuyens();
     } catch (error: any) {
       console.error('Error completing transport:', error);
-      message.error('Không thể hoàn thành vận chuyển');
+      message.error(getApiErrorMessage(error, 'Không thể hoàn thành vận chuyển'));
     }
   };
 
@@ -135,7 +169,7 @@ const QuanLyVanChuyen: React.FC = () => {
       loadVanChuyens();
     } catch (error: any) {
       console.error('Error saving transport:', error);
-      message.error('Không thể lưu thông tin vận chuyển');
+      message.error(getApiErrorMessage(error, 'Không thể lưu thông tin vận chuyển'));
     }
   };
 
@@ -252,7 +286,7 @@ const QuanLyVanChuyen: React.FC = () => {
               title="Tổng vận chuyển"
               value={stats.tongVanChuyen}
               prefix={<TruckOutlined />}
-              valueStyle={{ color: '#1890ff' }}
+              styles={{ content: { color: '#1890ff' } }}
             />
           </Card>
         </Col>
@@ -262,7 +296,7 @@ const QuanLyVanChuyen: React.FC = () => {
               title="Đang vận chuyển"
               value={stats.dangVanChuyen}
               prefix={<ClockCircleOutlined />}
-              valueStyle={{ color: '#faad14' }}
+              styles={{ content: { color: '#faad14' } }}
             />
           </Card>
         </Col>
@@ -272,7 +306,7 @@ const QuanLyVanChuyen: React.FC = () => {
               title="Hoàn thành"
               value={stats.hoanThanh}
               prefix={<CheckCircleOutlined />}
-              valueStyle={{ color: '#52c41a' }}
+              styles={{ content: { color: '#52c41a' } }}
             />
           </Card>
         </Col>
@@ -404,6 +438,43 @@ const QuanLyVanChuyen: React.FC = () => {
             </Space>
           </Form.Item>
         </Form>
+      </Modal>
+
+      <Modal
+        title="Chọn kho đích để nhập hàng"
+        open={completeModalOpen}
+        onCancel={() => {
+          setCompleteModalOpen(false);
+          setCompletingTransportId(null);
+          setSelectedWarehouseId(null);
+        }}
+        footer={
+          <Space>
+            <ModalButton
+              onClick={() => {
+                setCompleteModalOpen(false);
+                setCompletingTransportId(null);
+                setSelectedWarehouseId(null);
+              }}
+            >
+              Hủy
+            </ModalButton>
+            <ModalButton type="primary" onClick={confirmComplete}>
+              Xác nhận
+            </ModalButton>
+          </Space>
+        }
+      >
+        <Select
+          placeholder="Chọn kho đích"
+          style={{ width: '100%' }}
+          value={selectedWarehouseId ?? undefined}
+          onChange={(value) => setSelectedWarehouseId(Number(value))}
+          options={warehouses.map((kho) => ({
+            value: kho.maKho,
+            label: `${kho.maKho} - ${kho.tenKho}${kho.diaChi ? ` (${kho.diaChi})` : ''}`,
+          }))}
+        />
       </Modal>
     </AdminLayout>
   );

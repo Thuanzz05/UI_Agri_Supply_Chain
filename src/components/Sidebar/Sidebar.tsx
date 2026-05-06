@@ -6,7 +6,6 @@ import {
   LogoutOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
-  FileTextOutlined,
   ShopOutlined,
   ShoppingOutlined,
   InboxOutlined,

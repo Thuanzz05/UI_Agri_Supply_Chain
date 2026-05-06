@@ -30,7 +30,6 @@ import { AdminLayout } from '../../components/Layout';
 import { CustomPagination } from '../../components/CustomPagination';
 import { apiService } from '../../services/apiService';
 import type { ChiTietDonHang, DonHang } from '../../types/donHang';
-import type { NongDan } from '../../types/nongDan';
 import type { LoNongSan } from '../../types/loNongSan';
 import { ModalButton } from '../../components/ModalButton';
 import { useNavigate } from 'react-router-dom';
@@ -46,8 +45,14 @@ const getTrangThaiColor = (trangThai: string) => {
   switch (trangThai) {
     case 'cho_xac_nhan':
       return 'orange';
+    case 'cho_kiem_dinh':
+      return 'blue';
+    case 'dang_van_chuyen':
+      return 'cyan';
     case 'hoan_thanh':
       return 'green';
+    case 'tra_hang':
+      return 'volcano';
     case 'da_huy':
       return 'red';
     default:
@@ -59,8 +64,14 @@ const getTrangThaiText = (trangThai: string) => {
   switch (trangThai) {
     case 'cho_xac_nhan':
       return 'Chờ xác nhận';
+    case 'cho_kiem_dinh':
+      return 'Chờ kiểm định';
+    case 'dang_van_chuyen':
+      return 'Đang vận chuyển';
     case 'hoan_thanh':
       return 'Hoàn thành';
+    case 'tra_hang':
+      return 'Trả hàng';
     case 'da_huy':
       return 'Đã hủy';
     default:
@@ -105,7 +116,7 @@ const DonHangMuaVao: React.FC = () => {
   });
 
   // Danh sách nông dân và lô hàng
-  const [farmers, setFarmers] = React.useState<NongDan[]>([]);
+  const [farmers, setFarmers] = React.useState<Array<{ maNongDan: number; hoTen: string; diaChi?: string }>>([]);
   const [batches, setBatches] = React.useState<LoNongSan[]>([]);
   const [allBatches, setAllBatches] = React.useState<LoNongSan[]>([]); // Lưu tất cả lô để filter
   const [loadingFarmers, setLoadingFarmers] = React.useState(false);
@@ -157,15 +168,8 @@ const DonHangMuaVao: React.FC = () => {
     setLoadingBatches(true);
     
     try {
-      const [farmersResponse, batchesResponse] = await Promise.all([
-        apiService.getAllFarmers(),
-        // Lấy tất cả lô hàng available để tạo đơn hàng
-        apiService.getAllLoHangAvailable(),
-      ]);
-
-      if (farmersResponse?.data) {
-        setFarmers(Array.isArray(farmersResponse.data) ? farmersResponse.data : []);
-      }
+      // Lấy tất cả lô hàng available để tạo đơn hàng
+      const batchesResponse = await apiService.getAllLoHangAvailable();
 
       // Backend trả về { success, message, data, count }
       // apiService đã return response.data nên batchesResponse = { success, message, data, count }
@@ -202,6 +206,20 @@ const DonHangMuaVao: React.FC = () => {
         
         setAllBatches(mappedBatches); // Lưu tất cả lô
         setBatches(mappedBatches); // Hiển thị tất cả lô ban đầu
+
+        // Sinh danh sách nông dân trực tiếp từ lô hàng để tránh phụ thuộc API nông dân.
+        const uniqueFarmers = new Map<number, { maNongDan: number; hoTen: string; diaChi?: string }>();
+        fetchedBatches.forEach((batch: any) => {
+          const maNongDan = Number(batch.maNongDan);
+          if (!Number.isNaN(maNongDan) && !uniqueFarmers.has(maNongDan)) {
+            uniqueFarmers.set(maNongDan, {
+              maNongDan,
+              hoTen: batch.tenNongDan || 'Chưa có tên',
+              diaChi: batch.diaChi || '',
+            });
+          }
+        });
+        setFarmers(Array.from(uniqueFarmers.values()));
       }
     } catch (error: any) {
       message.error(getApiErrorMessage(error, 'Không thể tải danh sách'));
@@ -584,7 +602,10 @@ const DonHangMuaVao: React.FC = () => {
             options={[
               { label: 'Tất cả trạng thái', value: 'all' },
               { label: 'Chờ xác nhận', value: 'cho_xac_nhan' },
+              { label: 'Chờ kiểm định', value: 'cho_kiem_dinh' },
+              { label: 'Đang vận chuyển', value: 'dang_van_chuyen' },
               { label: 'Hoàn thành', value: 'hoan_thanh' },
+              { label: 'Trả hàng', value: 'tra_hang' },
               { label: 'Đã hủy', value: 'da_huy' },
             ]}
           />
@@ -736,7 +757,7 @@ const DonHangMuaVao: React.FC = () => {
             }
             options={farmers.map((farmer) => ({
               value: farmer.maNongDan?.toString(),
-              label: `${farmer.maNongDan} - ${farmer.hoTen || farmer.tenNongDan || 'Chưa có tên'}${
+              label: `${farmer.maNongDan} - ${farmer.hoTen || 'Chưa có tên'}${
                 farmer.diaChi ? ` (${farmer.diaChi})` : ''
               }`,
             }))}
@@ -769,12 +790,6 @@ const DonHangMuaVao: React.FC = () => {
                     (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
                   }
                   options={batches.map((batch: any) => {
-                    const kiemDinhStatus = batch.trangThaiKiemDinh === 'dat' 
-                      ? '✓ Đạt' 
-                      : batch.trangThaiKiemDinh === 'khong_dat'
-                      ? '✗ Không đạt'
-                      : '⚠ Chưa kiểm định';
-                    
                     // Tính số ngày còn lại đến HSD
                     let hsdInfo = '';
                     if (batch.hanSuDung) {
@@ -798,7 +813,7 @@ const DonHangMuaVao: React.FC = () => {
                       value: batch.maLo?.toString(),
                       label: `Lô ${batch.maLo} - ${batch.tenSanPham || 'Chưa có tên'} (${
                         batch.soLuongHienTai || 0
-                      } ${batch.donViTinh || 'kg'})${hsdInfo} - ${kiemDinhStatus}`,
+                      } ${batch.donViTinh || 'kg'})${hsdInfo}`,
                       disabled: batch.trangThaiKiemDinh === 'khong_dat', // Không cho chọn lô không đạt
                     };
                   })}

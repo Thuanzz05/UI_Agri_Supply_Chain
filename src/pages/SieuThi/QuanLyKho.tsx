@@ -131,7 +131,7 @@ const QuanLyKho: React.FC = () => {
               title="Tổng số kho"
               value={khos.length}
               prefix={<HomeOutlined />}
-              valueStyle={{ color: '#1890ff' }}
+              styles={{ content: { color: '#1890ff' } }}
             />
           </Card>
         </Col>
@@ -141,7 +141,7 @@ const QuanLyKho: React.FC = () => {
               title="Số mặt hàng tồn kho"
               value={tonKhos.length}
               prefix={<InboxOutlined />}
-              valueStyle={{ color: '#52c41a' }}
+              styles={{ content: { color: '#52c41a' } }}
             />
           </Card>
         </Col>
@@ -151,7 +151,7 @@ const QuanLyKho: React.FC = () => {
               title="Tổng số lượng"
               value={totalSoLuong}
               prefix={<DatabaseOutlined />}
-              valueStyle={{ color: '#faad14' }}
+              styles={{ content: { color: '#faad14' } }}
             />
           </Card>
         </Col>

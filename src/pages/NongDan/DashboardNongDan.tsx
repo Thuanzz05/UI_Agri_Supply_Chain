@@ -123,7 +123,7 @@ const DashboardNongDan: React.FC = () => {
                   title="Loại sản phẩm đang trồng"
                   value={stats.tongSanPham}
                   prefix={<ShopOutlined style={{ color: '#52c41a' }} />}
-                  valueStyle={{ color: '#52c41a' }}
+                  styles={{ content: { color: '#52c41a' } }}
                 />
               </Card>
             </Col>
@@ -133,7 +133,7 @@ const DashboardNongDan: React.FC = () => {
                   title="Tổng trang trại"
                   value={stats.tongTrangTrai}
                   prefix={<HomeOutlined style={{ color: '#1890ff' }} />}
-                  valueStyle={{ color: '#1890ff' }}
+                  styles={{ content: { color: '#1890ff' } }}
                 />
               </Card>
             </Col>
@@ -143,7 +143,7 @@ const DashboardNongDan: React.FC = () => {
                   title="Tổng lô nông sản"
                   value={stats.tongLoNongSan}
                   prefix={<InboxOutlined style={{ color: '#fa8c16' }} />}
-                  valueStyle={{ color: '#fa8c16' }}
+                  styles={{ content: { color: '#fa8c16' } }}
                 />
               </Card>
             </Col>
@@ -153,7 +153,7 @@ const DashboardNongDan: React.FC = () => {
                   title="Tổng đơn hàng"
                   value={stats.tongDonHang}
                   prefix={<CheckCircleOutlined style={{ color: '#f5222d' }} />}
-                  valueStyle={{ color: '#f5222d' }}
+                  styles={{ content: { color: '#f5222d' } }}
                 />
               </Card>
             </Col>

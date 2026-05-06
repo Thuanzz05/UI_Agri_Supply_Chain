@@ -141,7 +141,7 @@ const ThongTinCaNhan: React.FC = () => {
                 />
                 <Upload
                   listType="picture"
-                  fileList={[]}
+                  fileList={fileList}
                   onChange={handleUploadChange}
                   beforeUpload={beforeUpload}
                   maxCount={1}

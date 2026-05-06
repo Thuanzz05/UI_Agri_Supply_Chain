@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Row, Col, Spin, message } from 'antd';
 import { 
-  TrophyOutlined, 
   TeamOutlined, 
   ShopOutlined, 
   UserOutlined 

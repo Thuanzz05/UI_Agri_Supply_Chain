@@ -7,17 +7,21 @@ import {
   Input,
   InputNumber,
   Modal,
+  Select,
+  Space,
   Table,
   Tag,
   message,
 } from 'antd';
 import type { TableProps } from 'antd';
-import { EditOutlined, SearchOutlined, WarningOutlined } from '@ant-design/icons';
+import { EditOutlined, SearchOutlined, WarningOutlined, SwapOutlined, HistoryOutlined } from '@ant-design/icons';
 import { AdminLayout } from '../../components/Layout';
 import { CustomPagination } from '../../components/CustomPagination';
 import { apiService } from '../../services/apiService';
 import type { DuLieuCapNhatTonKho, TonKhoDaiLy } from '../../types/kho';
 import { ModalButton } from '../../components/ModalButton';
+import type { Kho } from '../../types/kho';
+import type { PhieuChuyenKho } from '../../types/chuyenKho';
 
 interface TonKhoTableItem extends TonKhoDaiLy {
   key: string;
@@ -76,9 +80,23 @@ const TonKhoDaiLyPage: React.FC = () => {
   const [loading, setLoading] = React.useState(false);
   const [submitting, setSubmitting] = React.useState(false);
   const [inventory, setInventory] = React.useState<TonKhoTableItem[]>([]);
+  const [warehouses, setWarehouses] = React.useState<Kho[]>([]);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [selectedItem, setSelectedItem] = React.useState<TonKhoTableItem | null>(null);
   const [form] = Form.useForm<DuLieuCapNhatTonKho>();
+
+  const [isTransferModalOpen, setIsTransferModalOpen] = React.useState(false);
+  const [transferItem, setTransferItem] = React.useState<TonKhoTableItem | null>(null);
+  const [transferSubmitting, setTransferSubmitting] = React.useState(false);
+  const [transferForm] = Form.useForm<{
+    maKhoDich: number;
+    soLuong: number;
+    ghiChu?: string;
+  }>();
+
+  const [historyOpen, setHistoryOpen] = React.useState(false);
+  const [historyLoading, setHistoryLoading] = React.useState(false);
+  const [history, setHistory] = React.useState<PhieuChuyenKho[]>([]);
 
   const fetchInventory = async () => {
     setLoading(true);
@@ -102,6 +120,7 @@ const TonKhoDaiLyPage: React.FC = () => {
       // Lấy danh sách kho của đại lý
       const warehousesResponse = await apiService.getWarehousesByAgent(maDaiLy);
       const warehouses = Array.isArray(warehousesResponse?.data) ? warehousesResponse.data : [];
+      setWarehouses(warehouses);
       
       if (warehouses.length === 0) {
         setInventory([]);
@@ -169,6 +188,86 @@ const TonKhoDaiLyPage: React.FC = () => {
       message.error(getApiErrorMessage(error, 'Không thể điều chỉnh số lượng tồn kho'));
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const openTransferModal = (item: TonKhoTableItem) => {
+    setTransferItem(item);
+    transferForm.setFieldsValue({
+      maKhoDich: undefined as any,
+      soLuong: item.soLuong,
+      ghiChu: '',
+    });
+    setIsTransferModalOpen(true);
+  };
+
+  const closeTransferModal = () => {
+    setIsTransferModalOpen(false);
+    setTransferItem(null);
+    transferForm.resetFields();
+  };
+
+  const submitTransfer = async (values: { maKhoDich: number; soLuong: number; ghiChu?: string }) => {
+    if (!transferItem) return;
+
+    if (values.maKhoDich === transferItem.maKho) {
+      message.error('Kho đích phải khác kho nguồn');
+      return;
+    }
+
+    if (values.soLuong <= 0) {
+      message.error('Số lượng chuyển phải lớn hơn 0');
+      return;
+    }
+
+    if (values.soLuong > transferItem.soLuong) {
+      message.error('Số lượng chuyển không được vượt quá số lượng tồn kho');
+      return;
+    }
+
+    setTransferSubmitting(true);
+    try {
+      await apiService.transferInventory({
+        maKhoNguon: transferItem.maKho,
+        maKhoDich: values.maKhoDich,
+        maLo: transferItem.maLo,
+        soLuong: values.soLuong,
+        ghiChu: values.ghiChu,
+      });
+      message.success('Chuyển kho thành công');
+      closeTransferModal();
+      await fetchInventory();
+    } catch (error: any) {
+      message.error(getApiErrorMessage(error, 'Không thể chuyển kho'));
+    } finally {
+      setTransferSubmitting(false);
+    }
+  };
+
+  const openHistory = async () => {
+    try {
+      const userStr = localStorage.getItem('user');
+      if (!userStr) {
+        message.error('Vui lòng đăng nhập lại');
+        return;
+      }
+      const user = JSON.parse(userStr);
+      const maDaiLy = user.MaDaiLy || user.maDaiLy;
+      if (!maDaiLy) {
+        message.warning('Phiên đăng nhập cũ. Vui lòng đăng xuất và đăng nhập lại để cập nhật thông tin');
+        return;
+      }
+
+      setHistoryOpen(true);
+      setHistoryLoading(true);
+      const res = await apiService.getTransferHistoryByAgent(Number(maDaiLy));
+      const rows = Array.isArray(res?.data) ? res.data : [];
+      setHistory(rows);
+    } catch (error: any) {
+      message.error(getApiErrorMessage(error, 'Không thể tải lịch sử chuyển kho'));
+      setHistory([]);
+    } finally {
+      setHistoryLoading(false);
     }
   };
 
@@ -250,17 +349,27 @@ const TonKhoDaiLyPage: React.FC = () => {
     {
       title: 'Thao tác',
       key: 'action',
-      width: 120,
+      width: 190,
       fixed: 'right',
       render: (_, record) => (
-        <Button 
-          type="link"
-          size="small"
-          icon={<EditOutlined />} 
-          onClick={() => showUpdateModal(record)}
-        >
-          Điều chỉnh
-        </Button>
+        <Space size={0}>
+          <Button
+            type="link"
+            size="small"
+            icon={<SwapOutlined />}
+            onClick={() => openTransferModal(record)}
+          >
+            Chuyển kho
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            icon={<EditOutlined />}
+            onClick={() => showUpdateModal(record)}
+          >
+            Điều chỉnh
+          </Button>
+        </Space>
       ),
     },
   ];
@@ -302,6 +411,10 @@ const TonKhoDaiLyPage: React.FC = () => {
             onChange={(event) => setSearchText(event.target.value)}
             allowClear
           />
+
+          <Button icon={<HistoryOutlined />} onClick={openHistory}>
+            Lịch sử chuyển kho
+          </Button>
         </div>
 
         <Table<TonKhoTableItem>
@@ -371,6 +484,116 @@ const TonKhoDaiLyPage: React.FC = () => {
             </ModalButton>
           </div>
         </Form>
+      </Modal>
+
+      <Modal
+        title="Chuyển kho nội bộ"
+        open={isTransferModalOpen}
+        onCancel={closeTransferModal}
+        footer={null}
+        destroyOnHidden
+      >
+        <Alert
+          message="Gợi ý"
+          description="Dùng 'Chuyển kho' để điều chuyển nội bộ giữa các kho của đại lý (có lưu lịch sử). 'Điều chỉnh' chỉ dùng khi kiểm kê/sai lệch."
+          type="info"
+          showIcon
+          style={{ marginBottom: 16 }}
+        />
+
+        <Form
+          form={transferForm}
+          layout="vertical"
+          onFinish={submitTransfer}
+        >
+          <Form.Item label="Kho nguồn">
+            <Input value={transferItem?.tenKho} disabled />
+          </Form.Item>
+
+          <Form.Item label="Sản phẩm">
+            <Input value={transferItem?.tenSanPham} disabled />
+          </Form.Item>
+
+          <Form.Item label="Mã lô">
+            <Input value={transferItem?.maLo} disabled />
+          </Form.Item>
+
+          <Form.Item
+            label="Kho đích"
+            name="maKhoDich"
+            rules={[{ required: true, message: 'Vui lòng chọn kho đích' }]}
+          >
+            <Select
+              placeholder="Chọn kho đích"
+              options={warehouses
+                .filter((kho) => kho.maKho !== transferItem?.maKho)
+                .map((kho) => ({
+                  value: kho.maKho,
+                  label: `${kho.maKho} - ${kho.tenKho}${kho.diaChi ? ` (${kho.diaChi})` : ''}`,
+                }))}
+            />
+          </Form.Item>
+
+          <Form.Item
+            label="Số lượng chuyển"
+            name="soLuong"
+            rules={[
+              { required: true, message: 'Vui lòng nhập số lượng chuyển' },
+              { type: 'number', min: 0.0000001, message: 'Số lượng chuyển phải lớn hơn 0' },
+            ]}
+          >
+            <InputNumber
+              style={{ width: '100%' }}
+              min={0}
+              max={transferItem?.soLuong ?? undefined}
+              step={0.1}
+              addonAfter={transferItem?.donViTinh}
+            />
+          </Form.Item>
+
+          <Form.Item label="Ghi chú" name="ghiChu">
+            <Input.TextArea rows={3} placeholder="(Không bắt buộc) Lý do chuyển kho..." />
+          </Form.Item>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
+            <ModalButton onClick={closeTransferModal}>Hủy</ModalButton>
+            <ModalButton type="primary" htmlType="submit" loading={transferSubmitting}>
+              Xác nhận chuyển kho
+            </ModalButton>
+          </div>
+        </Form>
+      </Modal>
+
+      <Modal
+        title="Lịch sử chuyển kho"
+        open={historyOpen}
+        onCancel={() => setHistoryOpen(false)}
+        footer={null}
+        width={900}
+        destroyOnHidden
+      >
+        <Table
+          rowKey="maPhieu"
+          loading={historyLoading}
+          dataSource={history}
+          pagination={{ pageSize: 8, showSizeChanger: true }}
+          columns={[
+            { title: 'Mã phiếu', dataIndex: 'maPhieu', key: 'maPhieu', width: 90 },
+            { title: 'Ngày', dataIndex: 'ngayChuyen', key: 'ngayChuyen', width: 120, render: (v: string) => formatDate(v) },
+            { title: 'Từ kho', dataIndex: 'tenKhoNguon', key: 'tenKhoNguon', width: 180, render: (v: string, r: any) => v || r.maKhoNguon },
+            { title: 'Sang kho', dataIndex: 'tenKhoDich', key: 'tenKhoDich', width: 180, render: (v: string, r: any) => v || r.maKhoDich },
+            { title: 'Mã lô', dataIndex: 'maLo', key: 'maLo', width: 80 },
+            { title: 'Sản phẩm', dataIndex: 'tenSanPham', key: 'tenSanPham', width: 160, render: (v: string) => v || '--' },
+            {
+              title: 'Số lượng',
+              dataIndex: 'soLuong',
+              key: 'soLuong',
+              width: 120,
+              render: (v: number, r: any) => `${Number(v).toLocaleString('vi-VN')} ${r.donViTinh || ''}`.trim(),
+            },
+            { title: 'Ghi chú', dataIndex: 'ghiChu', key: 'ghiChu', render: (v: string) => v || '--' },
+          ]}
+        />
       </Modal>
     </AdminLayout>
   );

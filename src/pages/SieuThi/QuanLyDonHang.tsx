@@ -293,7 +293,7 @@ const QuanLyDonHang: React.FC = () => {
               title="Tổng đơn hàng"
               value={statistics.total}
               prefix={<ShoppingCartOutlined />}
-              styles={{ value: { color: '#1890ff' } }}
+              styles={{ content: { color: '#1890ff' } }}
             />
           </Card>
         </Col>
@@ -303,7 +303,7 @@ const QuanLyDonHang: React.FC = () => {
               title="Chờ xác nhận"
               value={statistics.pending}
               prefix={<ClockCircleOutlined />}
-              styles={{ value: { color: '#faad14' } }}
+              styles={{ content: { color: '#faad14' } }}
             />
           </Card>
         </Col>
@@ -313,7 +313,7 @@ const QuanLyDonHang: React.FC = () => {
               title="Hoàn thành"
               value={statistics.completed}
               prefix={<CheckCircleOutlined />}
-              styles={{ value: { color: '#52c41a' } }}
+              styles={{ content: { color: '#52c41a' } }}
             />
           </Card>
         </Col>
@@ -323,7 +323,7 @@ const QuanLyDonHang: React.FC = () => {
               title="Đã hủy"
               value={statistics.cancelled}
               prefix={<CloseCircleOutlined />}
-              styles={{ value: { color: '#ff4d4f' } }}
+              styles={{ content: { color: '#ff4d4f' } }}
             />
           </Card>
         </Col>
