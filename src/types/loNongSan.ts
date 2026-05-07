@@ -37,5 +37,5 @@ export interface DuLieuCapNhatLoNongSan {
   ngayThuHoach: string;
   hanSuDung: string;
   maQR: string;
-  trangThai: string;
+  trangThai?: string; // Optional - để backend tự động xử lý
 }

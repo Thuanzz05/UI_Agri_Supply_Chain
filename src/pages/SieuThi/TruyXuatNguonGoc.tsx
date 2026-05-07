@@ -242,7 +242,43 @@ const TruyXuatNguonGoc: React.FC = () => {
               </Descriptions.Item>
               <Descriptions.Item label="Hạn sử dụng">
                 <CalendarOutlined style={{ marginRight: 4 }} />
-                {formatDate(traceData.hanSuDung)}
+                {(() => {
+                  const hsd = dayjs(traceData.hanSuDung);
+                  const today = dayjs();
+                  const daysLeft = hsd.diff(today, 'day');
+                  
+                  // Nếu đã bán HẾT (số lượng = 0), hiển thị bình thường
+                  if (traceData.trangThai === 'da_ban' && traceData.soLuongHienTai === 0) {
+                    return <span style={{ color: '#8c8c8c' }}>{formatDate(traceData.hanSuDung)}</span>;
+                  }
+                  
+                  // Nếu hết hạn
+                  if (daysLeft < 0) {
+                    return (
+                      <span style={{ color: '#ff4d4f', fontWeight: 500 }}>
+                        {formatDate(traceData.hanSuDung)} 
+                        <Tag color="red" style={{ marginLeft: 8 }}>
+                          Quá hạn {Math.abs(daysLeft)} ngày
+                        </Tag>
+                      </span>
+                    );
+                  }
+                  
+                  // Nếu sắp hết hạn (≤ 7 ngày)
+                  if (daysLeft <= 7) {
+                    return (
+                      <span style={{ color: '#faad14', fontWeight: 500 }}>
+                        {formatDate(traceData.hanSuDung)}
+                        <Tag color="orange" style={{ marginLeft: 8 }}>
+                          Còn {daysLeft} ngày
+                        </Tag>
+                      </span>
+                    );
+                  }
+                  
+                  // Còn hạn bình thường
+                  return formatDate(traceData.hanSuDung);
+                })()}
               </Descriptions.Item>
               <Descriptions.Item label="Trạng thái" span={2}>
                 <Tag color={getTrangThaiColor(traceData.trangThai)}>

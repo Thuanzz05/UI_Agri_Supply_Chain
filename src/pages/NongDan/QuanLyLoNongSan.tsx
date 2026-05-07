@@ -1,11 +1,11 @@
 import React from 'react';
 import { Card, Table, message, Tag, Input, Modal, Form, InputNumber, DatePicker, Select, Space } from 'antd';
 import type { TableProps } from 'antd';
-import { SearchOutlined, PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { SearchOutlined, PlusOutlined, EditOutlined, DeleteOutlined, ExclamationCircleOutlined, WarningOutlined } from '@ant-design/icons';
 import { AdminLayout } from '../../components/Layout';
 import { CustomPagination } from '../../components/CustomPagination';
 import { apiService } from '../../services/apiService';
-import type { DuLieuFormLoNongSan, DuLieuCapNhatLoNongSan } from '../../types/loNongSan';
+import type { DuLieuFormLoNongSan } from '../../types/loNongSan';
 import { ModalButton } from '../../components/ModalButton';
 import { ActionButton } from '../../components/ActionButton';
 import dayjs from 'dayjs';
@@ -170,12 +170,13 @@ const QuanLyLoNongSan: React.FC = () => {
       
       if (isEditMode && editingBatch) {
         // Sửa lô nông sản - chỉ gửi các trường cho phép update
-        const updateData: DuLieuCapNhatLoNongSan = {
+        // KHÔNG gửi trạng thái để backend tự động cập nhật dựa trên HSD
+        const updateData: any = {
           soLuongHienTai: values.soLuongHienTai,
           ngayThuHoach: values.ngayThuHoach.format('YYYY-MM-DD'),
           hanSuDung: values.hanSuDung.format('YYYY-MM-DD'),
-          maQR: values.maQR,
-          trangThai: values.trangThai
+          maQR: values.maQR
+          // Không gửi trangThai để backend tự động xử lý
         };
         await apiService.updateBatch(editingBatch.maLo, updateData);
         message.success('Cập nhật lô nông sản thành công!');
@@ -317,8 +318,49 @@ const QuanLyLoNongSan: React.FC = () => {
       title: 'Hạn sử dụng',
       dataIndex: 'hanSuDung',
       key: 'hanSuDung',
-      width: 130,
-      render: (date: string) => dayjs(date).format('DD/MM/YYYY'),
+      width: 150,
+      render: (date: string, record: DataType) => {
+        const hsd = dayjs(date);
+        const today = dayjs();
+        const daysLeft = hsd.diff(today, 'day');
+        
+        // Nếu đã bán HẾT (số lượng = 0), hiển thị bình thường không cảnh báo
+        if (record.trangThai === 'da_ban' && record.soLuongHienTai === 0) {
+          return (
+            <span style={{ color: '#8c8c8c' }}>
+              {hsd.format('DD/MM/YYYY')}
+            </span>
+          );
+        }
+        
+        // Xác định màu sắc dựa trên số ngày còn lại
+        let color = '';
+        let icon = null;
+        if (daysLeft < 0) {
+          color = '#ff4d4f'; // Đỏ - đã hết hạn
+          icon = <ExclamationCircleOutlined style={{ color: '#ff4d4f', marginRight: 4 }} />;
+        } else if (daysLeft <= 7) {
+          color = '#faad14'; // Cam - sắp hết hạn (7 ngày)
+          icon = <WarningOutlined style={{ color: '#faad14', marginRight: 4 }} />;
+        }
+        
+        return (
+          <span style={{ color }}>
+            {icon}
+            {hsd.format('DD/MM/YYYY')}
+            {daysLeft >= 0 && daysLeft <= 7 && (
+              <span style={{ fontSize: '12px', marginLeft: 4 }}>
+                ({daysLeft} ngày)
+              </span>
+            )}
+            {daysLeft < 0 && (
+              <span style={{ fontSize: '12px', marginLeft: 4 }}>
+                (Quá {Math.abs(daysLeft)} ngày)
+              </span>
+            )}
+          </span>
+        );
+      },
     },
     {
       title: 'Trạng thái',
@@ -513,10 +555,14 @@ const QuanLyLoNongSan: React.FC = () => {
                 label="Trạng thái"
                 name="trangThai"
                 rules={[
-                  { required: true, message: 'Vui lòng chọn trạng thái!' }
+                  { required: !isEditMode, message: 'Vui lòng chọn trạng thái!' }
                 ]}
+                tooltip={isEditMode ? "Trạng thái sẽ tự động cập nhật dựa trên hạn sử dụng và số lượng" : undefined}
               >
-                <Select placeholder="Chọn trạng thái">
+                <Select 
+                  placeholder="Chọn trạng thái"
+                  disabled={isEditMode}
+                >
                   <Select.Option value="san_sang">Sẵn sàng</Select.Option>
                   <Select.Option value="dang_van_chuyen">Đang vận chuyển</Select.Option>
                   <Select.Option value="da_ban">Đã bán</Select.Option>
