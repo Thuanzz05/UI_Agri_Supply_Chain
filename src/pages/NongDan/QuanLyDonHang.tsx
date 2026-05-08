@@ -34,6 +34,7 @@ import { ModalButton } from '../../components/ModalButton';
 import { ActionButton } from '../../components/ActionButton';
 import SocialLinks from '../../components/SocialLinks';
 import dayjs from 'dayjs';
+import './QuanLyDonHang.css';
 
 interface DonHangTableItem extends DonHang {
   key: string;
@@ -114,6 +115,20 @@ const QuanLyDonHangNongDan: React.FC = () => {
   const [selectedOrder, setSelectedOrder] = React.useState<DonHang | null>(null);
   const [counterpartyProfile, setCounterpartyProfile] = React.useState<unknown>(null);
   const [detailLoading, setDetailLoading] = React.useState(false);
+
+  // State để theo dõi kích thước màn hình
+  const [isMobile, setIsMobile] = React.useState(window.innerWidth < 768);
+  const [isTablet, setIsTablet] = React.useState(window.innerWidth < 992);
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+      setIsTablet(window.innerWidth < 992);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -278,6 +293,7 @@ const QuanLyDonHangNongDan: React.FC = () => {
       dataIndex: 'maDonHang',
       key: 'maDonHang',
       width: 80,
+      hidden: isMobile,
     },
     {
       title: 'Người mua',
@@ -291,6 +307,7 @@ const QuanLyDonHangNongDan: React.FC = () => {
       dataIndex: 'ngayDat',
       key: 'ngayDat',
       width: 110,
+      hidden: isTablet,
       render: (value: string) => dayjs(value).format('DD/MM/YYYY'),
     },
     {
@@ -312,19 +329,19 @@ const QuanLyDonHangNongDan: React.FC = () => {
     {
       title: 'Thao tác',
       key: 'action',
-      width: 120,
-      fixed: 'right',
-      render: (_, record) => (
+      width: isMobile ? 100 : 120,
+      fixed: isMobile ? false : ('right' as any),
+      render: (_: any, record: DonHangTableItem) => (
         <ActionButton
           type="primary"
           icon={<EyeOutlined />}
           onClick={() => showDetailModal(record)}
         >
-          Chi tiết
+          <span className="button-text">Chi tiết</span>
         </ActionButton>
       ),
     },
-  ];
+  ].filter(col => !col.hidden);
 
   const detailColumns: TableProps<ChiTietDonHang>['columns'] = [
     {
@@ -337,18 +354,20 @@ const QuanLyDonHangNongDan: React.FC = () => {
       dataIndex: 'maLo',
       key: 'maLo',
       width: 80,
+      hidden: isMobile,
     },
     {
       title: 'Số lượng',
       key: 'soLuong',
       width: 120,
-      render: (_, record) => `${record.soLuong} ${record.donViTinh || ''}`,
+      render: (_: any, record: ChiTietDonHang) => `${record.soLuong} ${record.donViTinh || ''}`,
     },
     {
       title: 'Đơn giá',
       dataIndex: 'donGia',
       key: 'donGia',
       width: 120,
+      hidden: isMobile,
       render: (value: number) => `${value.toLocaleString('vi-VN')} đ`,
     },
     {
@@ -358,7 +377,7 @@ const QuanLyDonHangNongDan: React.FC = () => {
       width: 130,
       render: (value: number) => `${value.toLocaleString('vi-VN')} đ`,
     },
-  ];
+  ].filter(col => !col.hidden);
 
   return (
     <AdminLayout>
@@ -410,20 +429,9 @@ const QuanLyDonHangNongDan: React.FC = () => {
       </Row>
 
       <Card>
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            gap: 16,
-            marginBottom: 24,
-            padding: '16px 0',
-            borderBottom: '1px solid #f0f0f0',
-            flexWrap: 'wrap',
-          }}
-        >
+        <div className="order-header-actions">
           <Select
-            style={{ width: 200 }}
+            className="status-filter"
             value={filterStatus}
             onChange={setFilterStatus}
             options={[
@@ -437,7 +445,7 @@ const QuanLyDonHangNongDan: React.FC = () => {
             ]}
           />
           <ActionButton icon={<ReloadOutlined />} onClick={fetchOrders} loading={loading}>
-            Làm mới
+            <span className="button-text">Làm mới</span>
           </ActionButton>
         </div>
 
@@ -446,7 +454,8 @@ const QuanLyDonHangNongDan: React.FC = () => {
           dataSource={paginatedOrders}
           pagination={false}
           loading={loading}
-          scroll={{ x: 750 }}
+          scroll={{ x: 'max-content' }}
+          className="order-table"
         />
 
         <CustomPagination
@@ -547,6 +556,8 @@ const QuanLyDonHangNongDan: React.FC = () => {
                 pagination={false}
                 size="small"
                 rowKey={(record) => `${record.maDonHang}-${record.maLo}`}
+                scroll={{ x: 'max-content' }}
+                className="detail-table"
               />
             </div>
           </>
