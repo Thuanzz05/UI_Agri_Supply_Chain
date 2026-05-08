@@ -1,0 +1,193 @@
+/* ===== TABLE HEADER ACTIONS ===== */
+.table-header-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding: 16px 0;
+  border-bottom: 1px solid #f0f0f0;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.search-input {
+  width: 300px;
+  max-width: 100%;
+}
+
+.button-text-mobile {
+  display: none;
+}
+
+/* ===== TABLE STYLES ===== */
+.batch-table {
+  overflow-x: auto;
+}
+
+.batch-table .ant-table {
+  font-size: 14px;
+}
+
+.batch-table .ant-table-thead > tr > th {
+  background: #fafafa;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.batch-table .ant-table-tbody > tr > td {
+  white-space: nowrap;
+}
+
+/* Action buttons in table */
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.action-buttons .button-text {
+  display: inline;
+}
+
+/* ===== RESPONSIVE BREAKPOINTS ===== */
+
+/* Tablet (< 992px) */
+@media (max-width: 991px) {
+  .search-input {
+    width: 250px;
+  }
+  
+  .batch-table .ant-table {
+    font-size: 13px;
+  }
+  
+  .batch-table .ant-table-thead > tr > th,
+  .batch-table .ant-table-tbody > tr > td {
+    padding: 12px 8px;
+  }
+}
+
+/* Mobile Landscape (< 768px) */
+@media (max-width: 767px) {
+  .table-header-actions {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 12px 0;
+  }
+  
+  .search-input {
+    width: 100%;
+  }
+  
+  .add-button {
+    width: 100%;
+  }
+  
+  .batch-table .ant-table {
+    font-size: 12px;
+  }
+  
+  .batch-table .ant-table-thead > tr > th,
+  .batch-table .ant-table-tbody > tr > td {
+    padding: 8px 6px;
+  }
+  
+  /* Compact action buttons */
+  .action-buttons {
+    flex-direction: row;
+    gap: 4px;
+    justify-content: center;
+  }
+  
+  .action-buttons button {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+  
+  .action-buttons .button-text {
+    display: none;
+  }
+}
+
+/* Mobile Portrait (< 576px) */
+@media (max-width: 575px) {
+  .button-text {
+    display: none;
+  }
+  
+  .button-text-mobile {
+    display: inline;
+  }
+  
+  /* Make table more compact */
+  .batch-table .ant-table-thead > tr > th,
+  .batch-table .ant-table-tbody > tr > td {
+    padding: 6px 4px;
+    font-size: 11px;
+  }
+  
+  /* Smaller tags */
+  .batch-table .ant-tag {
+    font-size: 11px;
+    padding: 0 4px;
+    line-height: 18px;
+  }
+  
+  /* Compact icons */
+  .batch-table .anticon {
+    font-size: 12px;
+  }
+  
+  /* Action buttons icon only */
+  .action-buttons button {
+    min-width: 32px;
+    padding: 4px;
+  }
+  
+  .action-buttons .anticon {
+    margin: 0;
+  }
+}
+
+/* Extra Small Mobile (< 400px) */
+@media (max-width: 399px) {
+  .batch-table .ant-table-thead > tr > th,
+  .batch-table .ant-table-tbody > tr > td {
+    padding: 4px 2px;
+    font-size: 10px;
+  }
+  
+  .batch-table .ant-tag {
+    font-size: 10px;
+    padding: 0 2px;
+    line-height: 16px;
+  }
+  
+  .action-buttons button {
+    min-width: 28px;
+    padding: 2px;
+  }
+}
+
+/* ===== MODAL RESPONSIVE ===== */
+@media (max-width: 575px) {
+  .ant-modal {
+    max-width: calc(100vw - 32px) !important;
+    margin: 16px auto;
+  }
+  
+  .ant-modal-body {
+    padding: 16px;
+  }
+  
+  .ant-modal-header {
+    padding: 16px;
+  }
+  
+  .ant-form-item {
+    margin-bottom: 16px;
+  }
+  
+  .ant-form-item-label {
+    padding-bottom: 4px;
+  }
+}

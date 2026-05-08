@@ -9,6 +9,7 @@ import type { DuLieuFormLoNongSan } from '../../types/loNongSan';
 import { ModalButton } from '../../components/ModalButton';
 import { ActionButton } from '../../components/ActionButton';
 import dayjs from 'dayjs';
+import './QuanLyLoNongSan.css';
 
 // Định nghĩa kiểu dữ liệu cho bảng
 interface DataType {
@@ -267,6 +268,20 @@ const QuanLyLoNongSan: React.FC = () => {
     return <Tag color={statusInfo.color}>{statusInfo.text}</Tag>;
   };
 
+  // State để theo dõi kích thước màn hình
+  const [isMobile, setIsMobile] = React.useState(window.innerWidth < 768);
+  const [isTablet, setIsTablet] = React.useState(window.innerWidth < 992);
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+      setIsTablet(window.innerWidth < 992);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   // Định nghĩa các cột của bảng
   const columns: TableProps<DataType>['columns'] = [
     {
@@ -274,18 +289,21 @@ const QuanLyLoNongSan: React.FC = () => {
       dataIndex: 'maLo',
       key: 'maLo',
       width: 80,
+      hidden: isMobile,
     },
     {
       title: 'Mã QR',
       dataIndex: 'maQR',
       key: 'maQR',
       width: 100,
+      hidden: isTablet,
     },
     {
       title: 'Trang trại',
       dataIndex: 'tenTrangTrai',
       key: 'tenTrangTrai',
       width: 150,
+      hidden: isMobile,
     },
     {
       title: 'Sản phẩm',
@@ -298,20 +316,22 @@ const QuanLyLoNongSan: React.FC = () => {
       dataIndex: 'soLuongBanDau',
       key: 'soLuongBanDau',
       width: 120,
-      render: (value: number, record) => `${value} ${record.donViTinh}`,
+      hidden: isTablet,
+      render: (value: number, record: DataType) => `${value} ${record.donViTinh}`,
     },
     {
       title: 'SL hiện tại',
       dataIndex: 'soLuongHienTai',
       key: 'soLuongHienTai',
       width: 120,
-      render: (value: number, record) => `${value} ${record.donViTinh}`,
+      render: (value: number, record: DataType) => `${value} ${record.donViTinh}`,
     },
     {
       title: 'Ngày thu hoạch',
       dataIndex: 'ngayThuHoach',
       key: 'ngayThuHoach',
       width: 130,
+      hidden: isMobile,
       render: (date: string) => dayjs(date).format('DD/MM/YYYY'),
     },
     {
@@ -372,27 +392,28 @@ const QuanLyLoNongSan: React.FC = () => {
     {
       title: 'Thao tác',
       key: 'action',
-      width: 150,
-      render: (_, record) => (
-        <Space size="small">
+      width: isMobile ? 100 : 150,
+      fixed: isMobile ? false : ('right' as any),
+      render: (_: any, record: DataType) => (
+        <Space size="small" className="action-buttons">
           <ActionButton 
             type="default" 
             icon={<EditOutlined />}
             onClick={() => showEditModal(record)}
           >
-            Sửa
+            <span className="button-text">Sửa</span>
           </ActionButton>
           <ActionButton 
             type="danger" 
             icon={<DeleteOutlined />}
             onClick={() => handleDelete(record)}
           >
-            Xóa
+            <span className="button-text">Xóa</span>
           </ActionButton>
         </Space>
       ),
     },
-  ];
+  ].filter(col => !col.hidden);
 
   return (
     <AdminLayout>
@@ -402,37 +423,34 @@ const QuanLyLoNongSan: React.FC = () => {
       </div>
       
       <Card>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '24px',
-          padding: '16px 0',
-          borderBottom: '1px solid #f0f0f0'
-        }}>
+        <div className="table-header-actions">
           <Input
             placeholder="Tìm kiếm lô nông sản..."
             prefix={<SearchOutlined />}
-            style={{ width: 300 }}
+            className="search-input"
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
             allowClear
           />
-          <ActionButton 
-            type="primary" 
-            icon={<PlusOutlined />}
-            onClick={showModal}
-          >
-            Thêm lô nông sản
-          </ActionButton>
+          <div className="add-button">
+            <ActionButton 
+              type="primary" 
+              icon={<PlusOutlined />}
+              onClick={showModal}
+            >
+              <span className="button-text">Thêm lô nông sản</span>
+              <span className="button-text-mobile">Thêm</span>
+            </ActionButton>
+          </div>
         </div>
         
         <Table<DataType>
           columns={columns} 
           dataSource={paginatedData}
           pagination={false}
-          scroll={{ x: 1200 }}
+          scroll={{ x: 'max-content' }}
           loading={loading}
+          className="batch-table"
         />
         
         <CustomPagination
