@@ -1,0 +1,166 @@
+/* ===== CUSTOM PAGINATION WRAPPER ===== */
+.custom-pagination-wrapper {
+  margin-top: 16px;
+  text-align: right;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+/* ===== DESKTOP STYLES ===== */
+.custom-pagination-wrapper .ant-pagination {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* ===== TABLET (< 992px) ===== */
+@media (max-width: 991px) {
+  .custom-pagination-wrapper {
+    justify-content: center;
+    text-align: center;
+  }
+  
+  .custom-pagination-wrapper .ant-pagination {
+    justify-content: center;
+  }
+  
+  /* Ẩn Quick Jumper trên tablet */
+  .custom-pagination-wrapper .ant-pagination-options-quick-jumper {
+    display: none;
+  }
+}
+
+/* ===== MOBILE (< 768px) ===== */
+@media (max-width: 767px) {
+  .custom-pagination-wrapper {
+    margin-top: 16px;
+    padding: 0 8px;
+  }
+  
+  .custom-pagination-wrapper .ant-pagination {
+    width: 100%;
+    justify-content: space-between;
+    gap: 4px;
+  }
+  
+  /* Ẩn text "items per page" */
+  .custom-pagination-wrapper .ant-pagination-options {
+    margin-left: 0;
+  }
+  
+  /* Ẩn Quick Jumper */
+  .custom-pagination-wrapper .ant-pagination-options-quick-jumper {
+    display: none !important;
+  }
+  
+  /* Giảm kích thước các button */
+  .custom-pagination-wrapper .ant-pagination-item,
+  .custom-pagination-wrapper .ant-pagination-prev,
+  .custom-pagination-wrapper .ant-pagination-next {
+    min-width: 32px;
+    height: 32px;
+    line-height: 30px;
+    font-size: 14px;
+  }
+  
+  /* Giảm kích thước select */
+  .custom-pagination-wrapper .ant-pagination-options-size-changer {
+    width: auto;
+  }
+  
+  .custom-pagination-wrapper .ant-select-selector {
+    padding: 0 8px !important;
+    font-size: 14px;
+  }
+  
+  /* Ẩn một số page numbers ở giữa */
+  .custom-pagination-wrapper .ant-pagination-item:not(.ant-pagination-item-active) {
+    display: none;
+  }
+  
+  /* Chỉ hiển thị: Prev, Active, Next, Size Changer */
+  .custom-pagination-wrapper .ant-pagination-item-active,
+  .custom-pagination-wrapper .ant-pagination-prev,
+  .custom-pagination-wrapper .ant-pagination-next,
+  .custom-pagination-wrapper .ant-pagination-jump-prev,
+  .custom-pagination-wrapper .ant-pagination-jump-next {
+    display: inline-block;
+  }
+}
+
+/* ===== SMALL MOBILE (< 576px) ===== */
+@media (max-width: 575px) {
+  .custom-pagination-wrapper {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .custom-pagination-wrapper .ant-pagination {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  /* Total text */
+  .custom-pagination-wrapper .ant-pagination-total-text {
+    width: 100%;
+    text-align: center;
+    order: -1;
+    font-size: 13px;
+    margin-bottom: 8px;
+  }
+  
+  /* Size changer ở dưới */
+  .custom-pagination-wrapper .ant-pagination-options {
+    order: 2;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-left: 0;
+    margin-top: 8px;
+  }
+  
+  /* Navigation buttons */
+  .custom-pagination-wrapper .ant-pagination-prev,
+  .custom-pagination-wrapper .ant-pagination-item,
+  .custom-pagination-wrapper .ant-pagination-next {
+    order: 1;
+  }
+  
+  /* Giảm kích thước button */
+  .custom-pagination-wrapper .ant-pagination-item,
+  .custom-pagination-wrapper .ant-pagination-prev,
+  .custom-pagination-wrapper .ant-pagination-next {
+    min-width: 36px;
+    height: 36px;
+    line-height: 34px;
+    margin: 0 2px;
+  }
+  
+  /* Ẩn jump prev/next */
+  .custom-pagination-wrapper .ant-pagination-jump-prev,
+  .custom-pagination-wrapper .ant-pagination-jump-next {
+    display: none !important;
+  }
+}
+
+/* ===== EXTRA SMALL MOBILE (< 400px) ===== */
+@media (max-width: 399px) {
+  .custom-pagination-wrapper .ant-pagination-item,
+  .custom-pagination-wrapper .ant-pagination-prev,
+  .custom-pagination-wrapper .ant-pagination-next {
+    min-width: 32px;
+    height: 32px;
+    line-height: 30px;
+    font-size: 12px;
+  }
+  
+  .custom-pagination-wrapper .ant-pagination-total-text {
+    font-size: 12px;
+  }
+  
+  .custom-pagination-wrapper .ant-select-selector {
+    font-size: 12px;
+  }
+}

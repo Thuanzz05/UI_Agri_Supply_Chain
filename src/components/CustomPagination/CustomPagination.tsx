@@ -1,5 +1,6 @@
 import React from 'react';
 import { Pagination } from 'antd';
+import './CustomPagination.css';
 
 interface CustomPaginationProps {
   current: number;
@@ -17,7 +18,7 @@ const CustomPagination: React.FC<CustomPaginationProps> = ({
   showTotal
 }) => {
   return (
-    <div style={{ marginTop: '16px', textAlign: 'right' }}>
+    <div className="custom-pagination-wrapper">
       <Pagination
         current={current}
         total={total}
@@ -26,6 +27,8 @@ const CustomPagination: React.FC<CustomPaginationProps> = ({
         showQuickJumper
         showTotal={showTotal}
         onChange={onChange}
+        responsive
+        simple={false}
       />
     </div>
   );

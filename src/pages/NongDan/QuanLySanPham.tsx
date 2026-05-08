@@ -240,17 +240,11 @@ const QuanLySanPham: React.FC = () => {
       </div>
       
       <div style={{ padding: '24px 0' }}>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '24px',
-          gap: '16px'
-        }}>
+        <div className="page-header-actions">
           <Input
             placeholder="Tìm kiếm sản phẩm..."
             prefix={<SearchOutlined />}
-            style={{ width: 300 }}
+            className="search-input"
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
             allowClear
@@ -259,8 +253,10 @@ const QuanLySanPham: React.FC = () => {
             type="primary" 
             icon={<PlusOutlined />}
             onClick={showModal}
+            className="add-button"
           >
-            Thêm sản phẩm
+            <span className="button-text">Thêm sản phẩm</span>
+            <span className="button-text-mobile">Thêm</span>
           </ActionButton>
         </div>
 
@@ -268,7 +264,7 @@ const QuanLySanPham: React.FC = () => {
           <Empty description="Không có sản phẩm nào" />
         ) : (
           <>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '16px' }}>
+            <div className="products-grid">
               {paginatedData.map((product) => (
                   <Card 
                     key={product.key}
@@ -282,15 +278,9 @@ const QuanLySanPham: React.FC = () => {
                           />
                         </div>
                       ) : (
-                        <div className="product-card-image" style={{ 
-                          display: 'flex', 
-                          alignItems: 'center', 
-                          justifyContent: 'center',
-                          background: '#f0f0f0',
-                          color: '#999'
-                        }}>
-                          <div style={{ textAlign: 'center' }}>
-                            <PlusOutlined style={{ fontSize: '32px', marginBottom: '8px' }} />
+                        <div className="product-card-image product-card-image-empty">
+                          <div className="product-card-image-placeholder">
+                            <PlusOutlined />
                             <div>Chưa có ảnh</div>
                           </div>
                         </div>
@@ -298,14 +288,14 @@ const QuanLySanPham: React.FC = () => {
                     }
                     hoverable
                   >
-                    <h3 style={{ marginBottom: '12px', color: '#2E7D32' }}>{product.tenSanPham}</h3>
-                    <div style={{ marginBottom: '12px', fontSize: '14px', color: '#666' }}>
+                    <h3 className="product-card-title">{product.tenSanPham}</h3>
+                    <div className="product-card-unit">
                       <strong>Đơn vị tính:</strong> {product.donViTinh}
                     </div>
-                    <div style={{ marginBottom: '16px', fontSize: '13px', color: '#999', maxHeight: '60px', overflow: 'hidden' }}>
+                    <div className="product-card-description">
                       <strong>Mô tả:</strong> {product.moTa}
                     </div>
-                    <Space style={{ width: '100%', justifyContent: 'flex-end' }}>
+                    <Space className="product-card-actions">
                       <ActionButton 
                         type="default" 
                         icon={<EditOutlined />}
@@ -325,7 +315,7 @@ const QuanLySanPham: React.FC = () => {
               ))}
             </div>
 
-            <div style={{ marginTop: '24px' }}>
+            <div className="pagination-wrapper">
               <CustomPagination
                 current={currentPage}
                 total={filteredData.length}
