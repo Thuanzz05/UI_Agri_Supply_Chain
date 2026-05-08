@@ -64,7 +64,7 @@
 .product-card-image-empty {
   display: flex;
   align-items: center;
-  justifyContent: center;
+  justify-content: center;
   background: #f0f0f0;
   color: #999;
 }
@@ -100,6 +100,7 @@
   text-overflow: ellipsis;
   display: -webkit-box;
   -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
 }
 
@@ -184,6 +185,7 @@
   .product-card-description {
     max-height: 48px;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
   }
   
   .product-card-actions {
@@ -240,6 +242,7 @@
     margin-bottom: 12px;
     max-height: none;
     -webkit-line-clamp: unset;
+    line-clamp: unset;
     display: block;
   }
   
