@@ -36,6 +36,7 @@ import { useNavigate } from 'react-router-dom';
 import { ActionButton } from '../../components/ActionButton';
 import SocialLinks from '../../components/SocialLinks';
 import dayjs from 'dayjs';
+import './DonHangMuaVao.css';
 
 interface DonHangTableItem extends DonHang {
   key: string;
@@ -100,6 +101,8 @@ const DonHangMuaVao: React.FC = () => {
   const [loading, setLoading] = React.useState(false);
   const [orders, setOrders] = React.useState<DonHangTableItem[]>([]);
   const [filterStatus, setFilterStatus] = React.useState<string>('all');
+  const [isMobile, setIsMobile] = React.useState(window.innerWidth < 768);
+  const [isTablet, setIsTablet] = React.useState(window.innerWidth >= 768 && window.innerWidth < 992);
   
   // Modal chi tiết
   const [isDetailModalOpen, setIsDetailModalOpen] = React.useState(false);
@@ -160,6 +163,15 @@ const DonHangMuaVao: React.FC = () => {
 
   React.useEffect(() => {
     fetchOrders();
+  }, []);
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+      setIsTablet(window.innerWidth >= 768 && window.innerWidth < 992);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   // Fetch danh sách nông dân và lô hàng khi mở modal
@@ -461,20 +473,20 @@ const DonHangMuaVao: React.FC = () => {
       width: 180,
       ellipsis: true,
     },
-    {
+    ...(!isMobile ? [{
       title: 'Ngày đặt',
       dataIndex: 'ngayDat',
       key: 'ngayDat',
       width: 110,
       render: (value: string) => dayjs(value).format('DD/MM/YYYY'),
-    },
-    {
+    }] : []),
+    ...(!isTablet && !isMobile ? [{
       title: 'Tổng giá trị',
       dataIndex: 'tongGiaTri',
       key: 'tongGiaTri',
       width: 130,
       render: (value: number) => `${(value || 0).toLocaleString('vi-VN')} đ`,
-    },
+    }] : []),
     {
       title: 'Trạng thái',
       dataIndex: 'trangThai',
@@ -488,14 +500,14 @@ const DonHangMuaVao: React.FC = () => {
       title: 'Thao tác',
       key: 'action',
       width: 120,
-      fixed: 'right',
+      fixed: isMobile ? undefined : 'right',
       render: (_, record) => (
         <ActionButton
           type="primary"
           icon={<EyeOutlined />}
           onClick={() => showDetailModal(record)}
         >
-          Chi tiết
+          {isMobile ? 'Xem' : 'Chi tiết'}
         </ActionButton>
       ),
     },
@@ -622,7 +634,7 @@ const DonHangMuaVao: React.FC = () => {
               icon={<PlusOutlined />} 
               onClick={showCreateModal}
             >
-              Tạo đơn hàng
+              {isMobile ? 'Tạo' : 'Tạo đơn hàng'}
             </ActionButton>
           </div>
         </div>
@@ -644,6 +656,7 @@ const DonHangMuaVao: React.FC = () => {
             setPageSize(size || 10);
           }}
           showTotal={(total, range) => `${range[0]}-${range[1]} của ${total} đơn hàng`}
+          responsive={isMobile || isTablet}
         />
       </Card>
 

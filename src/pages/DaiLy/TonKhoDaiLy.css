@@ -1,0 +1,129 @@
+/* ===== TABLE STYLES ===== */
+.inventory-table {
+  overflow-x: auto;
+}
+
+.inventory-table .ant-table {
+  font-size: 14px;
+}
+
+.inventory-table .ant-table-thead > tr > th {
+  background: #fafafa;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.inventory-table .ant-table-tbody > tr > td {
+  white-space: nowrap;
+}
+
+/* Action buttons */
+.action-buttons {
+  display: flex;
+  gap: 4px;
+}
+
+.action-buttons .button-text {
+  display: inline;
+}
+
+/* ===== RESPONSIVE BREAKPOINTS ===== */
+
+/* Tablet (< 992px) */
+@media (max-width: 991px) {
+  .inventory-table .ant-table {
+    font-size: 13px;
+  }
+  
+  .inventory-table .ant-table-thead > tr > th,
+  .inventory-table .ant-table-tbody > tr > td {
+    padding: 12px 8px;
+  }
+}
+
+/* Mobile (< 768px) */
+@media (max-width: 767px) {
+  .inventory-table .ant-table {
+    font-size: 12px;
+  }
+  
+  .inventory-table .ant-table-thead > tr > th,
+  .inventory-table .ant-table-tbody > tr > td {
+    padding: 8px 6px;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    gap: 2px;
+  }
+  
+  .action-buttons .ant-btn {
+    padding: 2px 8px;
+    font-size: 12px;
+  }
+  
+  .action-buttons .button-text {
+    display: none;
+  }
+}
+
+/* Mobile Portrait (< 576px) */
+@media (max-width: 575px) {
+  .inventory-table .ant-table-thead > tr > th,
+  .inventory-table .ant-table-tbody > tr > td {
+    padding: 6px 4px;
+    font-size: 11px;
+  }
+  
+  .inventory-table .ant-tag {
+    font-size: 11px;
+    padding: 0 4px;
+  }
+  
+  .inventory-table .anticon {
+    font-size: 12px;
+  }
+  
+  .action-buttons .ant-btn {
+    padding: 2px 4px;
+    min-width: 32px;
+  }
+}
+
+/* Extra Small Mobile (< 400px) */
+@media (max-width: 399px) {
+  .inventory-table .ant-table-thead > tr > th,
+  .inventory-table .ant-table-tbody > tr > td {
+    padding: 4px 2px;
+    font-size: 10px;
+  }
+  
+  .action-buttons .ant-btn {
+    min-width: 28px;
+    padding: 2px;
+  }
+}
+
+/* ===== MODAL RESPONSIVE ===== */
+@media (max-width: 575px) {
+  .ant-modal {
+    max-width: calc(100vw - 32px) !important;
+    margin: 16px auto;
+  }
+  
+  .ant-modal-body {
+    padding: 16px;
+  }
+  
+  .ant-modal-header {
+    padding: 16px;
+  }
+  
+  .ant-form-item {
+    margin-bottom: 16px;
+  }
+  
+  .ant-form-item-label {
+    padding-bottom: 4px;
+  }
+}

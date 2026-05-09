@@ -8,6 +8,7 @@ import { ModalButton } from '../../components/ModalButton';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
 import type { Kho } from '../../types/kho';
+import './QuanLyVanChuyen.css';
 
 interface VanChuyen {
   maVanChuyen: number;
@@ -42,6 +43,8 @@ const QuanLyVanChuyen: React.FC = () => {
     hoanThanh: 0
   });
   const [form] = Form.useForm();
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isTablet, setIsTablet] = useState(window.innerWidth >= 768 && window.innerWidth < 992);
 
   const getApiErrorMessage = (error: any, fallbackMessage: string) => {
     const responseData = error?.response?.data;
@@ -53,6 +56,15 @@ const QuanLyVanChuyen: React.FC = () => {
 
   useEffect(() => {
     loadVanChuyens();
+  }, []);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+      setIsTablet(window.innerWidth >= 768 && window.innerWidth < 992);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   const loadVanChuyens = async () => {
@@ -196,12 +208,12 @@ const QuanLyVanChuyen: React.FC = () => {
     : vanChuyens.filter(vc => vc.trangThai === filterStatus);
 
   const columns: ColumnsType<VanChuyen> = [
-    {
+    ...(!isMobile ? [{
       title: 'Mã VC',
       dataIndex: 'maVanChuyen',
       key: 'maVanChuyen',
       width: 80,
-    },
+    }] : []),
     {
       title: 'Sản phẩm',
       dataIndex: 'tenSanPham',
@@ -209,62 +221,63 @@ const QuanLyVanChuyen: React.FC = () => {
       width: 150,
       render: (text: string) => text || 'N/A',
     },
-    {
+    ...(!isMobile ? [{
       title: 'Điểm đi',
       dataIndex: 'diemDi',
       key: 'diemDi',
       ellipsis: true,
-    },
-    {
+    }] : []),
+    ...(!isMobile ? [{
       title: 'Điểm đến',
       dataIndex: 'diemDen',
       key: 'diemDen',
       ellipsis: true,
-    },
-    {
+    }] : []),
+    ...(!isTablet && !isMobile ? [{
       title: 'Ngày bắt đầu',
       dataIndex: 'ngayBatDau',
       key: 'ngayBatDau',
       width: 110,
       render: (date: string) => dayjs(date).format('DD/MM/YYYY'),
-    },
-    {
+    }] : []),
+    ...(!isTablet && !isMobile ? [{
       title: 'Ngày kết thúc',
       dataIndex: 'ngayKetThuc',
       key: 'ngayKetThuc',
       width: 110,
       render: (date: string) => date ? dayjs(date).format('DD/MM/YYYY') : '-',
-    },
+    }] : []),
     {
       title: 'Trạng thái',
       dataIndex: 'trangThai',
       key: 'trangThai',
-      width: 130,
+      width: isMobile ? 100 : 130,
       render: (status: string) => (
         <Tag color={getStatusColor(status)}>
-          {getStatusText(status)}
+          {isMobile ? (status === 'dang_van_chuyen' ? 'Đang VC' : status === 'hoan_thanh' ? 'HT' : 'Hủy') : getStatusText(status)}
         </Tag>
       ),
     },
     {
       title: 'Thao tác',
       key: 'actions',
-      width: 150,
+      width: isMobile ? 100 : 150,
+      fixed: isMobile ? undefined : 'right',
       render: (_, record) => (
-        <Space>
+        <Space size={isMobile ? 4 : 8}>
           <ModalButton
             type="default"
             icon={<EditOutlined />}
             onClick={() => handleEdit(record)}
           >
-            Sửa
+            {isMobile ? '' : 'Sửa'}
           </ModalButton>
           {record.trangThai === 'dang_van_chuyen' && (
             <ModalButton
               type="primary"
               onClick={() => handleComplete(record.maVanChuyen)}
             >
-              Hoàn thành
+              {isMobile ? 'HT' : 'Hoàn thành'}
             </ModalButton>
           )}
         </Space>
@@ -313,22 +326,22 @@ const QuanLyVanChuyen: React.FC = () => {
       </Row>
 
       <Card>
-        <Space style={{ marginBottom: 16 }}>
+        <Space style={{ marginBottom: 16, flexWrap: 'wrap' }}>
           <ActionButton
             type="primary"
             icon={<PlusOutlined />}
             onClick={handleCreate}
           >
-            Tạo vận chuyển
+            {isMobile ? 'Tạo' : 'Tạo vận chuyển'}
           </ActionButton>
           
           <Select
             value={filterStatus}
             onChange={setFilterStatus}
-            style={{ width: 200 }}
+            style={{ width: isMobile ? 120 : 200 }}
           >
-            <Select.Option value="all">Tất cả trạng thái</Select.Option>
-            <Select.Option value="dang_van_chuyen">Đang vận chuyển</Select.Option>
+            <Select.Option value="all">Tất cả</Select.Option>
+            <Select.Option value="dang_van_chuyen">Đang VC</Select.Option>
             <Select.Option value="hoan_thanh">Hoàn thành</Select.Option>
             <Select.Option value="da_huy">Đã hủy</Select.Option>
           </Select>

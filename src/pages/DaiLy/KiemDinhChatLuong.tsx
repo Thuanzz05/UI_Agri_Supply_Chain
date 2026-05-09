@@ -9,6 +9,7 @@ import { ActionButton } from '../../components/ActionButton';
 import { apiService } from '../../services/apiService';
 import { authService } from '../../services/authService';
 import type { LoHangKiemDinh } from '../../types/kiemDinh';
+import './KiemDinhChatLuong.css';
 
 interface DataType extends LoHangKiemDinh {
   key: string;
@@ -52,6 +53,8 @@ const KiemDinhChatLuong: React.FC = () => {
     datChuanCount: 0,
     khongDatCount: 0
   });
+  const [isMobile, setIsMobile] = React.useState(window.innerWidth < 768);
+  const [isTablet, setIsTablet] = React.useState(window.innerWidth >= 768 && window.innerWidth < 992);
   
   // Modal kiểm định
   const [isModalOpen, setIsModalOpen] = React.useState(false);
@@ -61,6 +64,15 @@ const KiemDinhChatLuong: React.FC = () => {
   // Load dữ liệu
   React.useEffect(() => {
     loadData();
+  }, []);
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+      setIsTablet(window.innerWidth >= 768 && window.innerWidth < 992);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   const loadData = async () => {
@@ -176,24 +188,24 @@ const KiemDinhChatLuong: React.FC = () => {
       key: 'tenSanPham',
       width: 150,
     },
-    {
+    ...(!isMobile ? [{
       title: 'Nông dân',
       dataIndex: 'tenNongDan',
       key: 'tenNongDan',
       width: 150,
-    },
-    {
+    }] : []),
+    ...(!isTablet && !isMobile ? [{
       title: 'Số lượng',
       key: 'soLuong',
       width: 120,
-      render: (_, record) => `${record.soLuong} ${record.donViTinh}`,
-    },
-    {
+      render: (_: any, record: DataType) => `${record.soLuong} ${record.donViTinh}`,
+    }] : []),
+    ...(!isMobile ? [{
       title: 'Ngày thu hoạch',
       dataIndex: 'ngayThuHoach',
       key: 'ngayThuHoach',
       width: 130,
-    },
+    }] : []),
     {
       title: 'Trạng thái',
       dataIndex: 'trangThaiKiemDinh',
@@ -207,14 +219,14 @@ const KiemDinhChatLuong: React.FC = () => {
       title: 'Thao tác',
       key: 'action',
       width: 150,
-      fixed: 'right',
+      fixed: isMobile ? undefined : 'right',
       render: (_, record) => (
         <ActionButton
           type="primary"
           icon={record.trangThaiKiemDinh === 'cho_kiem_dinh' ? <SafetyOutlined /> : <EyeOutlined />}
           onClick={() => showKiemDinhModal(record)}
         >
-          {record.trangThaiKiemDinh === 'cho_kiem_dinh' ? 'Kiểm định' : 'Chi tiết'}
+          {record.trangThaiKiemDinh === 'cho_kiem_dinh' ? (isMobile ? 'KĐ' : 'Kiểm định') : (isMobile ? 'Xem' : 'Chi tiết')}
         </ActionButton>
       ),
     },
@@ -305,6 +317,7 @@ const KiemDinhChatLuong: React.FC = () => {
             setPageSize(size || 10);
           }}
           showTotal={(total, range) => `${range[0]}-${range[1]} của ${total} lô hàng`}
+          responsive={isMobile || isTablet}
         />
       </Card>
 

@@ -22,6 +22,7 @@ import type { DuLieuCapNhatTonKho, TonKhoDaiLy } from '../../types/kho';
 import { ModalButton } from '../../components/ModalButton';
 import type { Kho } from '../../types/kho';
 import type { PhieuChuyenKho } from '../../types/chuyenKho';
+import './TonKhoDaiLy.css';
 
 interface TonKhoTableItem extends TonKhoDaiLy {
   key: string;
@@ -97,6 +98,20 @@ const TonKhoDaiLyPage: React.FC = () => {
   const [historyOpen, setHistoryOpen] = React.useState(false);
   const [historyLoading, setHistoryLoading] = React.useState(false);
   const [history, setHistory] = React.useState<PhieuChuyenKho[]>([]);
+  
+  // State để theo dõi kích thước màn hình
+  const [isMobile, setIsMobile] = React.useState(window.innerWidth < 768);
+  const [isTablet, setIsTablet] = React.useState(window.innerWidth < 992);
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+      setIsTablet(window.innerWidth < 992);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const fetchInventory = async () => {
     setLoading(true);
@@ -302,24 +317,24 @@ const TonKhoDaiLyPage: React.FC = () => {
   }, [currentPage, filteredInventory, pageSize]);
 
   const columns: TableProps<TonKhoTableItem>['columns'] = [
-    {
+    ...(!isMobile ? [{
       title: 'Mã kho',
       dataIndex: 'maKho',
       key: 'maKho',
       width: 80,
-    },
+    }] : []),
     {
       title: 'Tên kho',
       dataIndex: 'tenKho',
       key: 'tenKho',
       width: 160,
     },
-    {
+    ...(!isTablet ? [{
       title: 'Mã lô',
       dataIndex: 'maLo',
       key: 'maLo',
       width: 70,
-    },
+    }] : []),
     {
       title: 'Sản phẩm',
       dataIndex: 'tenSanPham',
@@ -330,36 +345,36 @@ const TonKhoDaiLyPage: React.FC = () => {
       title: 'Số lượng',
       key: 'soLuong',
       width: 120,
-      render: (_, record) => `${record.soLuong.toLocaleString('vi-VN')} ${record.donViTinh}`,
+      render: (_: any, record: TonKhoTableItem) => `${record.soLuong.toLocaleString('vi-VN')} ${record.donViTinh}`,
     },
-    {
+    ...(!isMobile ? [{
       title: 'Mã QR',
       dataIndex: 'maQR',
       key: 'maQR',
       width: 100,
       render: (value: string) => <Tag color="green">{value}</Tag>,
-    },
-    {
+    }] : []),
+    ...(!isTablet ? [{
       title: 'Ngày cập nhật',
       dataIndex: 'ngayCapNhat',
       key: 'ngayCapNhat',
       width: 110,
       render: (value: string) => formatDate(value),
-    },
+    }] : []),
     {
       title: 'Thao tác',
       key: 'action',
-      width: 190,
-      fixed: 'right',
-      render: (_, record) => (
-        <Space size={0}>
+      width: isMobile ? 120 : 190,
+      fixed: isMobile ? false : ('right' as any),
+      render: (_: any, record: TonKhoTableItem) => (
+        <Space size={0} className="action-buttons">
           <Button
             type="link"
             size="small"
             icon={<SwapOutlined />}
             onClick={() => openTransferModal(record)}
           >
-            Chuyển kho
+            <span className="button-text">Chuyển kho</span>
           </Button>
           <Button
             type="link"
@@ -367,7 +382,7 @@ const TonKhoDaiLyPage: React.FC = () => {
             icon={<EditOutlined />}
             onClick={() => showUpdateModal(record)}
           >
-            Điều chỉnh
+            <span className="button-text">Điều chỉnh</span>
           </Button>
         </Space>
       ),
@@ -422,7 +437,8 @@ const TonKhoDaiLyPage: React.FC = () => {
           dataSource={paginatedInventory}
           pagination={false}
           loading={loading}
-          scroll={{ x: 920 }}
+          scroll={{ x: 'max-content' }}
+          className="inventory-table"
         />
 
         <CustomPagination

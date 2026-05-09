@@ -35,6 +35,7 @@ import { ActionButton } from '../../components/ActionButton';
 import SocialLinks from '../../components/SocialLinks';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
+import './DonHangBanRa.css';
 
 interface DonHangTableItem extends DonHang {
   key: string;
@@ -108,6 +109,8 @@ const DonHangBanRa: React.FC = () => {
   const [selectedOrder, setSelectedOrder] = React.useState<DonHang | null>(null);
   const [counterpartyProfile, setCounterpartyProfile] = React.useState<unknown>(null);
   const [detailLoading, setDetailLoading] = React.useState(false);
+  const [isMobile, setIsMobile] = React.useState(window.innerWidth < 768);
+  const [isTablet, setIsTablet] = React.useState(window.innerWidth >= 768 && window.innerWidth < 992);
 
   // Modal tạo đơn
   const [isCreateModalOpen, setIsCreateModalOpen] = React.useState(false);
@@ -161,6 +164,15 @@ const DonHangBanRa: React.FC = () => {
 
   React.useEffect(() => {
     fetchOrders();
+  }, []);
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+      setIsTablet(window.innerWidth >= 768 && window.innerWidth < 992);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   const showDetailModal = async (order: DonHangTableItem) => {
@@ -395,20 +407,20 @@ const DonHangBanRa: React.FC = () => {
       width: 180,
       ellipsis: true,
     },
-    {
+    ...(!isMobile ? [{
       title: 'Ngày đặt',
       dataIndex: 'ngayDat',
       key: 'ngayDat',
       width: 110,
       render: (value: string) => dayjs(value).format('DD/MM/YYYY'),
-    },
-    {
+    }] : []),
+    ...(!isTablet && !isMobile ? [{
       title: 'Tổng giá trị',
       dataIndex: 'tongGiaTri',
       key: 'tongGiaTri',
       width: 130,
       render: (value: number) => `${(value || 0).toLocaleString('vi-VN')} đ`,
-    },
+    }] : []),
     {
       title: 'Trạng thái',
       dataIndex: 'trangThai',
@@ -422,14 +434,14 @@ const DonHangBanRa: React.FC = () => {
       title: 'Thao tác',
       key: 'action',
       width: 120,
-      fixed: 'right',
+      fixed: isMobile ? undefined : 'right',
       render: (_, record) => (
         <ActionButton
           type="primary"
           icon={<EyeOutlined />}
           onClick={() => showDetailModal(record)}
         >
-          Chi tiết
+          {isMobile ? 'Xem' : 'Chi tiết'}
         </ActionButton>
       ),
     },
@@ -553,7 +565,7 @@ const DonHangBanRa: React.FC = () => {
               icon={<PlusOutlined />}
               onClick={showCreateModal}
             >
-              Tạo đơn hàng
+              {isMobile ? 'Tạo' : 'Tạo đơn hàng'}
             </ActionButton>
           </div>
         </div>
@@ -575,6 +587,7 @@ const DonHangBanRa: React.FC = () => {
             setPageSize(size || 10);
           }}
           showTotal={(total, range) => `${range[0]}-${range[1]} của ${total} đơn hàng`}
+          responsive={isMobile || isTablet}
         />
       </Card>
 
