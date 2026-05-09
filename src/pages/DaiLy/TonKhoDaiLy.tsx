@@ -382,7 +382,7 @@ const TonKhoDaiLyPage: React.FC = () => {
       </div>
 
       <Alert
-        message="Lưu ý quan trọng"
+        title="Lưu ý quan trọng"
         description="Tồn kho tự động cập nhật khi nhập/xuất hàng. Chỉ sử dụng 'Điều chỉnh' cho trường hợp kiểm kê, hao hụt, hư hỏng hoặc sai lệch thực tế."
         type="warning"
         icon={<WarningOutlined />}
@@ -446,7 +446,7 @@ const TonKhoDaiLyPage: React.FC = () => {
         className="ton-kho-modal"
       >
         <Alert
-          message="Chỉ điều chỉnh khi cần thiết"
+          title="Chỉ điều chỉnh khi cần thiết"
           description="Tồn kho tự động cập nhật qua nhập/xuất hàng. Chỉ điều chỉnh khi phát hiện sai lệch thực tế."
           type="info"
           showIcon
@@ -494,7 +494,7 @@ const TonKhoDaiLyPage: React.FC = () => {
         destroyOnHidden
       >
         <Alert
-          message="Gợi ý"
+          title="Gợi ý"
           description="Dùng 'Chuyển kho' để điều chuyển nội bộ giữa các kho của đại lý (có lưu lịch sử). 'Điều chỉnh' chỉ dùng khi kiểm kê/sai lệch."
           type="info"
           showIcon

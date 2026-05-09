@@ -1,0 +1,74 @@
+/* ===== DASHBOARD STYLES ===== */
+.recent-orders-card {
+  margin-top: 24px;
+}
+
+.dashboard-table {
+  overflow-x: auto;
+}
+
+.dashboard-table .ant-table {
+  font-size: 14px;
+}
+
+.dashboard-table .ant-table-thead > tr > th {
+  background: #fafafa;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.dashboard-table .ant-table-tbody > tr > td {
+  white-space: nowrap;
+}
+
+/* ===== RESPONSIVE BREAKPOINTS ===== */
+
+/* Tablet (< 992px) */
+@media (max-width: 991px) {
+  .dashboard-table .ant-table {
+    font-size: 13px;
+  }
+  
+  .dashboard-table .ant-table-thead > tr > th,
+  .dashboard-table .ant-table-tbody > tr > td {
+    padding: 12px 8px;
+  }
+}
+
+/* Mobile (< 768px) */
+@media (max-width: 767px) {
+  .recent-orders-card {
+    margin-top: 16px;
+  }
+  
+  .dashboard-table .ant-table {
+    font-size: 12px;
+  }
+  
+  .dashboard-table .ant-table-thead > tr > th,
+  .dashboard-table .ant-table-tbody > tr > td {
+    padding: 8px 6px;
+  }
+}
+
+/* Mobile Portrait (< 576px) */
+@media (max-width: 575px) {
+  .dashboard-table .ant-table-thead > tr > th,
+  .dashboard-table .ant-table-tbody > tr > td {
+    padding: 6px 4px;
+    font-size: 11px;
+  }
+  
+  .dashboard-table .anticon {
+    font-size: 12px;
+  }
+}
+
+/* Extra Small Mobile (< 400px) */
+@media (max-width: 399px) {
+  .dashboard-table .ant-table-thead > tr > th,
+  .dashboard-table .ant-table-tbody > tr > td {
+    padding: 4px 2px;
+    font-size: 10px;
+  }
+}
