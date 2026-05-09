@@ -48,10 +48,21 @@ const QuanLyTaiKhoan: React.FC = () => {
   const [passwordModalVisible, setPasswordModalVisible] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
   const [form] = Form.useForm();
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isTablet, setIsTablet] = useState(window.innerWidth >= 768 && window.innerWidth < 992);
 
   useEffect(() => {
     fetchAccounts();
   }, [filterType]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+      setIsTablet(window.innerWidth >= 768 && window.innerWidth < 992);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     // Filter dữ liệu theo search text
@@ -154,63 +165,65 @@ const QuanLyTaiKhoan: React.FC = () => {
       title: 'ID',
       dataIndex: 'maTaiKhoan',
       key: 'maTaiKhoan',
-      width: 60,
+      width: isMobile ? 50 : 60,
     },
     {
       title: 'Tên đăng nhập',
       dataIndex: 'tenDangNhap',
       key: 'tenDangNhap',
-      width: 110,
+      width: isMobile ? 100 : 110,
     },
-    {
+    ...(!isMobile ? [{
       title: 'Email',
       dataIndex: 'email',
       key: 'email',
       width: 180,
-    },
+    }] : []),
     {
-      title: 'Loại tài khoản',
+      title: 'Loại',
       dataIndex: 'loaiTaiKhoan',
       key: 'loaiTaiKhoan',
-      width: 100,
+      width: isMobile ? 80 : 100,
       render: (loai: string) => getLoaiTaiKhoanTag(loai),
     },
-    {
+    ...(!isMobile ? [{
       title: 'Trạng thái',
       dataIndex: 'trangThai',
       key: 'trangThai',
       width: 90,
       render: (trangThai: string) => getTrangThaiTag(trangThai),
-    },
-    {
+    }] : []),
+    ...(!isTablet && !isMobile ? [{
       title: 'Ngày tạo',
       dataIndex: 'ngayTao',
       key: 'ngayTao',
       width: 90,
       render: (date: string) => dayjs(date).format('DD/MM/YYYY'),
-    },
+    }] : []),
     {
-      title: 'Thao tác',
+      title: '',
       key: 'action',
-      width: 200,
-      fixed: 'right' as const,
+      width: isMobile ? 100 : 200,
+      fixed: isMobile ? undefined : ('right' as const),
       render: (_: any, record: Account) => (
         <Space size="small">
-          <Button
-            type="link"
-            size="small"
-            icon={record.trangThai === 'hoat_dong' ? <LockOutlined /> : <UnlockOutlined />}
-            onClick={() => handleToggleStatus(record)}
-          >
-            {record.trangThai === 'hoat_dong' ? 'Khóa' : 'Mở'}
-          </Button>
+          {!isMobile && (
+            <Button
+              type="link"
+              size="small"
+              icon={record.trangThai === 'hoat_dong' ? <LockOutlined /> : <UnlockOutlined />}
+              onClick={() => handleToggleStatus(record)}
+            >
+              {record.trangThai === 'hoat_dong' ? 'Khóa' : 'Mở'}
+            </Button>
+          )}
           <Button
             type="link"
             size="small"
             icon={<EditOutlined />}
             onClick={() => openPasswordModal(record)}
           >
-            Đổi MK
+            {isMobile ? '' : 'Đổi MK'}
           </Button>
           <Popconfirm
             title="Xác nhận xóa"
@@ -234,7 +247,7 @@ const QuanLyTaiKhoan: React.FC = () => {
               danger
               icon={<DeleteOutlined />}
             >
-              Xóa
+              {isMobile ? '' : 'Xóa'}
             </Button>
           </Popconfirm>
         </Space>
@@ -250,18 +263,18 @@ const QuanLyTaiKhoan: React.FC = () => {
       </div>
 
       <Card>
-        <Space style={{ marginBottom: 16 }} wrap>
+        <Space style={{ marginBottom: 16, width: '100%' }} wrap>
           <Input
             placeholder="Tìm theo tên đăng nhập hoặc email..."
             prefix={<SearchOutlined />}
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
-            style={{ width: 300 }}
+            style={{ width: isMobile ? '100%' : 300 }}
             allowClear
           />
           <Select
             placeholder="Lọc theo loại tài khoản"
-            style={{ width: 200 }}
+            style={{ width: isMobile ? '100%' : 200 }}
             value={filterType || undefined}
             onChange={(value) => {
               setFilterType(value || '');

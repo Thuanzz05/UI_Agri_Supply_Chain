@@ -84,10 +84,21 @@ const QuanLyNguoiDung: React.FC = () => {
   const [detailModalVisible, setDetailModalVisible] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isTablet, setIsTablet] = useState(window.innerWidth >= 768 && window.innerWidth < 992);
 
   useEffect(() => {
     fetchUsers();
   }, [filterType]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+      setIsTablet(window.innerWidth >= 768 && window.innerWidth < 992);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     // Filter dữ liệu theo search text
@@ -174,52 +185,52 @@ const QuanLyNguoiDung: React.FC = () => {
       title: 'ID',
       dataIndex: 'id',
       key: 'id',
-      width: 60,
+      width: isMobile ? 50 : 60,
     },
     {
       title: 'Tên đăng nhập',
       dataIndex: 'tenDangNhap',
       key: 'tenDangNhap',
-      width: 130,
+      width: isMobile ? 100 : 130,
     },
-    {
+    ...(!isMobile ? [{
       title: 'Họ tên',
       dataIndex: 'hoTen',
       key: 'hoTen',
       width: 150,
-    },
+    }] : []),
     {
       title: 'Loại',
       dataIndex: 'loaiNguoiDung',
       key: 'loaiNguoiDung',
-      width: 100,
+      width: isMobile ? 80 : 100,
       render: (loai: string) => getLoaiNguoiDungTag(loai),
     },
-    {
+    ...(!isTablet && !isMobile ? [{
       title: 'Số điện thoại',
       dataIndex: 'soDienThoai',
       key: 'soDienThoai',
       width: 120,
-    },
-    {
+    }] : []),
+    ...(!isMobile ? [{
       title: 'Trạng thái',
       dataIndex: 'trangThai',
       key: 'trangThai',
       width: 110,
       render: (trangThai: string) => getTrangThaiTag(trangThai),
-    },
+    }] : []),
     {
-      title: 'Thao tác',
+      title: '',
       key: 'action',
-      width: 100,
-      fixed: 'right' as const,
+      width: isMobile ? 50 : 100,
+      fixed: isMobile ? undefined : ('right' as const),
       render: (_: any, record: User) => (
         <Button
           type="link"
           icon={<EyeOutlined />}
           onClick={() => handleViewDetail(record)}
         >
-          Chi tiết
+          {isMobile ? '' : 'Chi tiết'}
         </Button>
       ),
     },
@@ -350,18 +361,18 @@ const QuanLyNguoiDung: React.FC = () => {
       </div>
 
       <Card>
-        <Space style={{ marginBottom: 16 }} wrap>
+        <Space style={{ marginBottom: 16, width: '100%' }} wrap>
           <Input
             placeholder="Tìm theo tên, SĐT, email..."
             prefix={<SearchOutlined />}
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
-            style={{ width: 300 }}
+            style={{ width: isMobile ? '100%' : 300 }}
             allowClear
           />
           <Select
             placeholder="Lọc theo loại"
-            style={{ width: 150 }}
+            style={{ width: isMobile ? '100%' : 150 }}
             value={filterType || undefined}
             onChange={(value) => setFilterType(value || '')}
             allowClear
