@@ -10,6 +10,7 @@ import SocialLinks from '../../components/SocialLinks';
 import type { ColumnsType } from 'antd/es/table';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
+import './QuanLyDonHang.css';
 
 interface ChiTietDonHang {
   maDonHang: number;
@@ -57,6 +58,8 @@ const QuanLyDonHang: React.FC = () => {
   const [donHangs, setDonHangs] = useState<DonHang[]>([]);
   const [loading, setLoading] = useState(false);
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isTablet, setIsTablet] = useState(window.innerWidth >= 768 && window.innerWidth < 992);
 
   // Modal chi tiết
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
@@ -66,6 +69,15 @@ const QuanLyDonHang: React.FC = () => {
 
   useEffect(() => {
     loadDonHangs();
+  }, []);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+      setIsTablet(window.innerWidth >= 768 && window.innerWidth < 992);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   const loadDonHangs = async () => {
@@ -196,7 +208,7 @@ const QuanLyDonHang: React.FC = () => {
       title: 'Mã ĐH',
       dataIndex: 'maDonHang',
       key: 'maDonHang',
-      width: 80,
+      width: isMobile ? 70 : 80,
     },
     {
       title: 'Đại lý',
@@ -204,42 +216,43 @@ const QuanLyDonHang: React.FC = () => {
       key: 'tenNguoiBan',
       ellipsis: true,
     },
-    {
+    ...(!isMobile ? [{
       title: 'Ngày đặt',
       dataIndex: 'ngayDat',
       key: 'ngayDat',
       width: 120,
       render: (date: string) => date ? dayjs(date).format('DD/MM/YYYY') : '-',
-    },
-    {
+    }] : []),
+    ...(!isTablet && !isMobile ? [{
       title: 'Tổng tiền',
       dataIndex: 'tongGiaTri',
       key: 'tongGiaTri',
       width: 140,
       render: (value: number) => `${(value || 0).toLocaleString('vi-VN')} đ`,
-    },
+    }] : []),
     {
       title: 'Trạng thái',
       dataIndex: 'trangThai',
       key: 'trangThai',
-      width: 130,
+      width: isMobile ? 90 : 130,
       render: (status: string) => (
         <Tag color={getStatusColor(status)}>
-          {getStatusText(status)}
+          {isMobile ? (status === 'cho_xac_nhan' ? 'Chờ' : status === 'hoan_thanh' ? 'HT' : 'Hủy') : getStatusText(status)}
         </Tag>
       ),
     },
     {
-      title: 'Thao tác',
+      title: '',
       key: 'action',
-      width: 100,
+      width: isMobile ? 50 : 100,
+      fixed: isMobile ? undefined : 'right',
       render: (_, record) => (
         <ActionButton
           type="primary"
           icon={<EyeOutlined />}
           onClick={() => showDetailModal(record)}
         >
-          Chi tiết
+          {isMobile ? '' : 'Chi tiết'}
         </ActionButton>
       ),
     },

@@ -6,6 +6,7 @@ import { authService } from '../../services/authService';
 import { apiService } from '../../services/apiService';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
+import './QuanLyKho.css';
 
 interface TonKho {
   maKho: number;
@@ -32,9 +33,20 @@ const QuanLyKho: React.FC = () => {
   const [tonKhos, setTonKhos] = useState<TonKho[]>([]);
   const [khos, setKhos] = useState<Kho[]>([]);
   const [loading, setLoading] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isTablet, setIsTablet] = useState(window.innerWidth >= 768 && window.innerWidth < 992);
 
   useEffect(() => {
     loadData();
+  }, []);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+      setIsTablet(window.innerWidth >= 768 && window.innerWidth < 992);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   const loadData = async () => {
@@ -85,36 +97,36 @@ const QuanLyKho: React.FC = () => {
       key: 'tenSanPham',
       render: (text: string) => text || '--',
     },
-    {
+    ...(!isMobile ? [{
       title: 'Mã lô',
       dataIndex: 'maLo',
       key: 'maLo',
       width: 80,
-    },
-    {
+    }] : []),
+    ...(!isTablet && !isMobile ? [{
       title: 'Mã QR',
       dataIndex: 'maQR',
       key: 'maQR',
       width: 110,
       render: (text: string) => text ? <Tag color="blue">{text}</Tag> : '--',
-    },
+    }] : []),
     {
       title: 'Số lượng',
       key: 'soLuong',
       width: 130,
-      render: (_, record) => (
+      render: (_: any, record: TonKho) => (
         <strong style={{ color: record.soLuong > 0 ? '#52c41a' : '#ff4d4f' }}>
           {record.soLuong} {record.donViTinh || ''}
         </strong>
       ),
     },
-    {
+    ...(!isMobile ? [{
       title: 'Ngày cập nhật',
       dataIndex: 'ngayCapNhat',
       key: 'ngayCapNhat',
       width: 140,
       render: (date: string) => date ? dayjs(date).format('DD/MM/YYYY HH:mm') : '--',
-    },
+    }] : []),
   ];
 
   return (

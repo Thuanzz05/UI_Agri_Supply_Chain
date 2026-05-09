@@ -11,6 +11,7 @@ import { authService } from '../../services/authService';
 import { apiService } from '../../services/apiService';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
+import './DashboardSieuThi.css';
 
 interface DashboardStats {
   tongSanPhamTrongKho: number;
@@ -29,9 +30,20 @@ interface DashboardStats {
 const DashboardSieuThi: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isTablet, setIsTablet] = useState(window.innerWidth >= 768 && window.innerWidth < 992);
 
   useEffect(() => {
     loadDashboardStats();
+  }, []);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+      setIsTablet(window.innerWidth >= 768 && window.innerWidth < 992);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   const loadDashboardStats = async () => {
@@ -86,20 +98,20 @@ const DashboardSieuThi: React.FC = () => {
       dataIndex: 'tenNguoiBan',
       key: 'tenNguoiBan',
     },
-    {
+    ...(!isMobile ? [{
       title: 'Ngày đặt',
       dataIndex: 'ngayDat',
       key: 'ngayDat',
       width: 120,
       render: (date: string) => dayjs(date).format('DD/MM/YYYY'),
-    },
-    {
+    }] : []),
+    ...(!isTablet && !isMobile ? [{
       title: 'Tổng tiền',
       dataIndex: 'tongGiaTri',
       key: 'tongGiaTri',
       width: 130,
       render: (value: number) => `${value.toLocaleString('vi-VN')} đ`,
-    },
+    }] : []),
     {
       title: 'Trạng thái',
       dataIndex: 'trangThai',
