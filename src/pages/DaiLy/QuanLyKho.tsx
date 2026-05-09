@@ -13,6 +13,7 @@ import { apiService } from '../../services/apiService';
 import type { DuLieuFormKhoThem, DuLieuFormKhoSua } from '../../types/kho';
 import { ModalButton } from '../../components/ModalButton';
 import { ActionButton } from '../../components/ActionButton';
+import './QuanLyKho.css';
 
 interface DataType {
   key: string;
@@ -37,6 +38,20 @@ const QuanLyKho: React.FC = () => {
   const [isEditMode, setIsEditMode] = React.useState(false);
   const [editingWarehouse, setEditingWarehouse] = React.useState<DataType | null>(null);
   const [form] = Form.useForm();
+  
+  // State để theo dõi kích thước màn hình
+  const [isMobile, setIsMobile] = React.useState(window.innerWidth < 768);
+  const [isTablet, setIsTablet] = React.useState(window.innerWidth < 992);
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+      setIsTablet(window.innerWidth < 992);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Function để gọi API lấy dữ liệu
   const fetchWarehouses = async () => {
@@ -189,31 +204,31 @@ const QuanLyKho: React.FC = () => {
   }, [filteredData, currentPage, pageSize]);
 
   const columns: TableProps<DataType>['columns'] = [
-    {
+    ...(!isMobile ? [{
       title: 'Mã kho',
       dataIndex: 'maKho',
       key: 'maKho',
       width: 70,
-    },
+    }] : []),
     {
       title: 'Tên kho',
       dataIndex: 'tenKho',
       key: 'tenKho',
       width: 160,
     },
-    {
+    ...(!isTablet ? [{
       title: 'Loại kho',
       dataIndex: 'loaiKho',
       key: 'loaiKho',
       width: 100,
-    },
-    {
+    }] : []),
+    ...(!isMobile ? [{
       title: 'Địa chỉ',
       dataIndex: 'diaChi',
       key: 'diaChi',
       width: 220,
       ellipsis: true,
-    },
+    }] : []),
     {
       title: 'Chủ sở hữu',
       dataIndex: 'tenChuSoHuu',
@@ -224,22 +239,23 @@ const QuanLyKho: React.FC = () => {
     {
       title: 'Thao tác',
       key: 'action',
-      width: 140,
-      render: (_, record) => (
-        <Space size="small">
+      width: isMobile ? 100 : 140,
+      fixed: isMobile ? false : ('right' as any),
+      render: (_: any, record: DataType) => (
+        <Space size="small" className="action-buttons">
           <ActionButton 
             type="default" 
             icon={<EditOutlined />}
             onClick={() => showEditModal(record)}
           >
-            Sửa
+            <span className="button-text">Sửa</span>
           </ActionButton>
           <ActionButton 
             type="danger" 
             icon={<DeleteOutlined />}
             onClick={() => handleDelete(record)}
           >
-            Xóa
+            <span className="button-text">Xóa</span>
           </ActionButton>
         </Space>
       ),
@@ -275,7 +291,8 @@ const QuanLyKho: React.FC = () => {
             icon={<PlusOutlined />}
             onClick={showModal}
           >
-            Thêm kho hàng
+            <span className="button-text">Thêm kho hàng</span>
+            <span className="button-text-mobile">Thêm</span>
           </ActionButton>
         </div>
         
@@ -283,8 +300,9 @@ const QuanLyKho: React.FC = () => {
           columns={columns} 
           dataSource={paginatedData}
           pagination={false}
-          scroll={{ x: 850 }}
+          scroll={{ x: 'max-content' }}
           loading={loading}
+          className="warehouse-table"
         />
         
         <CustomPagination
