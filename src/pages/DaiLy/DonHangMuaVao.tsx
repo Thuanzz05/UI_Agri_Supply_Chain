@@ -805,13 +805,23 @@ const DonHangMuaVao: React.FC = () => {
                   options={batches.map((batch: any) => {
                     // Tính số ngày còn lại đến HSD
                     let hsdInfo = '';
+                    let isExpired = false;
                     if (batch.hanSuDung) {
+                      // Chuyển về đầu ngày để so sánh chính xác
                       const hsd = new Date(batch.hanSuDung);
+                      hsd.setHours(0, 0, 0, 0);
+                      
                       const today = new Date();
+                      today.setHours(0, 0, 0, 0);
+                      
                       const daysLeft = Math.ceil((hsd.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
                       
                       if (daysLeft < 0) {
                         hsdInfo = ' - ⚠ Hết hạn';
+                        isExpired = true;
+                      } else if (daysLeft === 0) {
+                        hsdInfo = ' - ⚠ Hết hạn hôm nay';
+                        isExpired = true;
                       } else if (daysLeft <= 7) {
                         hsdInfo = ` - ⚠ Còn ${daysLeft} ngày`;
                       } else if (daysLeft <= 14) {
@@ -827,7 +837,7 @@ const DonHangMuaVao: React.FC = () => {
                       label: `Lô ${batch.maLo} - ${batch.tenSanPham || 'Chưa có tên'} (${
                         batch.soLuongHienTai || 0
                       } ${batch.donViTinh || 'kg'})${hsdInfo}`,
-                      disabled: batch.trangThaiKiemDinh === 'khong_dat', // Không cho chọn lô không đạt
+                      disabled: batch.trangThaiKiemDinh === 'khong_dat' || isExpired, // Không cho chọn lô không đạt hoặc hết hạn
                     };
                   })}
                 />
