@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, Space, Input, message, Modal, Form, Empty, Upload } from 'antd';
+import { Card, Space, Input, message, Modal, Form, Empty, Upload, Select } from 'antd';
 import type { UploadFile, UploadProps } from 'antd';
 import { 
   PlusOutlined, 
@@ -22,6 +22,7 @@ interface DataType {
   donViTinh: string;
   moTa: string;
   hinhAnh?: string;
+  maTrangTrai: number;
 }
 
 const QuanLySanPham: React.FC = () => {
@@ -31,6 +32,7 @@ const QuanLySanPham: React.FC = () => {
   // 2.1: Tạo state để lưu dữ liệu từ API
   const [data, setData] = React.useState<DataType[]>([]);
   const [loading, setLoading] = React.useState(false);
+  const [farms, setFarms] = React.useState<any[]>([]);
   
   // State cho modal thêm sản phẩm
   const [isModalOpen, setIsModalOpen] = React.useState(false);
@@ -41,11 +43,28 @@ const QuanLySanPham: React.FC = () => {
   const [fileList, setFileList] = React.useState<UploadFile[]>([]);
   const [imageBase64, setImageBase64] = React.useState<string>('');
 
-  // 2.2: Tạo function để gọi API lấy dữ liệu
+  // 2.2: Tạo function để gọi API lấy dữ liệu theo nông dân
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const response = await apiService.getFarmerProducts();
+      // Lấy thông tin nông dân từ localStorage
+      const userStr = localStorage.getItem('user');
+      if (!userStr) {
+        message.error('Không tìm thấy thông tin người dùng');
+        setData([]);
+        return;
+      }
+
+      const user = JSON.parse(userStr);
+      const maNongDan = user.maNongDan;
+
+      if (!maNongDan) {
+        message.error('Không tìm thấy mã nông dân');
+        setData([]);
+        return;
+      }
+
+      const response = await apiService.getProductsByFarmer(maNongDan);
       
       if (response && response.data) {
         const products = Array.isArray(response.data) ? response.data : [];
@@ -56,7 +75,8 @@ const QuanLySanPham: React.FC = () => {
           tenSanPham: product.tenSanPham,
           donViTinh: product.donViTinh,
           moTa: product.moTa,
-          hinhAnh: product.hinhAnh
+          hinhAnh: product.hinhAnh,
+          maTrangTrai: product.maTrangTrai
         }));
         
         setData(mappedData);
@@ -71,9 +91,30 @@ const QuanLySanPham: React.FC = () => {
     }
   };
 
+  // Function lấy danh sách trang trại của nông dân
+  const fetchFarms = async () => {
+    try {
+      const userStr = localStorage.getItem('user');
+      if (!userStr) return;
+
+      const user = JSON.parse(userStr);
+      const maNongDan = user.maNongDan;
+
+      if (!maNongDan) return;
+
+      const response = await apiService.getFarmsByFarmer(maNongDan);
+      if (response && response.data) {
+        setFarms(Array.isArray(response.data) ? response.data : []);
+      }
+    } catch (error) {
+      console.error('Error fetching farms:', error);
+    }
+  };
+
   // 2.6: Gọi API khi component được mount
   React.useEffect(() => {
     fetchProducts();
+    fetchFarms();
   }, []);
 
   // Hàm mở modal thêm mới
@@ -106,7 +147,8 @@ const QuanLySanPham: React.FC = () => {
     form.setFieldsValue({
       tenSanPham: record.tenSanPham,
       donViTinh: record.donViTinh,
-      moTa: record.moTa
+      moTa: record.moTa,
+      maTrangTrai: record.maTrangTrai
     });
     setIsModalOpen(true);
   };
@@ -347,6 +389,22 @@ const QuanLySanPham: React.FC = () => {
           onFinish={handleSubmit}
           style={{ marginTop: 24 }}
         >
+          <Form.Item
+            label="Trang trại"
+            name="maTrangTrai"
+            rules={[
+              { required: true, message: 'Vui lòng chọn trang trại!' }
+            ]}
+          >
+            <Select placeholder="Chọn trang trại" disabled={isEditMode}>
+              {farms.map(farm => (
+                <Select.Option key={farm.maTrangTrai} value={farm.maTrangTrai}>
+                  {farm.tenTrangTrai}
+                </Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
+
           <Form.Item
             label="Tên sản phẩm"
             name="tenSanPham"

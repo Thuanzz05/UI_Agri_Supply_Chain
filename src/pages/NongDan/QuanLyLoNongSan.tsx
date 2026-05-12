@@ -47,6 +47,7 @@ const QuanLyLoNongSan: React.FC = () => {
   // State cho dropdown
   const [farms, setFarms] = React.useState<any[]>([]);
   const [products, setProducts] = React.useState<any[]>([]);
+  const [selectedFarmId, setSelectedFarmId] = React.useState<number | null>(null);
 
   // Function gọi API lấy danh sách lô nông sản của nông dân đang đăng nhập
   const fetchBatches = async () => {
@@ -107,13 +108,27 @@ const QuanLyLoNongSan: React.FC = () => {
   React.useEffect(() => {
     fetchBatches();
     fetchFarms();
-    fetchProducts();
   }, []);
 
-  // Function lấy danh sách trang trại
+  // Function lấy danh sách trang trại của nông dân
   const fetchFarms = async () => {
     try {
-      const response = await apiService.getAllFarms();
+      // Lấy thông tin nông dân từ localStorage
+      const userStr = localStorage.getItem('user');
+      if (!userStr) {
+        message.error('Không tìm thấy thông tin người dùng');
+        return;
+      }
+
+      const user = JSON.parse(userStr);
+      const maNongDan = user.maNongDan;
+
+      if (!maNongDan) {
+        message.error('Không tìm thấy mã nông dân');
+        return;
+      }
+
+      const response = await apiService.getFarmsByFarmer(maNongDan);
       if (response && response.data) {
         setFarms(Array.isArray(response.data) ? response.data : []);
       }
@@ -122,22 +137,32 @@ const QuanLyLoNongSan: React.FC = () => {
     }
   };
 
-  // Function lấy danh sách sản phẩm
-  const fetchProducts = async () => {
+  // Function lấy danh sách sản phẩm theo trang trại
+  const fetchProductsByFarm = async (maTrangTrai: number) => {
     try {
-      const response = await apiService.getFarmerProducts();
+      const response = await apiService.getProductsByFarm(maTrangTrai);
       if (response && response.data) {
         setProducts(Array.isArray(response.data) ? response.data : []);
       }
     } catch (error) {
-      console.error('Error fetching products:', error);
+      console.error('Error fetching products by farm:', error);
+      setProducts([]);
     }
+  };
+
+  // Xử lý khi chọn trang trại
+  const handleFarmChange = (maTrangTrai: number) => {
+    setSelectedFarmId(maTrangTrai);
+    form.setFieldsValue({ maSanPham: undefined }); // Reset sản phẩm đã chọn
+    fetchProductsByFarm(maTrangTrai);
   };
 
   // Hàm mở modal thêm mới
   const showModal = () => {
     setIsEditMode(false);
     setEditingBatch(null);
+    setSelectedFarmId(null);
+    setProducts([]);
     form.resetFields();
     setIsModalOpen(true);
   };
@@ -161,6 +186,8 @@ const QuanLyLoNongSan: React.FC = () => {
     setIsModalOpen(false);
     setIsEditMode(false);
     setEditingBatch(null);
+    setSelectedFarmId(null);
+    setProducts([]);
     form.resetFields();
   };
 
@@ -490,7 +517,10 @@ const QuanLyLoNongSan: React.FC = () => {
                   { required: true, message: 'Vui lòng chọn trang trại!' }
                 ]}
               >
-                <Select placeholder="Chọn trang trại">
+                <Select 
+                  placeholder="Chọn trang trại"
+                  onChange={handleFarmChange}
+                >
                   {farms.map(farm => (
                     <Select.Option key={farm.maTrangTrai} value={farm.maTrangTrai}>
                       {farm.tenTrangTrai}
@@ -506,7 +536,10 @@ const QuanLyLoNongSan: React.FC = () => {
                   { required: true, message: 'Vui lòng chọn sản phẩm!' }
                 ]}
               >
-                <Select placeholder="Chọn sản phẩm">
+                <Select 
+                  placeholder={selectedFarmId ? "Chọn sản phẩm" : "Vui lòng chọn trang trại trước"}
+                  disabled={!selectedFarmId}
+                >
                   {products.map(product => (
                     <Select.Option key={product.maSanPham} value={product.maSanPham}>
                       {product.tenSanPham} ({product.donViTinh})

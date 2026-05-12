@@ -43,6 +43,26 @@ export const apiService = {
     }
   },
 
+  // API lấy sản phẩm theo nông dân
+  async getProductsByFarmer(maNongDan: number) {
+    try {
+      const response = await apiClient.get(`/api-nongdan/san-pham/get-by-nong-dan/${maNongDan}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // API lấy sản phẩm theo trang trại
+  async getProductsByFarm(maTrangTrai: number) {
+    try {
+      const response = await apiClient.get(`/api-nongdan/san-pham/get-by-trang-trai/${maTrangTrai}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
   // API thêm sản phẩm mới
   async addFarmerProduct(productData: any) {
     try {

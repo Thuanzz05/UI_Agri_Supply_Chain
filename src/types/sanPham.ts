@@ -4,6 +4,7 @@ export interface SanPham {
   donViTinh: string;
   moTa: string;
   hinhAnh?: string;
+  maTrangTrai: number;
 }
 
 export interface DuLieuFormSanPham {
@@ -11,4 +12,5 @@ export interface DuLieuFormSanPham {
   donViTinh: string;
   moTa: string;
   hinhAnh?: string;
+  maTrangTrai: number;
 }
