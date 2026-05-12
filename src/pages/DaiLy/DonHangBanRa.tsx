@@ -226,9 +226,23 @@ const DonHangBanRa: React.FC = () => {
     setLoadingInventory(true);
 
     try {
+      const userStr = localStorage.getItem('user');
+      if (!userStr) {
+        message.error('Vui lòng đăng nhập lại');
+        return;
+      }
+
+      const user = JSON.parse(userStr);
+      const maDaiLy = user.maDaiLy || (user as any).MaDaiLy;
+
+      if (!maDaiLy) {
+        message.error('Không tìm thấy thông tin đại lý');
+        return;
+      }
+
       const [supermarketsResponse, inventoryResponse] = await Promise.all([
         apiService.getAllSupermarkets(),
-        apiService.getAllInventory(),
+        apiService.getInventoryByDaiLy(maDaiLy), // Chỉ lấy tồn kho của đại lý này
       ]);
 
       // Xử lý danh sách siêu thị
@@ -239,9 +253,12 @@ const DonHangBanRa: React.FC = () => {
 
       // Xử lý tồn kho - chỉ lấy tồn kho có số lượng > 0
       const invData = inventoryResponse?.data || inventoryResponse;
+      console.log('Inventory data:', invData); // Debug
       if (invData) {
         const items = Array.isArray(invData) ? invData : [];
-        setInventoryItems(items.filter((item: TonKhoItem) => item.soLuong > 0));
+        const filteredItems = items.filter((item: TonKhoItem) => item.soLuong > 0);
+        console.log('Filtered inventory items:', filteredItems); // Debug
+        setInventoryItems(filteredItems);
       }
     } catch (error: any) {
       message.error(getApiErrorMessage(error, 'Không thể tải dữ liệu'));
