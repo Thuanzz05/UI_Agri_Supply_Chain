@@ -62,6 +62,8 @@ const getTrangThaiColor = (trangThai: string) => {
   switch (trangThai) {
     case 'cho_xac_nhan':
       return 'orange';
+    case 'dang_van_chuyen':
+      return 'cyan';
     case 'hoan_thanh':
       return 'green';
     case 'da_huy':
@@ -75,6 +77,8 @@ const getTrangThaiText = (trangThai: string) => {
   switch (trangThai) {
     case 'cho_xac_nhan':
       return 'Chờ xác nhận';
+    case 'dang_van_chuyen':
+      return 'Đang vận chuyển';
     case 'hoan_thanh':
       return 'Hoàn thành';
     case 'da_huy':
@@ -362,7 +366,7 @@ const DonHangBanRa: React.FC = () => {
         })),
       });
 
-      message.success('Tạo đơn hàng và sinh vận chuyển thành công!');
+      message.success('Tạo đơn hàng thành công! Đơn hàng đang chờ siêu thị xác nhận.');
       handleCloseCreateModal();
       await fetchOrders();
     } catch (error: any) {
@@ -565,6 +569,7 @@ const DonHangBanRa: React.FC = () => {
             options={[
               { label: 'Tất cả trạng thái', value: 'all' },
               { label: 'Chờ xác nhận', value: 'cho_xac_nhan' },
+              { label: 'Đang vận chuyển', value: 'dang_van_chuyen' },
               { label: 'Hoàn thành', value: 'hoan_thanh' },
               { label: 'Đã hủy', value: 'da_huy' },
             ]}
@@ -690,7 +695,7 @@ const DonHangBanRa: React.FC = () => {
       >
         <Alert
           message="Lưu ý"
-          description="Khi tạo đơn hàng thành công, hệ thống sẽ tự động sinh phiếu vận chuyển (đang vận chuyển). Khi vận chuyển hoàn thành, tồn kho bên đại lý sẽ giảm và tồn kho bên siêu thị sẽ tăng tương ứng."
+          description="Sau khi tạo đơn hàng, đơn hàng sẽ ở trạng thái 'Chờ xác nhận'. Khi siêu thị xác nhận, hệ thống sẽ tự động tạo phiếu vận chuyển và chuyển trạng thái sang 'Đang vận chuyển'. Khi vận chuyển hoàn thành, tồn kho bên đại lý sẽ giảm và tồn kho bên siêu thị sẽ tăng tương ứng."
           type="info"
           showIcon
           style={{ marginBottom: 20 }}

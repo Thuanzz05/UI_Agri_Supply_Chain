@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Tag, Space, message, Card, Statistic, Row, Col, Modal, Form, Input, Select, DatePicker, Tooltip } from 'antd';
-import { TruckOutlined, ClockCircleOutlined, CheckCircleOutlined, PlusOutlined, EditOutlined } from '@ant-design/icons';
+import { Table, Tag, Space, message, Card, Statistic, Row, Col, Modal, Form, Input, Select, DatePicker, Tooltip, Descriptions } from 'antd';
+import {
+  CheckCircleOutlined,
+  ClockCircleOutlined,
+  EyeOutlined,
+  PlusOutlined,
+  TruckOutlined,
+} from '@ant-design/icons';
 import { AdminLayout } from '../../components/Layout';
 import { apiService } from '../../services/apiService';
 import { ActionButton } from '../../components/ActionButton';
@@ -13,6 +19,7 @@ import './QuanLyVanChuyen.css';
 interface VanChuyen {
   maVanChuyen: number;
   maLo: number;
+  maDonHang?: number;
   tenSanPham?: string;
   diemDi: string;
   diemDen: string;
@@ -27,15 +34,29 @@ interface VanChuyen {
   ghiChu?: string;
 }
 
+// Interface cho vận chuyển đã nhóm theo đơn hàng
+interface GroupedVanChuyen {
+  maDonHang: number | null;
+  diemDi: string;
+  diemDen: string;
+  ngayBatDau: string;
+  ngayKetThuc?: string;
+  trangThai: string;
+  soLuongSanPham: number; // Số lượng sản phẩm/lô trong đơn
+  danhSachLo: VanChuyen[]; // Danh sách các lô trong đơn
+  tenSanPham: string; // Tên sản phẩm (nếu nhiều sẽ hiển thị "Nhiều sản phẩm")
+}
+
 const QuanLyVanChuyen: React.FC = () => {
   const [vanChuyens, setVanChuyens] = useState<VanChuyen[]>([]);
+  const [groupedVanChuyens, setGroupedVanChuyens] = useState<GroupedVanChuyen[]>([]);
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [editingVanChuyen, setEditingVanChuyen] = useState<VanChuyen | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [warehouses, setWarehouses] = useState<Kho[]>([]);
   const [completeModalOpen, setCompleteModalOpen] = useState(false);
-  const [completingTransportId, setCompletingTransportId] = useState<number | null>(null);
+  const [completingGroup, setCompletingGroup] = useState<GroupedVanChuyen | null>(null);
   const [selectedWarehouseId, setSelectedWarehouseId] = useState<number | null>(null);
   const [stats, setStats] = useState({
     tongVanChuyen: 0,
@@ -45,6 +66,11 @@ const QuanLyVanChuyen: React.FC = () => {
   const [form] = Form.useForm();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [isTablet, setIsTablet] = useState(window.innerWidth >= 768 && window.innerWidth < 992);
+  
+  // Modal chi tiết vận chuyển
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [selectedGroup, setSelectedGroup] = useState<GroupedVanChuyen | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
 
   const getApiErrorMessage = (error: any, fallbackMessage: string) => {
     const responseData = error?.response?.data;
@@ -57,6 +83,50 @@ const QuanLyVanChuyen: React.FC = () => {
   useEffect(() => {
     loadVanChuyens();
   }, []);
+
+  useEffect(() => {
+    // Nhóm vận chuyển theo đơn hàng
+    const grouped = groupVanChuyensByOrder(vanChuyens);
+    setGroupedVanChuyens(grouped);
+  }, [vanChuyens]);
+
+  const groupVanChuyensByOrder = (list: VanChuyen[]): GroupedVanChuyen[] => {
+    const groups = new Map<string, VanChuyen[]>();
+    
+    // Nhóm theo maDonHang (hoặc maVanChuyen nếu không có maDonHang)
+    list.forEach(vc => {
+      const groupKey = vc.maDonHang ? `order_${vc.maDonHang}` : `transport_${vc.maVanChuyen}`;
+      if (!groups.has(groupKey)) {
+        groups.set(groupKey, []);
+      }
+      groups.get(groupKey)!.push(vc);
+    });
+
+    // Chuyển đổi thành GroupedVanChuyen
+    const result: GroupedVanChuyen[] = [];
+    groups.forEach((items) => {
+      const first = items[0];
+      const uniqueProducts = new Set(items.map(i => i.tenSanPham).filter(Boolean));
+      
+      result.push({
+        maDonHang: first.maDonHang || null,
+        diemDi: first.diemDi,
+        diemDen: first.diemDen,
+        ngayBatDau: first.ngayBatDau,
+        ngayKetThuc: first.ngayKetThuc,
+        trangThai: first.trangThai,
+        soLuongSanPham: items.length,
+        danhSachLo: items,
+        tenSanPham: uniqueProducts.size === 1 
+          ? Array.from(uniqueProducts)[0] || 'N/A'
+          : `${uniqueProducts.size} sản phẩm`
+      });
+    });
+
+    return result.sort((a, b) => 
+      new Date(b.ngayBatDau).getTime() - new Date(a.ngayBatDau).getTime()
+    );
+  };
 
   useEffect(() => {
     const handleResize = () => {
@@ -125,40 +195,69 @@ const QuanLyVanChuyen: React.FC = () => {
     setModalVisible(true);
   };
 
-  const handleEdit = (record: VanChuyen) => {
-    setEditingVanChuyen(record);
-    form.setFieldsValue({
-      ...record,
-      ngayBatDau: record.ngayBatDau ? dayjs(record.ngayBatDau) : null,
-      ngayKetThuc: record.ngayKetThuc ? dayjs(record.ngayKetThuc) : null,
-    });
-    setModalVisible(true);
-  };
-
-  const handleComplete = async (id: number) => {
-    setCompletingTransportId(id);
-    setSelectedWarehouseId(null);
-    setCompleteModalOpen(true);
+  const handleComplete = async (group: GroupedVanChuyen) => {
+    // Kiểm tra xem có phải đơn bán ra không (có maDonHang)
+    if (group.maDonHang) {
+      // Đơn bán ra - không cần chọn kho, tự động nhập vào kho siêu thị
+      Modal.confirm({
+        title: 'Xác nhận hoàn thành vận chuyển',
+        content: 'Hàng sẽ được tự động nhập vào kho siêu thị. Bạn có chắc muốn hoàn thành vận chuyển này?',
+        okText: 'Xác nhận',
+        cancelText: 'Hủy',
+        onOk: async () => {
+          try {
+            // Hoàn thành tất cả các vận chuyển trong nhóm (không cần maKhoDich)
+            for (const vc of group.danhSachLo) {
+              await apiService.completeTransport(vc.maVanChuyen, 0); // Pass 0 để backend tự động lấy kho siêu thị
+            }
+            message.success('Hoàn thành vận chuyển thành công. Hàng đã được nhập vào kho siêu thị.');
+            loadVanChuyens();
+          } catch (error: any) {
+            console.error('Error completing transport:', error);
+            message.error(getApiErrorMessage(error, 'Không thể hoàn thành vận chuyển'));
+          }
+        },
+      });
+    } else {
+      // Đơn mua vào - cần chọn kho đại lý
+      setCompletingGroup(group);
+      setSelectedWarehouseId(null);
+      setCompleteModalOpen(true);
+    }
   };
 
   const confirmComplete = async () => {
-    if (!completingTransportId) return;
+    if (!completingGroup) return;
     if (!selectedWarehouseId) {
       message.error('Vui lòng chọn kho đích để nhập hàng');
       return;
     }
 
     try {
-      await apiService.completeTransport(completingTransportId, selectedWarehouseId);
+      // Hoàn thành tất cả các vận chuyển trong nhóm
+      for (const vc of completingGroup.danhSachLo) {
+        await apiService.completeTransport(vc.maVanChuyen, selectedWarehouseId);
+      }
       message.success('Hoàn thành vận chuyển thành công');
       setCompleteModalOpen(false);
-      setCompletingTransportId(null);
+      setCompletingGroup(null);
       setSelectedWarehouseId(null);
       loadVanChuyens();
     } catch (error: any) {
       console.error('Error completing transport:', error);
       message.error(getApiErrorMessage(error, 'Không thể hoàn thành vận chuyển'));
     }
+  };
+
+  const handleViewDetail = async (group: GroupedVanChuyen) => {
+    setSelectedGroup(group);
+    setIsDetailModalOpen(true);
+    setDetailLoading(false);
+  };
+
+  const handleCloseDetailModal = () => {
+    setIsDetailModalOpen(false);
+    setSelectedGroup(null);
   };
 
   const handleSubmit = async (values: any) => {
@@ -204,22 +303,32 @@ const QuanLyVanChuyen: React.FC = () => {
   };
 
   const filteredVanChuyens = filterStatus === 'all' 
-    ? vanChuyens 
-    : vanChuyens.filter(vc => vc.trangThai === filterStatus);
+    ? groupedVanChuyens 
+    : groupedVanChuyens.filter(vc => vc.trangThai === filterStatus);
 
-  const columns: ColumnsType<VanChuyen> = [
+  const columns: ColumnsType<GroupedVanChuyen> = [
     ...(!isMobile ? [{
-      title: 'Mã VC',
-      dataIndex: 'maVanChuyen',
-      key: 'maVanChuyen',
+      title: 'Mã ĐH',
+      dataIndex: 'maDonHang',
+      key: 'maDonHang',
       width: 80,
+      render: (value: number | null) => value || '-',
     }] : []),
     {
       title: 'Sản phẩm',
       dataIndex: 'tenSanPham',
       key: 'tenSanPham',
       width: 150,
-      render: (text: string) => text || 'N/A',
+      render: (text: string, record: GroupedVanChuyen) => (
+        <div>
+          <div>{text}</div>
+          {record.soLuongSanPham > 1 && (
+            <div style={{ fontSize: 12, color: '#888' }}>
+              ({record.soLuongSanPham} lô)
+            </div>
+          )}
+        </div>
+      ),
     },
     ...(!isMobile ? [{
       title: 'Điểm đi',
@@ -261,25 +370,23 @@ const QuanLyVanChuyen: React.FC = () => {
     {
       title: 'Thao tác',
       key: 'actions',
-      width: isMobile ? 100 : 150,
-      fixed: isMobile ? undefined : 'right',
-      render: (_, record) => (
+      width: isMobile ? 120 : 180,
+      fixed: (isMobile ? undefined : 'right') as any,
+      render: (_: any, record: GroupedVanChuyen) => (
         <Space size={isMobile ? 4 : 8}>
-          {record.trangThai !== 'hoan_thanh' && (
+          <Tooltip title="Xem chi tiết">
             <ModalButton
               type="default"
-              icon={<EditOutlined />}
-              onClick={() => handleEdit(record)}
-            >
-              {isMobile ? '' : 'Sửa'}
-            </ModalButton>
-          )}
+              icon={<EyeOutlined />}
+              onClick={() => handleViewDetail(record)}
+            />
+          </Tooltip>
           {record.trangThai === 'dang_van_chuyen' && (
             <Tooltip title="Hoàn thành">
               <ModalButton
                 type="primary"
                 icon={<CheckCircleOutlined />}
-                onClick={() => handleComplete(record.maVanChuyen)}
+                onClick={() => handleComplete(record)}
               />
             </Tooltip>
           )}
@@ -353,7 +460,7 @@ const QuanLyVanChuyen: React.FC = () => {
         <Table
           columns={columns}
           dataSource={filteredVanChuyens}
-          rowKey="maVanChuyen"
+          rowKey={(record) => record.maDonHang ? `order_${record.maDonHang}` : `group_${record.danhSachLo[0]?.maVanChuyen}`}
           loading={loading}
           pagination={{
             pageSize: 10,
@@ -470,7 +577,7 @@ const QuanLyVanChuyen: React.FC = () => {
         open={completeModalOpen}
         onCancel={() => {
           setCompleteModalOpen(false);
-          setCompletingTransportId(null);
+          setCompletingGroup(null);
           setSelectedWarehouseId(null);
         }}
         footer={
@@ -478,7 +585,7 @@ const QuanLyVanChuyen: React.FC = () => {
             <ModalButton
               onClick={() => {
                 setCompleteModalOpen(false);
-                setCompletingTransportId(null);
+                setCompletingGroup(null);
                 setSelectedWarehouseId(null);
               }}
             >
@@ -500,6 +607,102 @@ const QuanLyVanChuyen: React.FC = () => {
             label: `${kho.maKho} - ${kho.tenKho}${kho.diaChi ? ` (${kho.diaChi})` : ''}`,
           }))}
         />
+      </Modal>
+
+      {/* Modal chi tiết vận chuyển */}
+      <Modal
+        title="Chi tiết vận chuyển"
+        open={isDetailModalOpen}
+        onCancel={handleCloseDetailModal}
+        width={800}
+        footer={
+          <Space>
+            <ModalButton onClick={handleCloseDetailModal}>
+              Đóng
+            </ModalButton>
+            {selectedGroup?.trangThai === 'dang_van_chuyen' && (
+              <ModalButton
+                type="primary"
+                icon={<CheckCircleOutlined />}
+                onClick={() => {
+                  handleCloseDetailModal();
+                  handleComplete(selectedGroup);
+                }}
+              >
+                Hoàn thành vận chuyển
+              </ModalButton>
+            )}
+          </Space>
+        }
+      >
+        {detailLoading ? (
+          <div style={{ textAlign: 'center', padding: '40px 0' }}>Đang tải...</div>
+        ) : selectedGroup ? (
+          <>
+            <Descriptions bordered column={2} size="small" style={{ marginBottom: 24 }}>
+              <Descriptions.Item label="Mã đơn hàng" span={2}>
+                {selectedGroup.maDonHang || 'Không có'}
+              </Descriptions.Item>
+              <Descriptions.Item label="Điểm đi" span={2}>
+                {selectedGroup.diemDi}
+              </Descriptions.Item>
+              <Descriptions.Item label="Điểm đến" span={2}>
+                {selectedGroup.diemDen}
+              </Descriptions.Item>
+              <Descriptions.Item label="Ngày bắt đầu">
+                {dayjs(selectedGroup.ngayBatDau).format('DD/MM/YYYY HH:mm')}
+              </Descriptions.Item>
+              <Descriptions.Item label="Ngày kết thúc">
+                {selectedGroup.ngayKetThuc 
+                  ? dayjs(selectedGroup.ngayKetThuc).format('DD/MM/YYYY HH:mm')
+                  : '-'}
+              </Descriptions.Item>
+              <Descriptions.Item label="Trạng thái" span={2}>
+                <Tag color={getStatusColor(selectedGroup.trangThai)}>
+                  {getStatusText(selectedGroup.trangThai)}
+                </Tag>
+              </Descriptions.Item>
+            </Descriptions>
+
+            <h4 style={{ marginBottom: 12 }}>Danh sách lô trong vận chuyển ({selectedGroup.soLuongSanPham} lô)</h4>
+            <Table
+              size="small"
+              dataSource={selectedGroup.danhSachLo}
+              rowKey="maVanChuyen"
+              pagination={false}
+              columns={[
+                {
+                  title: 'Mã VC',
+                  dataIndex: 'maVanChuyen',
+                  width: 80,
+                },
+                {
+                  title: 'Sản phẩm',
+                  dataIndex: 'tenSanPham',
+                  render: (text: string) => text || 'N/A',
+                },
+                {
+                  title: 'Mã lô',
+                  dataIndex: 'maLo',
+                  width: 80,
+                },
+                {
+                  title: 'Số lượng',
+                  dataIndex: 'soLuongLo',
+                  width: 100,
+                  render: (value: number, record: VanChuyen) => 
+                    `${value || 0} ${record.donViTinh || 'kg'}`,
+                },
+                {
+                  title: 'Mã QR',
+                  dataIndex: 'maQR',
+                  width: 120,
+                  render: (text: string) => text || '-',
+                },
+              ]}
+            />
+          </>
+        ) : null}
       </Modal>
     </AdminLayout>
   );

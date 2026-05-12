@@ -500,17 +500,40 @@ export const apiService = {
     throw lastError;
   },
 
-  // Cập nhật trạng thái đơn hàng siêu thị (xác nhận/hủy)
-  async updateSupermarketOrderStatus(id: number, trangThai: string) {
+  // Xác nhận đơn hàng từ siêu thị (chuyển từ cho_xac_nhan sang dang_van_chuyen)
+  async confirmSupermarketOrder(id: number) {
     const routes = [
-      `/api-daily/don-hang-sieu-thi/update-trang-thai/${id}`,
-      `/api/don-hang-sieu-thi/update-trang-thai/${id}`
+      `/api-sieuthi/don-hang/xac-nhan/${id}`,
+      `/api/don-hang/xac-nhan/${id}`
     ];
     
     let lastError: any = null;
     for (const route of routes) {
       try {
-        const response = await apiClient.put(route, { trangThai });
+        const response = await apiClient.put(route);
+        return response.data;
+      } catch (error: any) {
+        lastError = error;
+        const status = error?.response?.status;
+        if (status !== 404) {
+          throw error;
+        }
+      }
+    }
+    throw lastError;
+  },
+
+  // Hủy đơn hàng từ siêu thị
+  async cancelSupermarketOrder(id: number) {
+    const routes = [
+      `/api-sieuthi/don-hang/huy/${id}`,
+      `/api/don-hang/huy/${id}`
+    ];
+    
+    let lastError: any = null;
+    for (const route of routes) {
+      try {
+        const response = await apiClient.put(route);
         return response.data;
       } catch (error: any) {
         lastError = error;

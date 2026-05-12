@@ -134,8 +134,8 @@ const QuanLyDonHang: React.FC = () => {
 
   const handleConfirmOrder = async (id: number) => {
     try {
-      await apiService.updateSupermarketOrderStatus(id, 'hoan_thanh');
-      message.success('Xác nhận đơn hàng thành công');
+      await apiService.confirmSupermarketOrder(id);
+      message.success('Xác nhận đơn hàng thành công. Hệ thống đã tự động tạo phiếu vận chuyển.');
       handleCloseDetailModal();
       await loadDonHangs();
     } catch (error: any) {
@@ -145,7 +145,7 @@ const QuanLyDonHang: React.FC = () => {
 
   const handleCancelOrder = async (id: number) => {
     try {
-      await apiService.updateSupermarketOrderStatus(id, 'da_huy');
+      await apiService.cancelSupermarketOrder(id);
       message.success('Đã hủy đơn hàng');
       handleCloseDetailModal();
       await loadDonHangs();
@@ -173,8 +173,7 @@ const QuanLyDonHang: React.FC = () => {
   const getStatusColor = (status: string) => {
     const statusMap: Record<string, string> = {
       'cho_xac_nhan': 'orange',
-      'da_xac_nhan': 'blue',
-      'dang_giao': 'cyan',
+      'dang_van_chuyen': 'cyan',
       'hoan_thanh': 'green',
       'da_huy': 'red',
     };
@@ -184,8 +183,7 @@ const QuanLyDonHang: React.FC = () => {
   const getStatusText = (status: string) => {
     const statusMap: Record<string, string> = {
       'cho_xac_nhan': 'Chờ xác nhận',
-      'da_xac_nhan': 'Đã xác nhận',
-      'dang_giao': 'Đang giao',
+      'dang_van_chuyen': 'Đang vận chuyển',
       'hoan_thanh': 'Hoàn thành',
       'da_huy': 'Đã hủy',
     };
@@ -199,6 +197,7 @@ const QuanLyDonHang: React.FC = () => {
   const statistics = {
     total: donHangs.length,
     pending: donHangs.filter(dh => dh.trangThai === 'cho_xac_nhan').length,
+    shipping: donHangs.filter(dh => dh.trangThai === 'dang_van_chuyen').length,
     completed: donHangs.filter(dh => dh.trangThai === 'hoan_thanh').length,
     cancelled: donHangs.filter(dh => dh.trangThai === 'da_huy').length,
   };
@@ -237,7 +236,11 @@ const QuanLyDonHang: React.FC = () => {
       width: isMobile ? 90 : 130,
       render: (status: string) => (
         <Tag color={getStatusColor(status)}>
-          {isMobile ? (status === 'cho_xac_nhan' ? 'Chờ' : status === 'hoan_thanh' ? 'HT' : 'Hủy') : getStatusText(status)}
+          {isMobile ? (
+            status === 'cho_xac_nhan' ? 'Chờ' : 
+            status === 'dang_van_chuyen' ? 'VC' :
+            status === 'hoan_thanh' ? 'HT' : 'Hủy'
+          ) : getStatusText(status)}
         </Tag>
       ),
     },
@@ -323,20 +326,20 @@ const QuanLyDonHang: React.FC = () => {
         <Col xs={24} sm={12} lg={6}>
           <Card>
             <Statistic
-              title="Hoàn thành"
-              value={statistics.completed}
-              prefix={<CheckCircleOutlined />}
-              styles={{ content: { color: '#52c41a' } }}
+              title="Đang vận chuyển"
+              value={statistics.shipping}
+              prefix={<ShoppingCartOutlined />}
+              styles={{ content: { color: '#13c2c2' } }}
             />
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
           <Card>
             <Statistic
-              title="Đã hủy"
-              value={statistics.cancelled}
-              prefix={<CloseCircleOutlined />}
-              styles={{ content: { color: '#ff4d4f' } }}
+              title="Hoàn thành"
+              value={statistics.completed}
+              prefix={<CheckCircleOutlined />}
+              styles={{ content: { color: '#52c41a' } }}
             />
           </Card>
         </Col>
@@ -362,6 +365,7 @@ const QuanLyDonHang: React.FC = () => {
           >
             <Select.Option value="all">Tất cả trạng thái</Select.Option>
             <Select.Option value="cho_xac_nhan">Chờ xác nhận</Select.Option>
+            <Select.Option value="dang_van_chuyen">Đang vận chuyển</Select.Option>
             <Select.Option value="hoan_thanh">Hoàn thành</Select.Option>
             <Select.Option value="da_huy">Đã hủy</Select.Option>
           </Select>
