@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Tag, Space, message, Card, Statistic, Row, Col, Modal, Form, Input, Select, DatePicker } from 'antd';
+import { Table, Tag, Space, message, Card, Statistic, Row, Col, Modal, Form, Input, Select, DatePicker, Tooltip } from 'antd';
 import { TruckOutlined, ClockCircleOutlined, CheckCircleOutlined, PlusOutlined, EditOutlined } from '@ant-design/icons';
 import { AdminLayout } from '../../components/Layout';
 import { apiService } from '../../services/apiService';
@@ -265,20 +265,23 @@ const QuanLyVanChuyen: React.FC = () => {
       fixed: isMobile ? undefined : 'right',
       render: (_, record) => (
         <Space size={isMobile ? 4 : 8}>
-          <ModalButton
-            type="default"
-            icon={<EditOutlined />}
-            onClick={() => handleEdit(record)}
-          >
-            {isMobile ? '' : 'Sửa'}
-          </ModalButton>
-          {record.trangThai === 'dang_van_chuyen' && (
+          {record.trangThai !== 'hoan_thanh' && (
             <ModalButton
-              type="primary"
-              onClick={() => handleComplete(record.maVanChuyen)}
+              type="default"
+              icon={<EditOutlined />}
+              onClick={() => handleEdit(record)}
             >
-              {isMobile ? 'HT' : 'Hoàn thành'}
+              {isMobile ? '' : 'Sửa'}
             </ModalButton>
+          )}
+          {record.trangThai === 'dang_van_chuyen' && (
+            <Tooltip title="Hoàn thành">
+              <ModalButton
+                type="primary"
+                icon={<CheckCircleOutlined />}
+                onClick={() => handleComplete(record.maVanChuyen)}
+              />
+            </Tooltip>
           )}
         </Space>
       ),
@@ -426,10 +429,19 @@ const QuanLyVanChuyen: React.FC = () => {
             name="trangThai"
             rules={[{ required: true, message: 'Vui lòng chọn trạng thái!' }]}
           >
-            <Select placeholder="Chọn trạng thái">
-              <Select.Option value="dang_van_chuyen">Đang vận chuyển</Select.Option>
-              <Select.Option value="hoan_thanh">Hoàn thành</Select.Option>
-              <Select.Option value="da_huy">Đã hủy</Select.Option>
+            <Select 
+              placeholder="Chọn trạng thái"
+              disabled={editingVanChuyen?.trangThai === 'hoan_thanh'}
+            >
+              {editingVanChuyen?.trangThai === 'da_huy' ? (
+                <Select.Option value="dang_van_chuyen">Đang vận chuyển</Select.Option>
+              ) : (
+                <>
+                  <Select.Option value="dang_van_chuyen">Đang vận chuyển</Select.Option>
+                  <Select.Option value="hoan_thanh">Hoàn thành</Select.Option>
+                  <Select.Option value="da_huy">Đã hủy</Select.Option>
+                </>
+              )}
             </Select>
           </Form.Item>
 
