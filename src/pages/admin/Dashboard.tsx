@@ -3,8 +3,9 @@ import { Card, Row, Col, Spin, message } from 'antd';
 import { 
   TeamOutlined, 
   ShopOutlined, 
-  UserOutlined 
+  UserOutlined
 } from '@ant-design/icons';
+import { Column } from '@ant-design/charts';
 import { AdminLayout } from '../../components/Layout';
 import { apiService } from '../../services/apiService';
 import './Dashboard.css';
@@ -38,8 +39,8 @@ const Dashboard: React.FC = () => {
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
+      // Fetch basic stats
       const statsResponse = await apiService.getDashboardStats();
-
       if (statsResponse?.data) {
         setStats(statsResponse.data);
       }
@@ -48,6 +49,36 @@ const Dashboard: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Chart config
+  const userStatsData = [
+    { type: 'Nông dân', value: stats.tongNongDan },
+    { type: 'Đại lý', value: stats.tongDaiLy },
+    { type: 'Siêu thị', value: stats.tongSieuThi },
+  ];
+
+  const userStatsConfig: any = {
+    data: userStatsData,
+    xField: 'type',
+    yField: 'value',
+    style: {
+      radiusEndTop: 6,
+      fill: (d: any) => {
+        if (d.type === 'Nông dân') return '#52c41a';
+        if (d.type === 'Đại lý') return '#1890ff';
+        return '#fa8c16';
+      },
+    },
+    label: {
+      text: 'value',
+      position: 'outside',
+      style: { fill: '#595959', fontSize: 14 },
+    },
+    axis: {
+      x: { label: { style: { fontSize: 12 } } },
+      y: { title: 'Số lượng' },
+    },
   };
 
   return (
@@ -114,8 +145,23 @@ const Dashboard: React.FC = () => {
           </Col>
         </Row>
 
+        {/* Chart Row */}
+        <Row gutter={[24, 24]} style={{ marginBottom: '24px' }}>
+          <Col xs={24}>
+            <Card title="Thống kê người dùng theo loại" className="dashboard-chart-card">
+              <div className="chart-container">
+                {userStatsData.some(d => d.value > 0) ? (
+                  <Column {...userStatsConfig} height={320} />
+                ) : (
+                  <div className="chart-empty">Chưa có dữ liệu</div>
+                )}
+              </div>
+            </Card>
+          </Col>
+        </Row>
+
         {/* Welcome Card with Illustration */}
-        <Row gutter={[24, 24]}>
+        <Row gutter={[24, 24]} style={{ marginTop: '24px' }}>
           <Col xs={24}>
             <Card 
               style={{ 

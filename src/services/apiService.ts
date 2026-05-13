@@ -1199,6 +1199,38 @@ export const apiService = {
     }
   },
 
+  // Lấy thống kê đơn hàng theo tháng
+  async getAdminOrdersByMonth() {
+    try {
+      const response = await apiClient.get('/api-admin/Dashboard/orders-by-month');
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Lấy thống kê trạng thái đơn hàng
+  async getAdminOrderStatusStats() {
+    try {
+      const response = await apiClient.get('/api-admin/Dashboard/order-status-stats');
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Lấy hoạt động gần đây
+  async getAdminRecentActivities(limit: number = 10) {
+    try {
+      const response = await apiClient.get('/api-admin/Dashboard/recent-activities', {
+        params: { limit }
+      });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
   // ==================== API Dashboard Nông Dân ====================
   
   // Lấy thống kê dashboard nông dân
@@ -1227,6 +1259,16 @@ export const apiService = {
   async getFarmerOrderStats(maNongDan: number) {
     try {
       const response = await apiClient.get(`/api-nongdan/Dashboard/order-stats/${maNongDan}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Lấy thống kê sản phẩm bán chạy của nông dân
+  async getFarmerProductSales(maNongDan: number) {
+    try {
+      const response = await apiClient.get(`/api-nongdan/Dashboard/product-sales/${maNongDan}`);
       return response.data;
     } catch (error) {
       throw error;
@@ -1291,6 +1333,26 @@ export const apiService = {
   async getAgentOrderStats(maDaiLy: number) {
     try {
       const response = await apiClient.get(`/api-daily/Dashboard/order-stats/${maDaiLy}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Lấy thống kê sản phẩm bán chạy của đại lý
+  async getAgentProductSales(maDaiLy: number) {
+    try {
+      const response = await apiClient.get(`/api-daily/Dashboard/product-sales/${maDaiLy}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Lấy thống kê sản phẩm bán chạy của siêu thị
+  async getSupermarketProductSales(maSieuThi: number) {
+    try {
+      const response = await apiClient.get(`/api-sieuthi/Dashboard/product-sales/${maSieuThi}`);
       return response.data;
     } catch (error) {
       throw error;

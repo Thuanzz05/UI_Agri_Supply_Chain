@@ -1,24 +1,103 @@
-/* Mobile Portrait (<576px) */
-@media (max-width: 575px) {
-  .page-header h1 {
-    font-size: 20px;
-  }
-  
-  .page-header p {
+/* ===== DASHBOARD SIÊU THỊ STYLES ===== */
+
+/* --- Stat Cards --- */
+.dashboard-stat-card {
+  border-radius: 10px;
+  transition: box-shadow 0.3s, transform 0.2s;
+}
+
+.dashboard-stat-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+/* --- Chart Cards --- */
+.dashboard-chart-card {
+  border-radius: 10px;
+}
+
+.dashboard-chart-card .ant-card-head-title {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.chart-container {
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chart-empty {
+  color: #bfbfbf;
+  font-size: 14px;
+  text-align: center;
+  padding: 60px 0;
+}
+
+/* --- Recent Orders Card --- */
+.recent-orders-card {
+  border-radius: 10px;
+}
+
+.dashboard-table {
+  overflow-x: auto;
+}
+
+.dashboard-table .ant-table {
+  font-size: 14px;
+}
+
+.dashboard-table .ant-table-thead > tr > th {
+  background: #fafafa;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.dashboard-table .ant-table-tbody > tr > td {
+  white-space: nowrap;
+}
+
+/* ===== RESPONSIVE BREAKPOINTS ===== */
+
+@media (max-width: 991px) {
+  .dashboard-table .ant-table {
     font-size: 13px;
   }
-}
 
-/* Mobile Landscape (576-767px) */
-@media (min-width: 576px) and (max-width: 767px) {
-  .page-header h1 {
-    font-size: 22px;
+  .dashboard-table .ant-table-thead > tr > th,
+  .dashboard-table .ant-table-tbody > tr > td {
+    padding: 12px 8px;
+  }
+
+  .chart-container {
+    min-height: 260px;
   }
 }
 
-/* Tablet (768-991px) */
-@media (min-width: 768px) and (max-width: 991px) {
-  .page-header h1 {
-    font-size: 24px;
+@media (max-width: 767px) {
+  .recent-orders-card {
+    margin-top: 16px;
+  }
+
+  .dashboard-table .ant-table {
+    font-size: 12px;
+  }
+
+  .dashboard-table .ant-table-thead > tr > th,
+  .dashboard-table .ant-table-tbody > tr > td {
+    padding: 8px 6px;
+  }
+
+  .chart-container {
+    min-height: 220px;
+  }
+}
+
+@media (max-width: 575px) {
+  .dashboard-table .ant-table-thead > tr > th,
+  .dashboard-table .ant-table-tbody > tr > td {
+    padding: 6px 4px;
+    font-size: 11px;
   }
 }
