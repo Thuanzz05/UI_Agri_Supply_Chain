@@ -1,6 +1,44 @@
-/* ===== DASHBOARD STYLES ===== */
+/* ===== DASHBOARD ĐẠI LÝ STYLES ===== */
+
+/* --- Stat Cards --- */
+.dashboard-stat-card {
+  border-radius: 10px;
+  transition: box-shadow 0.3s, transform 0.2s;
+}
+
+.dashboard-stat-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+/* --- Chart Cards --- */
+.dashboard-chart-card {
+  border-radius: 10px;
+}
+
+.dashboard-chart-card .ant-card-head-title {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.chart-container {
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chart-empty {
+  color: #bfbfbf;
+  font-size: 14px;
+  text-align: center;
+  padding: 60px 0;
+}
+
+/* --- Recent Orders Card --- */
 .recent-orders-card {
-  margin-top: 24px;
+  margin-top: 0;
+  border-radius: 10px;
 }
 
 .dashboard-table {
@@ -33,6 +71,10 @@
   .dashboard-table .ant-table-tbody > tr > td {
     padding: 12px 8px;
   }
+
+  .chart-container {
+    min-height: 260px;
+  }
 }
 
 /* Mobile (< 768px) */
@@ -48,6 +90,10 @@
   .dashboard-table .ant-table-thead > tr > th,
   .dashboard-table .ant-table-tbody > tr > td {
     padding: 8px 6px;
+  }
+
+  .chart-container {
+    min-height: 220px;
   }
 }
 
