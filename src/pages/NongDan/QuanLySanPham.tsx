@@ -295,7 +295,6 @@ const QuanLySanPham: React.FC = () => {
             type="primary" 
             icon={<PlusOutlined />}
             onClick={showModal}
-            className="add-button"
           >
             <span className="button-text">Thêm sản phẩm</span>
             <span className="button-text-mobile">Thêm</span>
