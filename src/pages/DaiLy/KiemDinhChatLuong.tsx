@@ -317,7 +317,6 @@ const KiemDinhChatLuong: React.FC = () => {
             setPageSize(size || 10);
           }}
           showTotal={(total, range) => `${range[0]}-${range[1]} của ${total} lô hàng`}
-          responsive={isMobile || isTablet}
         />
       </Card>
 
