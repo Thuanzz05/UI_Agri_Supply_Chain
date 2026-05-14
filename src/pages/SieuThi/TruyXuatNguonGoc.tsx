@@ -195,7 +195,7 @@ const TruyXuatNguonGoc: React.FC = () => {
       {/* Kết quả */}
       {loading && (
         <div style={{ textAlign: 'center', padding: '60px 0' }}>
-          <Spin size="large" tip="Đang tra cứu..." />
+          <Spin size="large" />
         </div>
       )}
 
@@ -229,12 +229,6 @@ const TruyXuatNguonGoc: React.FC = () => {
               </Descriptions.Item>
               <Descriptions.Item label="Sản phẩm" span={2}>
                 <strong style={{ fontSize: 16 }}>{traceData.tenSanPham}</strong>
-              </Descriptions.Item>
-              <Descriptions.Item label="Số lượng ban đầu">
-                {traceData.soLuongBanDau} {traceData.donViTinh}
-              </Descriptions.Item>
-              <Descriptions.Item label="Số lượng hiện tại">
-                <strong>{traceData.soLuongHienTai} {traceData.donViTinh}</strong>
               </Descriptions.Item>
               <Descriptions.Item label="Ngày thu hoạch">
                 <CalendarOutlined style={{ marginRight: 4 }} />
@@ -400,11 +394,10 @@ const TruyXuatNguonGoc: React.FC = () => {
           >
             {traceData.vanChuyen && traceData.vanChuyen.length > 0 ? (
               <Timeline
-                mode="left"
                 items={traceData.vanChuyen.map((vc) => ({
                   color: vc.trangThai === 'hoan_thanh' ? 'green' : 'blue',
-                  label: formatDate(vc.ngayBatDau),
-                  children: (
+                  title: formatDate(vc.ngayBatDau),
+                  content: (
                     <div>
                       <div style={{ fontWeight: 600, marginBottom: 4 }}>
                         Mã VC: #{vc.maVanChuyen}

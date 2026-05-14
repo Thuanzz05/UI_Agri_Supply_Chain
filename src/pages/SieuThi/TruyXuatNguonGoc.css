@@ -6,18 +6,19 @@
 
 .truy-xuat-search-container {
   text-align: center;
-  padding: 20px 0;
+  padding: 12px 0;
 }
 
 .truy-xuat-qr-icon {
   font-size: 48px;
   color: #fff;
-  margin-bottom: 16px;
+  margin-bottom: 4px;
 }
 
 .truy-xuat-title {
   color: #000 !important;
-  margin-bottom: 16px;
+  margin-bottom: 8px;
+  margin-top: 0;
 }
 
 .truy-xuat-search-wrapper {
@@ -26,7 +27,7 @@
 }
 
 .truy-xuat-hint-text {
-  color: rgba(255, 255, 255, 0.8);
+  color: #000;
   margin-top: 12px;
   display: block;
 }
