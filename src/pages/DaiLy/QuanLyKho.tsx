@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, Table, Space, Input, message, Modal, Form } from 'antd';
+import { Card, Table, Space, Input, message, Modal, Form, Select } from 'antd';
 import type { TableProps } from 'antd';
 import { 
   PlusOutlined, 
@@ -137,13 +137,37 @@ const QuanLyKho: React.FC = () => {
   const handleSubmit = async (values: DuLieuFormKhoThem | DuLieuFormKhoSua) => {
     try {
       setLoading(true);
+      
       if (isEditMode && editingWarehouse) {
         await apiService.updateWarehouse(editingWarehouse.maKho, values);
         message.success('Cập nhật kho hàng thành công!');
       } else {
-        await apiService.addWarehouse(values);
+        // Lấy thông tin đại lý từ localStorage
+        const userStr = localStorage.getItem('user');
+        if (!userStr) {
+          message.error('Vui lòng đăng nhập lại');
+          return;
+        }
+        
+        const user = JSON.parse(userStr);
+        const maDaiLy = user.MaDaiLy || user.maDaiLy;
+        
+        if (!maDaiLy) {
+          message.error('Không tìm thấy thông tin đại lý');
+          return;
+        }
+        
+        // Tự động thêm thông tin chủ sở hữu
+        const warehouseData = {
+          ...values,
+          maChuSoHuu: maDaiLy,
+          loaiChuSoHuu: 'daily'
+        };
+        
+        await apiService.addWarehouse(warehouseData);
         message.success('Thêm kho hàng thành công!');
       }
+      
       setIsModalOpen(false);
       form.resetFields();
       setIsEditMode(false);
@@ -348,36 +372,18 @@ const QuanLyKho: React.FC = () => {
             label="Loại kho"
             name="loaiKho"
             rules={[
-              { required: true, message: 'Vui lòng nhập loại kho!' }
+              { required: true, message: 'Vui lòng chọn loại kho!' }
             ]}
+            tooltip="Loại kho theo chức năng lưu trữ"
           >
-            <Input placeholder="Ví dụ: daily, lanh, thuong..." />
+            <Select placeholder="Chọn loại kho">
+              <Select.Option value="thuong">Kho thường</Select.Option>
+              <Select.Option value="lanh">Kho lạnh</Select.Option>
+              <Select.Option value="dong">Kho đông</Select.Option>
+              <Select.Option value="tong">Kho tổng</Select.Option>
+              <Select.Option value="daily">Kho đại lý</Select.Option>
+            </Select>
           </Form.Item>
-
-          {/* Chỉ hiển thị các trường này khi thêm mới */}
-          {!isEditMode && (
-            <>
-              <Form.Item
-                label="Mã chủ sở hữu"
-                name="maChuSoHuu"
-                rules={[
-                  { required: true, message: 'Vui lòng nhập mã chủ sở hữu!' }
-                ]}
-              >
-                <Input type="number" placeholder="Nhập mã chủ sở hữu" />
-              </Form.Item>
-
-              <Form.Item
-                label="Loại chủ sở hữu"
-                name="loaiChuSoHuu"
-                rules={[
-                  { required: true, message: 'Vui lòng nhập loại chủ sở hữu!' }
-                ]}
-              >
-                <Input placeholder="Ví dụ: daily, nongdan..." />
-              </Form.Item>
-            </>
-          )}
 
           <Form.Item
             label="Địa chỉ"

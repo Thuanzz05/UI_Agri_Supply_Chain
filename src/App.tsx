@@ -26,6 +26,7 @@ import TonKhoDaiLy from './pages/DaiLy/TonKhoDaiLy';
 import DashboardSieuThi from './pages/SieuThi/DashboardSieuThi';
 import QuanLyDonHangSieuThi from './pages/SieuThi/QuanLyDonHang';
 import QuanLyKhoSieuThi from './pages/SieuThi/QuanLyKho';
+import TonKhoSieuThi from './pages/SieuThi/TonKho';
 import ThongTinCaNhanSieuThi from './pages/SieuThi/ThongTinCaNhan';
 import TruyXuatNguonGoc from './pages/SieuThi/TruyXuatNguonGoc';
 import QuanLyNguoiDung from './pages/admin/QuanLyNguoiDung';
@@ -226,6 +227,14 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={['Supermarket']}>
                 <QuanLyKhoSieuThi />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/supermarket/inventory" 
+            element={
+              <ProtectedRoute allowedRoles={['Supermarket']}>
+                <TonKhoSieuThi />
               </ProtectedRoute>
             } 
           />

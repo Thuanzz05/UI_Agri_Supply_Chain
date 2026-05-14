@@ -589,6 +589,56 @@ export const apiService = {
     throw lastError;
   },
 
+  // Thêm kho hàng cho siêu thị
+  async addSupermarketWarehouse(data: any) {
+    try {
+      const response = await apiClient.post('/api-sieuthi/kho/create', data);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Cập nhật kho hàng siêu thị
+  async updateSupermarketWarehouse(maKho: number, data: any) {
+    try {
+      const response = await apiClient.put(`/api-sieuthi/kho/update/${maKho}`, data);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Xóa kho hàng siêu thị
+  async deleteSupermarketWarehouse(maKho: number) {
+    try {
+      const response = await apiClient.delete(`/api-sieuthi/kho/delete/${maKho}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Chuyển kho nội bộ siêu thị
+  async transferSupermarketWarehouse(data: any) {
+    try {
+      const response = await apiClient.post('/api-sieuthi/chuyen-kho/create', data);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Lấy lịch sử chuyển kho siêu thị
+  async getSupermarketWarehouseTransferHistory(maSieuThi: number) {
+    try {
+      const response = await apiClient.get(`/api-sieuthi/chuyen-kho/get-by-sieu-thi/${maSieuThi}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
   // Lấy tồn kho của siêu thị
   async getSupermarketInventory(maSieuThi: number) {
     const routes = [

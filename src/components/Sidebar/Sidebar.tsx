@@ -15,6 +15,7 @@ import {
   TruckOutlined,
   KeyOutlined,
   MessageOutlined,
+  DatabaseOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Button, Menu } from 'antd';
@@ -191,6 +192,11 @@ const Sidebar: React.FC = () => {
       key: '/supermarket/warehouses', 
       icon: <HomeOutlined />, 
       label: 'Kho hàng' 
+    },
+    { 
+      key: '/supermarket/inventory', 
+      icon: <DatabaseOutlined />, 
+      label: 'Tồn kho' 
     },
     { 
       key: '/supermarket/traceability', 
