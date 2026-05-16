@@ -103,7 +103,7 @@ const DonHangMuaVao: React.FC = () => {
   const [filterStatus, setFilterStatus] = React.useState<string>('all');
   const [isMobile, setIsMobile] = React.useState(window.innerWidth < 768);
   const [isTablet, setIsTablet] = React.useState(window.innerWidth >= 768 && window.innerWidth < 992);
-  
+
   // Modal chi tiết
   const [isDetailModalOpen, setIsDetailModalOpen] = React.useState(false);
   const [selectedOrder, setSelectedOrder] = React.useState<DonHang | null>(null);
@@ -137,7 +137,7 @@ const DonHangMuaVao: React.FC = () => {
 
       const user = JSON.parse(userStr);
       const maDaiLy = user.maDaiLy || (user as any).MaDaiLy;
-      
+
       if (!maDaiLy) {
         message.warning('Phiên đăng nhập cũ. Vui lòng đăng xuất và đăng nhập lại');
         setOrders([]);
@@ -178,34 +178,32 @@ const DonHangMuaVao: React.FC = () => {
   const fetchFarmersAndBatches = async () => {
     setLoadingFarmers(true);
     setLoadingBatches(true);
-    
+
     try {
       // Lấy tất cả lô hàng available để tạo đơn hàng
       const batchesResponse = await apiService.getAllLoHangAvailable();
 
       // Backend trả về { success, message, data, count }
-      // apiService đã return response.data nên batchesResponse = { success, message, data, count }
       const batchesData = batchesResponse?.data || batchesResponse;
-      
+
       if (batchesData) {
-        // Lấy tất cả lô (bao gồm cả chưa kiểm định và đã kiểm định)
-        const fetchedBatches = Array.isArray(batchesData) 
+        const fetchedBatches = Array.isArray(batchesData)
           ? batchesData
           : [];
-        
+
         // Map sang format LoNongSan và thêm thông tin kiểm định
         const mappedBatches = fetchedBatches.map((batch: any) => ({
           maLo: batch.maLo,
-          maTrangTrai: 0, // Không cần thiết cho form tạo đơn
-          maSanPham: 0, // Không cần thiết cho form tạo đơn
+          maTrangTrai: 0,
+          maSanPham: 0,
           soLuongBanDau: batch.soLuong,
           soLuongHienTai: batch.soLuong,
           ngayThuHoach: batch.ngayThuHoach,
-          hanSuDung: batch.hanSuDung || '', // Thêm HSD
-          maQR: '', // Không cần thiết cho form tạo đơn
+          hanSuDung: batch.hanSuDung || '',
+          maQR: '',
           trangThai: 'san_sang',
-          ngayTao: '', // Không cần thiết cho form tạo đơn
-          tenTrangTrai: '', // Không cần thiết cho form tạo đơn
+          ngayTao: '',
+          tenTrangTrai: '',
           tenSanPham: batch.tenSanPham,
           donViTinh: batch.donViTinh,
           // Thêm các field cho kiểm định
@@ -215,9 +213,9 @@ const DonHangMuaVao: React.FC = () => {
           trangThaiKiemDinh: batch.trangThaiKiemDinh,
           ketQuaKiemDinh: batch.ketQuaKiemDinh,
         }));
-        
-        setAllBatches(mappedBatches); // Lưu tất cả lô
-        setBatches(mappedBatches); // Hiển thị tất cả lô ban đầu
+
+        setAllBatches(mappedBatches);
+        setBatches(mappedBatches);
 
         // Sinh danh sách nông dân trực tiếp từ lô hàng để tránh phụ thuộc API nông dân.
         const uniqueFarmers = new Map<number, { maNongDan: number; hoTen: string; diaChi?: string }>();
@@ -243,12 +241,11 @@ const DonHangMuaVao: React.FC = () => {
 
   // Filter lô theo nông dân được chọn
   const handleFarmerChange = (maNongDan: string) => {
-    // Reset form: đổi nông dân thì xóa hết lô đã chọn
-    setCreateForm({ 
+    setCreateForm({
       maNongDan,
       chiTietDonHang: [{ maLo: '', soLuong: '', donGia: '' }]
     });
-    
+
     if (maNongDan) {
       // Filter lô theo mã nông dân
       const filteredBatches = allBatches.filter(
@@ -256,7 +253,6 @@ const DonHangMuaVao: React.FC = () => {
       );
       setBatches(filteredBatches);
     } else {
-      // Nếu không chọn nông dân, hiển thị tất cả
       setBatches(allBatches);
     }
   };
@@ -295,7 +291,7 @@ const DonHangMuaVao: React.FC = () => {
 
   const handleChatWithFarmer = () => {
     if (!selectedOrder) return;
-    
+
     const chatInfo = {
       maNguoi: selectedOrder.maNguoiBan,
       loaiNguoi: selectedOrder.loaiNguoiBan || 'nongdan',
@@ -341,7 +337,7 @@ const DonHangMuaVao: React.FC = () => {
   const handleProductChange = (index: number, field: string, value: string) => {
     const newChiTiet = [...createForm.chiTietDonHang];
     newChiTiet[index] = { ...newChiTiet[index], [field]: value };
-    
+
     // Nếu đang chọn lô và chưa có nông dân được chọn
     if (field === 'maLo' && value && !createForm.maNongDan) {
       // Tìm lô được chọn để lấy mã nông dân
@@ -353,14 +349,14 @@ const DonHangMuaVao: React.FC = () => {
           (batch: any) => batch.maNongDan?.toString() === maNongDan
         );
         setBatches(filteredBatches);
-        setCreateForm({ 
+        setCreateForm({
           maNongDan,
-          chiTietDonHang: newChiTiet 
+          chiTietDonHang: newChiTiet
         });
         return;
       }
     }
-    
+
     setCreateForm({ ...createForm, chiTietDonHang: newChiTiet });
   };
 
@@ -622,16 +618,16 @@ const DonHangMuaVao: React.FC = () => {
             ]}
           />
           <div style={{ display: 'flex', gap: 8 }}>
-            <ActionButton 
-              icon={<ReloadOutlined />} 
-              onClick={fetchOrders} 
+            <ActionButton
+              icon={<ReloadOutlined />}
+              onClick={fetchOrders}
               loading={loading}
             >
               Làm mới
             </ActionButton>
-            <ActionButton 
-              type="primary" 
-              icon={<PlusOutlined />} 
+            <ActionButton
+              type="primary"
+              icon={<PlusOutlined />}
               onClick={showCreateModal}
             >
               {isMobile ? 'Tạo' : 'Tạo đơn hàng'}
@@ -769,9 +765,8 @@ const DonHangMuaVao: React.FC = () => {
             }
             options={farmers.map((farmer) => ({
               value: farmer.maNongDan?.toString(),
-              label: `${farmer.maNongDan} - ${farmer.hoTen || 'Chưa có tên'}${
-                farmer.diaChi ? ` (${farmer.diaChi})` : ''
-              }`,
+              label: `${farmer.maNongDan} - ${farmer.hoTen || 'Chưa có tên'}${farmer.diaChi ? ` (${farmer.diaChi})` : ''
+                }`,
             }))}
           />
         </div>
@@ -809,12 +804,12 @@ const DonHangMuaVao: React.FC = () => {
                       // Chuyển về đầu ngày để so sánh chính xác
                       const hsd = new Date(batch.hanSuDung);
                       hsd.setHours(0, 0, 0, 0);
-                      
+
                       const today = new Date();
                       today.setHours(0, 0, 0, 0);
-                      
+
                       const daysLeft = Math.ceil((hsd.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-                      
+
                       if (daysLeft < 0) {
                         hsdInfo = ' - ⚠ Hết hạn';
                         isExpired = true;
@@ -830,12 +825,11 @@ const DonHangMuaVao: React.FC = () => {
                       }
                       // Nếu > 30 ngày thì không hiển thị (còn lâu)
                     }
-                    
+
                     return {
                       value: batch.maLo?.toString(),
-                      label: `Lô ${batch.maLo} - ${batch.tenSanPham || 'Chưa có tên'} (${
-                        batch.soLuongHienTai || 0
-                      } ${batch.donViTinh || 'kg'})${hsdInfo}`,
+                      label: `Lô ${batch.maLo} - ${batch.tenSanPham || 'Chưa có tên'} (${batch.soLuongHienTai || 0
+                        } ${batch.donViTinh || 'kg'})${hsdInfo}`,
                       disabled: batch.trangThaiKiemDinh === 'khong_dat' || isExpired, // Không cho chọn lô không đạt hoặc hết hạn
                     };
                   })}

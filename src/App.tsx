@@ -8,7 +8,7 @@ import Guide from './pages/Guide';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/admin/Dashboard';
-import Users from './pages/admin/Users';
+
 import QuanLyKho from './pages/DaiLy/QuanLyKho';
 import DonHangMuaVao from './pages/DaiLy/DonHangMuaVao';
 import DonHangBanRa from './pages/DaiLy/DonHangBanRa';
@@ -54,14 +54,7 @@ function App() {
               </ProtectedRoute>
             } 
           />
-          <Route 
-            path="/admin/users" 
-            element={
-              <ProtectedRoute allowedRoles={['Admin']}>
-                <Users />
-              </ProtectedRoute>
-            } 
-          />
+
           <Route 
             path="/admin/quan-ly-nguoi-dung" 
             element={
